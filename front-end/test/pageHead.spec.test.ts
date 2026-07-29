@@ -9,43 +9,39 @@ import {
 
 describe("page head helpers", () => {
 	it.each([
-		["/", "Classes with Julio"],
-		[
-			"/course-resource?asset=/course-assets/python/reference.md",
-			"Course Resource | Classes with Julio"
-		],
-		["/graph-sketcher", "Graph Sketcher | Classes with Julio"],
-		["/python-ide", "Python IDE | Classes with Julio"],
-		["/student-privacy", "Student Privacy | Classes with Julio"],
-		["/admin", "Teacher Admin | Classes with Julio"],
-		["/not-a-real-page", "Page Not Found | Classes with Julio"]
+		["/", "Math with Julio"],
+		["/courses", "Math Courses | Math with Julio"],
+		["/graph-sketcher", "Graph Sketcher | Math with Julio"],
+		["/course-resource", "Page Not Found | Math with Julio"],
+		["/python-ide", "Page Not Found | Math with Julio"],
+		["/student-privacy", "Page Not Found | Math with Julio"],
+		["/admin", "Teacher Admin | Math with Julio"],
+		["/not-a-real-page", "Page Not Found | Math with Julio"]
 	])("returns a useful title for %s", (path, title) => {
 		expect(pageTitleForPath(path)).toBe(title);
 	});
 
 	it.each([
 		"/about",
-		"/courses",
 		"/profile",
 		"/signup",
 		"/payment",
 		"/zoom",
 		"/pathways"
 	])("does not preserve a product title for removed route %s", path => {
-		expect(pageTitleForPath(path)).toBe(
-			"Page Not Found | Classes with Julio"
-		);
+		expect(pageTitleForPath(path)).toBe("Page Not Found | Math with Julio");
 	});
 
-	it("indexes only the public catalog, graphing tool, and privacy notice", () => {
+	it("indexes only the graphing tool and math-course catalog", () => {
 		expect(pageRobotsForPath("/")).toBe(INDEX_ROBOTS);
+		expect(pageRobotsForPath("/courses")).toBe(INDEX_ROBOTS);
 		expect(pageRobotsForPath("/graph-sketcher")).toBe(INDEX_ROBOTS);
-		expect(pageRobotsForPath("/student-privacy")).toBe(INDEX_ROBOTS);
 
 		for (const path of [
 			"/admin",
 			"/course-resource",
 			"/python-ide",
+			"/student-privacy",
 			"/not-a-real-page"
 		]) {
 			expect(pageRobotsForPath(path)).toBe(NOINDEX_ROBOTS);
@@ -53,14 +49,15 @@ describe("page head helpers", () => {
 	});
 
 	it("builds stable canonical URLs without query strings or trailing slashes", () => {
-		expect(canonicalUrlForPath("/")).toBe("https://cs.avasan.org/");
-		expect(canonicalUrlForPath("/python-ide/")).toBe(
-			"https://cs.avasan.org/python-ide"
+		expect(canonicalUrlForPath("/")).toBe("https://math.avasan.org/");
+		expect(canonicalUrlForPath("/courses/")).toBe(
+			"https://math.avasan.org/courses"
 		);
-		expect(
-			canonicalUrlForPath(
-				"/course-resource?asset=/course-assets/python/reference.md"
-			)
-		).toBe("https://cs.avasan.org/course-resource");
+		expect(canonicalUrlForPath("/graph-sketcher")).toBe(
+			"https://math.avasan.org/"
+		);
+		expect(canonicalUrlForPath("/not-a-real-page?query=ignored")).toBe(
+			"https://math.avasan.org/not-a-real-page"
+		);
 	});
 });

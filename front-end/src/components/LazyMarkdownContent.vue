@@ -1,29 +1,16 @@
 <script lang="ts" setup>
 import { ref, watch } from "vue";
-import {
-	courseAssetViewerUrl,
-	isPreviewableCourseAsset
-} from "@/modules/courseAssetPreview";
 
 const props = defineProps<{
 	content: string;
 }>();
 
-interface MarkdownToken {
-	attrs: [string, string][] | null;
-	attrIndex: (name: string) => number;
-}
-
 interface MarkdownRendererHelpers {
-	renderToken: (
-		tokens: MarkdownToken[],
-		index: number,
-		options: unknown
-	) => string;
+	renderToken: (tokens: unknown[], index: number, options: unknown) => string;
 }
 
 type MarkdownRenderRule = (
-	tokens: MarkdownToken[],
+	tokens: unknown[],
 	index: number,
 	options: unknown,
 	env: unknown,
@@ -105,10 +92,6 @@ function getMarkdownRenderer() {
 					breaks: true,
 					linkify: true
 				}) as unknown as MarkdownRendererInstance;
-				const defaultLinkOpen =
-					markdown.renderer.rules.link_open ??
-					((tokens, index, options, _env, self) =>
-						self.renderToken(tokens, index, options));
 				const defaultTableOpen =
 					markdown.renderer.rules.table_open ??
 					((tokens, index, options, _env, self) =>
@@ -118,26 +101,6 @@ function getMarkdownRenderer() {
 					((tokens, index, options, _env, self) =>
 						self.renderToken(tokens, index, options));
 
-				markdown.renderer.rules.link_open = (
-					tokens,
-					index,
-					options,
-					env,
-					self
-				) => {
-					const token = tokens[index];
-					const hrefIndex = token.attrIndex("href");
-
-					if (hrefIndex >= 0) {
-						const href = token.attrs?.[hrefIndex]?.[1] ?? "";
-						if (isPreviewableCourseAsset(href)) {
-							token.attrs![hrefIndex][1] =
-								courseAssetViewerUrl(href);
-						}
-					}
-
-					return defaultLinkOpen(tokens, index, options, env, self);
-				};
 				markdown.renderer.rules.table_open = (
 					tokens,
 					index,

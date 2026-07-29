@@ -533,14 +533,6 @@ html.dark .media-frame {
 	background: #132238;
 }
 
-html.dark .site-toggler {
-	background: rgba(15, 25, 42, 0.84);
-}
-
-html.dark .navbar-toggler-icon {
-	filter: invert(1) saturate(0.4) brightness(1.45);
-}
-
 html.dark body :is(.site-nav__link:hover, .site-nav__utility-link:hover, .site-nav__link.is-active, .site-nav__utility-link.is-active) {
 	background: rgba(125, 199, 255, 0.12);
 	box-shadow: inset 0 0 0 1px rgba(191, 219, 254, 0.16);

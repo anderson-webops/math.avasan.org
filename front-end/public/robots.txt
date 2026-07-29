@@ -9,42 +9,26 @@ Disallow: /
 
 User-agent: Googlebot
 Allow: /
-Disallow: /api
-Disallow: /admin
 
 User-agent: Bingbot
 Allow: /
-Disallow: /api
-Disallow: /admin
 
 User-agent: OAI-SearchBot
 Allow: /
-Disallow: /api
-Disallow: /admin
 
 User-agent: Claude-SearchBot
 Allow: /
-Disallow: /api
-Disallow: /admin
 
 User-agent: PerplexityBot
 Allow: /
-Disallow: /api
-Disallow: /admin
 
 User-agent: Perplexity-User
 Allow: /
-Disallow: /api
-Disallow: /admin
 
 User-agent: Claude-User
 Allow: /
-Disallow: /api
-Disallow: /admin
 
 User-agent: *
 Allow: /
-Disallow: /api
-Disallow: /admin
 
-Sitemap: https://cs.avasan.org/sitemap.xml
+Sitemap: https://math.avasan.org/sitemap.xml

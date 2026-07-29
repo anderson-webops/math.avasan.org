@@ -11,19 +11,11 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AccountManagement: typeof import('./components/AccountManagement.vue')['default']
-    AccountSecurity: typeof import('./components/AccountSecurity.vue')['default']
-    CodePreview: typeof import('./components/CodePreview.vue')['default']
-    CourseAssetPreview: typeof import('./components/CourseAssetPreview.vue')['default']
     CourseExplorer: typeof import('./components/CourseExplorer.vue')['default']
     GraphSketcherWorkspace: typeof import('./components/GraphSketcherWorkspace.vue')['default']
     LazyMarkdownContent: typeof import('./components/LazyMarkdownContent.vue')['default']
-    PythonIdeWorkspace: typeof import('./components/PythonIdeWorkspace.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    StudentAccess: typeof import('./components/StudentAccess.vue')['default']
-    StudentManagement: typeof import('./components/StudentManagement.vue')['default']
-    StudentProjectReview: typeof import('./components/StudentProjectReview.vue')['default']
     TheHeader: typeof import('./components/TheHeader.vue')['default']
   }
 }

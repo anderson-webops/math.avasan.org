@@ -1,7 +1,4 @@
 <script lang="ts" setup>
-import type { CodePreviewResource } from "@/modules/codePreview";
-import type { CourseAssetResource } from "@/modules/courseAssetPreview";
-import type { CourseProgress, User } from "@/stores/app";
 import type {
 	CourseDefinition,
 	CourseModule,
@@ -16,18 +13,7 @@ import {
 	shallowRef,
 	watch
 } from "vue";
-import { api } from "@/api";
-import { reportClassroomUsage } from "@/modules/classroomUsage";
-import {
-	groupCoursesByLearnerStatus,
-	orderedCoursesByLearnerStatus
-} from "@/modules/courseAccess";
-import { courseAssetViewerUrl } from "@/modules/courseAssetPreview";
-import {
-	getPythonIdeModeLabel,
-	pythonIdeModeForCourseId
-} from "@/modules/pythonIde";
-import { useAppStore } from "@/stores/app";
+import { reportMathClassroomUsage } from "@/modules/classroomUsage";
 import { useCoursesStore } from "@/stores/courses";
 import {
 	hasPendingStaticMediaNotice,
@@ -35,18 +21,7 @@ import {
 	isStaticMediaUrl,
 	staticMediaFilename
 } from "@/stores/courses/staticMedia";
-import CodePreview from "./CodePreview.vue";
-import CourseAssetPreview from "./CourseAssetPreview.vue";
 import LazyMarkdownContent from "./LazyMarkdownContent.vue";
-
-const props = withDefaults(
-	defineProps<{
-		publicCatalog?: boolean;
-	}>(),
-	{
-		publicCatalog: false
-	}
-);
 
 interface VisibleModule extends CourseModule {
 	position: number;
@@ -57,291 +32,84 @@ interface VisibleModule extends CourseModule {
 
 interface ResourceLink {
 	host: string;
-	kind: "project" | "solution" | "dataset" | "asset" | "media" | "reference";
+	kind: "media";
 	label: string;
 	url: string;
 }
 
 const IMAGE_FILE_RE = /\.(?:avif|gif|jpe?g|png|svg|webp)(?:\?|$)/i;
-const VIDEO_FILE_RE = /\.(?:mp4|webm|ogg)(?:\?|$)/i;
 const WHITESPACE_RE = /\s+/g;
 const WWW_PREFIX_RE = /^www\./;
-const REFERENCE_TITLE_RE = /reference/i;
-const STARTER_RE = /starter/i;
-const CAPSTONE_TITLE_RE = /capstone|master project/i;
 const PROJECT_PREFIX_RE = /^Project:\s*/i;
-const SOURCE_REPOSITORY_ROOT_RE =
-	/^https:\/\/github\.com\/instruction-material\/[^/]+\/tree\/main$/i;
-const REPOSITORY_ARCHIVE_RE =
-	/\b(?:reference archive|full repo|repo bank|problem bank|workspace archive|source archive)\b/i;
-const LEARNER_SELECTION_STORAGE_KEY =
-	"classes:course-explorer:selected-learner";
-const COURSE_SELECTION_STORAGE_KEY = "classes:course-explorer:selected-course";
+const COURSE_SELECTION_STORAGE_KEY = "math:course-explorer:selected-course";
 const MODULE_SELECTION_STORAGE_KEY_PREFIX =
-	"classes:course-explorer:active-module:";
+	"math:course-explorer:active-module:";
+const PUBLIC_COURSE_GROUPS = [
+	{
+		key: "elementary",
+		label: "Elementary",
+		ids: [
+			"early-elementary-a-math",
+			"early-elementary-b-math",
+			"late-elementary-a-math",
+			"late-elementary-b-math"
+		]
+	},
+	{
+		key: "pre-algebra",
+		label: "Pre-Algebra",
+		ids: ["pre-algebra-a", "pre-algebra-b"]
+	},
+	{
+		key: "algebra-geometry",
+		label: "Algebra and Geometry",
+		ids: [
+			"algebra-1a",
+			"algebra-1b",
+			"geometry-a",
+			"geometry-b",
+			"algebra-2a",
+			"algebra-2b"
+		]
+	},
+	{
+		key: "advanced",
+		label: "Advanced",
+		ids: ["pre-calculus-a", "pre-calculus-b", "ap-calculus"]
+	}
+] as const;
 
 const coursesStore = useCoursesStore();
 const { courses } = storeToRefs(coursesStore);
 
-const appStore = useAppStore();
-const { currentTutor, currentAdmin, currentUser, users } =
-	storeToRefs(appStore);
-
 const searchQuery = ref("");
 const selectedCourseId = ref("");
-const selectedLearnerId = ref("");
 const activeModuleId = ref("");
 const selectedCourse = shallowRef<CourseDefinition | null>(null);
 const courseLoadError = ref("");
 const isCourseLoading = ref(false);
 const unavailableStaticMediaUrls = ref<string[]>([]);
-const managedLearnersLoading = ref(false);
-const managedLearnersError = ref("");
-const progressSaveStatus = ref<
-	"idle" | "unsaved" | "saving" | "saved" | "error"
->("idle");
-const progressSaveError = ref("");
-const progressDrafts = ref<Record<string, CourseProgress>>({});
 const isStorageReady = ref(false);
-const hasRestoredStoredLearner = ref(false);
 const currentHashAnchor = ref(readCurrentHashAnchor());
-const prefersReducedMotion = ref(false);
-let reducedMotionQuery: MediaQueryList | null = null;
-let progressSaveTimer: ReturnType<typeof setTimeout> | null = null;
-let pendingProgressSave: {
-	courseId: string;
-	progress: CourseProgress;
-	userID: string;
-} | null = null;
 
 const allCourses = computed(() => courses.value ?? []);
-
-const canViewSolutions = computed(
-	() => !!currentTutor.value || !!currentAdmin.value
-);
-
-const isStaffContext = computed(
-	() => !props.publicCatalog && (!!currentTutor.value || !!currentAdmin.value)
-);
-
-const managedLearners = computed(() =>
-	isStaffContext.value ? users.value : []
-);
-
-const selectedLearner = computed(
-	() =>
-		managedLearners.value.find(
-			user => user._id === selectedLearnerId.value
-		) ?? null
-);
-
-const progressOwner = computed<User | null>(() => {
-	if (isStaffContext.value) return selectedLearner.value;
-	return currentUser.value;
-});
-
-const permittedCourseIds = computed(() => {
-	if (isStaffContext.value) {
-		return selectedLearner.value?.courseAccess ?? [];
-	}
-	if (currentTutor.value) return currentTutor.value.coursePermissions ?? [];
-	if (currentUser.value) return currentUser.value.courseAccess ?? [];
-	return [];
-});
-
-const courseGroupingOwner = computed<User | null>(() => {
-	if (isStaffContext.value) return selectedLearner.value;
-	return currentUser.value;
-});
-
-const courseList = computed(() => {
-	if (props.publicCatalog) {
-		return allCourses.value;
-	}
-	const allowed = new Set(permittedCourseIds.value);
-	return orderedCoursesByLearnerStatus(
-		allCourses.value.filter(course => allowed.has(course.id)),
-		courseGroupingOwner.value
-	);
-});
+const courseList = computed(() => allCourses.value);
 
 const courseGroups = computed(() => {
-	if (props.publicCatalog) {
-		return [
-			{
-				key: "current" as const,
-				label: "Current courses",
-				courses: allCourses.value
-			}
-		].filter(group => group.courses.length > 0);
-	}
-
-	return groupCoursesByLearnerStatus(
-		courseList.value,
-		courseGroupingOwner.value
-	);
+	return PUBLIC_COURSE_GROUPS.map(group => ({
+		...group,
+		courses: group.ids.flatMap(id => {
+			const course = allCourses.value.find(item => item.id === id);
+			return course ? [course] : [];
+		})
+	})).filter(group => group.courses.length > 0);
 });
 
-const hasCourseAccess = computed(() => {
-	if (props.publicCatalog) return courseList.value.length > 0;
-	return isStaffContext.value || courseList.value.length > 0;
-});
-
-const pythonIdeCourseMode = computed(() =>
-	pythonIdeModeForCourseId(selectedCourse.value?.id)
-);
-const pythonIdeCourseHref = computed(() => {
-	if (!selectedCourse.value || !pythonIdeCourseMode.value) return "";
-	const params = new URLSearchParams({
-		course: selectedCourse.value.id,
-		mode: pythonIdeCourseMode.value
-	});
-	if (
-		selectedCourse.value.id === "pygames" ||
-		selectedCourse.value.id === "pygames-classroom" ||
-		selectedCourse.value.id === "pygames-archive"
-	) {
-		params.set("starter", "course");
-		params.set("projectKey", `${selectedCourse.value.id}:course`);
-		params.set("starterTitle", `${selectedCourse.value.name} Starter`);
-		params.set("starterLabel", "Course starter");
-	}
-	return `/python-ide?${params.toString()}`;
-});
-const pythonIdeCourseLabel = computed(() =>
-	pythonIdeCourseMode.value
-		? `Open ${getPythonIdeModeLabel(pythonIdeCourseMode.value)} IDE`
-		: ""
-);
-
-const emptyTitle = computed(() =>
-	props.publicCatalog
-		? "No courses are available right now."
-		: isStaffContext.value
-			? "Choose a learner to open their courses."
-			: "You don't have any courses assigned yet."
-);
-
-const emptyHint = computed(() =>
-	props.publicCatalog
-		? "Check back soon for updates to the course library."
-		: isStaffContext.value
-			? "If a learner has no courses, update their access from Admin > People and access."
-			: "Email if access should already be enabled."
-);
-
-const canEditProgress = computed(
-	() =>
-		isStaffContext.value &&
-		!!selectedLearner.value &&
-		!!selectedCourseId.value
-);
-
-const progressSaveStatusText = computed(() => {
-	switch (progressSaveStatus.value) {
-		case "unsaved":
-			return "Unsaved changes";
-		case "saving":
-			return "Saving...";
-		case "saved":
-			return "Saved";
-		case "error":
-			return progressSaveError.value || "Couldn't save progress";
-		default:
-			return selectedLearner.value
-				? "Progress ready"
-				: "Select a learner";
-	}
-});
+const hasCourseAccess = computed(() => courseList.value.length > 0);
+const emptyTitle = "No courses are available right now.";
+const emptyHint = "Check back soon for updates to the course library.";
 
 const normalizedQuery = computed(() => normalizeSearch(searchQuery.value));
-
-watch(
-	[
-		isStaffContext,
-		() => currentAdmin.value?._id,
-		() => currentTutor.value?._id
-	],
-	async ([staffContext]) => {
-		if (!staffContext) {
-			selectedLearnerId.value = "";
-			managedLearnersError.value = "";
-			return;
-		}
-
-		await loadManagedLearners();
-	},
-	{ immediate: true }
-);
-
-watch(
-	[managedLearners, isStorageReady, currentHashAnchor],
-	([value, storageReady]) => {
-		if (!isStaffContext.value) return;
-
-		if (value.length === 0) {
-			selectedLearnerId.value = "";
-			return;
-		}
-
-		if (!storageReady) return;
-
-		const selectedStillValid = value.some(
-			user => user._id === selectedLearnerId.value
-		);
-		const hashCourseId = courseIdFromHash(
-			allCourses.value.map(course => course.id)
-		);
-		const learnerForHash = preferredLearnerIdForCourse(value, hashCourseId);
-		const storedLearnerId = readStoredValue(LEARNER_SELECTION_STORAGE_KEY);
-		const storedLearner = value.find(user => user._id === storedLearnerId);
-
-		if (!hasRestoredStoredLearner.value) {
-			hasRestoredStoredLearner.value = true;
-
-			if (
-				storedLearner &&
-				(!hashCourseId ||
-					learnerCanAccessCourse(storedLearner, hashCourseId))
-			) {
-				selectedLearnerId.value = storedLearner._id;
-				return;
-			}
-
-			if (learnerForHash) {
-				selectedLearnerId.value = learnerForHash;
-				return;
-			}
-
-			if (storedLearner) {
-				selectedLearnerId.value = storedLearner._id;
-				return;
-			}
-		}
-
-		if (
-			selectedStillValid &&
-			(!hashCourseId ||
-				learnerCanAccessCourse(selectedLearner.value, hashCourseId))
-		) {
-			return;
-		}
-
-		if (learnerForHash) {
-			selectedLearnerId.value = learnerForHash;
-			return;
-		}
-
-		if (!selectedStillValid) {
-			selectedLearnerId.value = value[0]._id;
-		}
-	},
-	{ immediate: true }
-);
-
-watch([selectedLearnerId, selectedCourseId], () => {
-	void flushPendingProgressSave();
-});
 
 watch(
 	[courseList, isStorageReady, currentHashAnchor],
@@ -353,13 +121,7 @@ watch(
 
 		const availableCourseIds = availableCourses.map(course => course.id);
 		if (!storageReady) {
-			// The public catalog has no identity-dependent choice. Select its
-			// first real course during SSG so no-JavaScript readers and crawlers
-			// receive course content instead of a false empty-state message.
-			if (
-				props.publicCatalog &&
-				!availableCourseIds.includes(selectedCourseId.value)
-			) {
+			if (!availableCourseIds.includes(selectedCourseId.value)) {
 				selectedCourseId.value = availableCourses[0].id;
 			}
 			return;
@@ -388,8 +150,8 @@ watch(
 );
 
 watch(
-	[selectedCourseId, canViewSolutions],
-	async ([courseId], _previousValue, onCleanup) => {
+	selectedCourseId,
+	async (courseId, _previousValue, onCleanup) => {
 		if (!courseId) {
 			selectedCourse.value = null;
 			courseLoadError.value = "";
@@ -421,32 +183,16 @@ watch(
 );
 
 watch([selectedCourse, isStorageReady], ([course, storageReady]) => {
-	if (!props.publicCatalog || !storageReady || !course) return;
-	void reportClassroomUsage("course-open", course.id);
+	if (!storageReady || !course) return;
+	void reportMathClassroomUsage("course-open", course.id);
 });
-
-const selectedCourseProgress = computed(() => {
-	const courseId = selectedCourseId.value;
-	const owner = progressOwner.value;
-	if (!courseId || !owner) return null;
-	return progressFor(owner, courseId);
-});
-
-const hasProgressTracking = computed(
-	() => !props.publicCatalog && !!progressOwner.value
-);
-
-const completedModuleIdSet = computed(
-	() => new Set(selectedCourseProgress.value?.completedModuleIds ?? [])
-);
-
-const completedItemIdSet = computed(
-	() => new Set(selectedCourseProgress.value?.completedItemIds ?? [])
-);
 
 const courseModules = computed(() => selectedCourse.value?.modules ?? []);
 const coreCourseModules = computed(() =>
 	courseModules.value.filter(isCoreModule)
+);
+const transitionCourseModules = computed(() =>
+	courseModules.value.filter(isTransitionModule)
 );
 const appendixCourseModules = computed(() =>
 	courseModules.value.filter(isAppendixModule)
@@ -456,12 +202,17 @@ const visibleCoreModules = computed<VisibleModule[]>(() =>
 	visibleModuleList(coreCourseModules.value, normalizedQuery.value)
 );
 
+const visibleTransitionModules = computed<VisibleModule[]>(() =>
+	visibleModuleList(transitionCourseModules.value, normalizedQuery.value)
+);
+
 const visibleAppendixModules = computed<VisibleModule[]>(() =>
 	visibleModuleList(appendixCourseModules.value, normalizedQuery.value)
 );
 
 const visibleModules = computed<VisibleModule[]>(() => [
 	...visibleCoreModules.value,
+	...visibleTransitionModules.value,
 	...visibleAppendixModules.value
 ]);
 
@@ -471,6 +222,11 @@ const visibleOutlineGroups = computed(() =>
 			key: "modules",
 			label: "Modules",
 			modules: visibleCoreModules.value
+		},
+		{
+			key: "next-steps",
+			label: "Next Steps",
+			modules: visibleTransitionModules.value
 		},
 		{
 			key: "references",
@@ -572,27 +328,28 @@ const activeModule = computed(
 		) ?? null
 );
 
-const canEditActiveModuleProgress = computed(
-	() =>
-		canEditProgress.value &&
-		!!activeModule.value &&
-		isCoreModule(activeModule.value)
-);
-
 const activeCurriculumSectionLabel = computed(() =>
-	activeModule.value?.kind === "appendix" ? "Reference" : "Core path"
+	activeModule.value?.kind === "appendix"
+		? "Reference"
+		: activeModule.value?.kind === "transition"
+			? "Optional transition"
+			: "Core path"
 );
 
 const activeCurriculumHeading = computed(() =>
 	activeModule.value?.kind === "appendix"
 		? "Reference Materials"
-		: "Curriculum"
+		: activeModule.value?.kind === "transition"
+			? "Next Step"
+			: "Curriculum"
 );
 
 const activeSupplementalSectionLabel = computed(() =>
 	activeModule.value?.kind === "appendix"
 		? "Reference practice"
-		: "Extra practice"
+		: activeModule.value?.kind === "transition"
+			? "Optional practice"
+			: "Extra practice"
 );
 
 const activeSupplementalHeading = computed(() =>
@@ -602,7 +359,11 @@ const activeSupplementalHeading = computed(() =>
 );
 
 const activeCurriculumJumpHeading = computed(() =>
-	activeModule.value?.kind === "appendix" ? "References:" : "Lessons:"
+	activeModule.value?.kind === "appendix"
+		? "References:"
+		: activeModule.value?.kind === "transition"
+			? "Next step:"
+			: "Lessons:"
 );
 
 const activeSupplementalJumpHeading = computed(() =>
@@ -621,15 +382,21 @@ const courseReaderStatus = computed(() => {
 });
 
 function moduleKindLabel(module: Pick<CourseModule, "kind">) {
-	return module.kind === "appendix" ? "Appendix" : "Module";
+	if (module.kind === "appendix") return "Appendix";
+	if (module.kind === "transition") return "Next step";
+	return "Module";
 }
 
 function isAppendixModule(module: Pick<CourseModule, "kind">) {
 	return module.kind === "appendix";
 }
 
+function isTransitionModule(module: Pick<CourseModule, "kind">) {
+	return module.kind === "transition";
+}
+
 function isCoreModule(module: Pick<CourseModule, "kind">) {
-	return !isAppendixModule(module);
+	return !isAppendixModule(module) && !isTransitionModule(module);
 }
 
 const activeModuleProjectLinks = computed(() => {
@@ -687,27 +454,6 @@ function courseIdFromHash(courseIds: string[]) {
 	);
 }
 
-function learnerCanAccessCourse(
-	learner: Pick<User, "courseAccess"> | null | undefined,
-	courseId: string
-) {
-	return !!learner && (learner.courseAccess ?? []).includes(courseId);
-}
-
-function preferredLearnerIdForCourse(learners: User[], courseId: string) {
-	if (!courseId) return "";
-	return (
-		learners.find(learner => learnerCanAccessCourse(learner, courseId))
-			?._id ?? ""
-	);
-}
-
-function learnerOptionLabel(learner: User, index: number) {
-	const name = learner.name?.trim() || `Learner ${index + 1}`;
-	const courseCount = learner.courseAccess?.length ?? 0;
-	return `${name} · ${courseCount} ${courseCount === 1 ? "course" : "courses"}`;
-}
-
 function moduleIdFromHash(modules: VisibleModule[]) {
 	const anchor = currentHashAnchor.value;
 	if (!anchor) return "";
@@ -740,18 +486,6 @@ function itemMatches(item: CourseModuleItem, query: string) {
 	);
 }
 
-function progressIds(entity: { aliases?: string[]; id: string }) {
-	return [entity.id, ...(entity.aliases ?? [])];
-}
-
-function isModuleComplete(module: CourseModule) {
-	return progressIds(module).some(id => completedModuleIdSet.value.has(id));
-}
-
-function isItemComplete(item: CourseModuleItem) {
-	return progressIds(item).some(id => completedItemIdSet.value.has(id));
-}
-
 function selectCourse(id: string) {
 	selectedCourseId.value = id;
 }
@@ -764,204 +498,8 @@ function clearSearch() {
 	searchQuery.value = "";
 }
 
-async function loadManagedLearners() {
-	if (!isStaffContext.value) return;
-
-	managedLearnersLoading.value = true;
-	managedLearnersError.value = "";
-
-	try {
-		if (currentAdmin.value) {
-			await appStore.fetchUsers();
-			return;
-		}
-
-		if (currentTutor.value) {
-			const { data } = await api.get<User[]>(
-				`/users/oftutor/${currentTutor.value._id}`
-			);
-			appStore.setUsers(data);
-		}
-	} catch (error: any) {
-		managedLearnersError.value =
-			error.response?.data?.message ??
-			error.message ??
-			"Unable to load learners.";
-	} finally {
-		managedLearnersLoading.value = false;
-	}
-}
-
-function progressKey(userID: string, courseId: string) {
-	return `${userID}:${courseId}`;
-}
-
-function cleanProgress(progress: CourseProgress): CourseProgress {
-	return {
-		courseId: progress.courseId,
-		completedModuleIds: unique(progress.completedModuleIds ?? []),
-		completedItemIds: unique(progress.completedItemIds ?? []),
-		...(progress.updatedAt ? { updatedAt: progress.updatedAt } : {}),
-		...(progress.updatedBy ? { updatedBy: progress.updatedBy } : {}),
-		...(progress.updatedByRole
-			? { updatedByRole: progress.updatedByRole }
-			: {})
-	};
-}
-
-function progressFor(owner: User, courseId: string): CourseProgress {
-	const key = progressKey(owner._id, courseId);
-	const draft = progressDrafts.value[key];
-	if (draft) return draft;
-
-	const saved = owner.courseProgress?.find(
-		progress => progress.courseId === courseId
-	);
-
-	return cleanProgress(
-		saved ?? {
-			courseId,
-			completedModuleIds: [],
-			completedItemIds: []
-		}
-	);
-}
-
-function updateProgressDraft(
-	userID: string,
-	courseId: string,
-	updater: (progress: CourseProgress) => CourseProgress
-) {
-	const owner = progressOwner.value;
-	if (!owner || owner._id !== userID) return;
-
-	const next = cleanProgress(updater(progressFor(owner, courseId)));
-	progressDrafts.value = {
-		...progressDrafts.value,
-		[progressKey(userID, courseId)]: next
-	};
-	queueProgressSave(userID, courseId, next);
-}
-
-function toggleModuleProgress(module: CourseModule, checked: boolean) {
-	const learner = selectedLearner.value;
-	const courseId = selectedCourseId.value;
-	if (!canEditProgress.value || !learner || !courseId) return;
-
-	updateProgressDraft(learner._id, courseId, progress => ({
-		...progress,
-		completedModuleIds: checked
-			? unique([...progress.completedModuleIds, module.id])
-			: progress.completedModuleIds.filter(
-					id => !progressIds(module).includes(id)
-				)
-	}));
-}
-
-function toggleItemProgress(item: CourseModuleItem, checked: boolean) {
-	const learner = selectedLearner.value;
-	const courseId = selectedCourseId.value;
-	if (!canEditProgress.value || !learner || !courseId) return;
-
-	updateProgressDraft(learner._id, courseId, progress => ({
-		...progress,
-		completedItemIds: checked
-			? unique([...progress.completedItemIds, item.id])
-			: progress.completedItemIds.filter(
-					id => !progressIds(item).includes(id)
-				)
-	}));
-}
-
-function unique(values: string[]) {
-	return [...new Set(values.map(value => value.trim()).filter(Boolean))];
-}
-
-function queueProgressSave(
-	userID: string,
-	courseId: string,
-	progress: CourseProgress
-) {
-	if (progressSaveTimer) clearTimeout(progressSaveTimer);
-
-	pendingProgressSave = {
-		userID,
-		courseId,
-		progress: cleanProgress(progress)
-	};
-	progressSaveStatus.value = "unsaved";
-	progressSaveError.value = "";
-
-	progressSaveTimer = setTimeout(() => {
-		void flushPendingProgressSave();
-	}, 700);
-}
-
-async function flushPendingProgressSave() {
-	if (!pendingProgressSave) return;
-	if (progressSaveTimer) {
-		clearTimeout(progressSaveTimer);
-		progressSaveTimer = null;
-	}
-
-	const pending = pendingProgressSave;
-	progressSaveStatus.value = "saving";
-	progressSaveError.value = "";
-
-	try {
-		await api.put(`/users/${pending.userID}/course-progress`, {
-			courseId: pending.courseId,
-			completedModuleIds: pending.progress.completedModuleIds,
-			completedItemIds: pending.progress.completedItemIds
-		});
-
-		updateStoredUserProgress(
-			pending.userID,
-			cleanProgress(pending.progress)
-		);
-		pendingProgressSave = null;
-		progressSaveStatus.value = "saved";
-	} catch (error: any) {
-		progressSaveStatus.value = "error";
-		progressSaveError.value =
-			error.response?.data?.message ??
-			error.message ??
-			"Couldn't save progress.";
-	}
-}
-
-function retryProgressSave() {
-	void flushPendingProgressSave();
-}
-
-function updateStoredUserProgress(userID: string, progress: CourseProgress) {
-	const updateUser = (user: User): User => {
-		if (user._id !== userID) return user;
-
-		const existing = user.courseProgress ?? [];
-		const nextProgress = [
-			...existing.filter(item => item.courseId !== progress.courseId),
-			progress
-		];
-
-		return {
-			...user,
-			courseProgress: nextProgress
-		};
-	};
-
-	appStore.setUsers(users.value.map(updateUser));
-	if (currentUser.value?._id === userID) {
-		appStore.setCurrentUser(updateUser(currentUser.value));
-	}
-}
-
 function itemAnchorId(moduleId: string, itemId: string) {
 	return `${moduleId}-${itemId}`;
-}
-
-function isVideo(link: string) {
-	return VIDEO_FILE_RE.test(link);
 }
 
 function isImage(link: string) {
@@ -969,7 +507,7 @@ function isImage(link: string) {
 }
 
 function isEmbeddedMedia(link: string) {
-	return isVideo(link) || isImage(link);
+	return isImage(link);
 }
 
 function staticAssetName(url: string) {
@@ -1026,271 +564,8 @@ function canonicalResourceTarget(url: string) {
 	return fragment ? `${canonicalBase}#${fragment}` : canonicalBase;
 }
 
-function sameResourceTarget(left: string, right: string) {
-	return canonicalResourceTarget(left) === canonicalResourceTarget(right);
-}
-
-function isSourceRepositoryRootLink(url: string) {
-	const base = canonicalResourceTarget(url)
-		.split("#", 1)[0]
-		.replace(/\/+$/, "");
-	return SOURCE_REPOSITORY_ROOT_RE.test(base);
-}
-
-function isRepositoryArchiveReference(item: CourseModuleItem) {
-	return REPOSITORY_ARCHIVE_RE.test(`${item.title} ${item.content ?? ""}`);
-}
-
-function repositoryArchiveLabel(item: CourseModuleItem) {
-	const combinedText = `${item.title} ${item.content ?? ""}`;
-
-	if (/\b(?:repo bank|problem bank)\b/i.test(combinedText)) {
-		return "Problem bank";
-	}
-
-	return "Source archive";
-}
-
-function projectLabel(item: CourseModuleItem, url: string) {
-	const normalizedTitle = item.title.toLowerCase();
-	const normalizedUrl = url.toLowerCase();
-
-	if (normalizedUrl.startsWith("/course-assets/")) {
-		return datasetLabel(url);
-	}
-
-	if (REFERENCE_TITLE_RE.test(normalizedTitle)) {
-		return "Reference";
-	}
-
-	if (STARTER_RE.test(normalizedTitle) || STARTER_RE.test(normalizedUrl)) {
-		return "Starter project";
-	}
-
-	if (CAPSTONE_TITLE_RE.test(normalizedTitle)) {
-		return "Capstone repo";
-	}
-
-	if (normalizedUrl.includes("scratch.mit.edu")) {
-		return "Scratch project";
-	}
-
-	if (normalizedUrl.includes("github.com")) {
-		return "Project repo";
-	}
-
-	return "Project link";
-}
-
-function solutionLabel(url: string) {
-	const normalizedUrl = url.toLowerCase();
-
-	if (
-		normalizedUrl.includes("answer-key") ||
-		normalizedUrl.includes("rubric")
-	) {
-		return "Rubric / answer key";
-	}
-
-	if (normalizedUrl.includes("scratch.mit.edu")) {
-		return "Scratch solution";
-	}
-
-	if (normalizedUrl.includes("github.com")) {
-		return "Solution repo";
-	}
-
-	return "Solution link";
-}
-
-function datasetLabel(url: string) {
-	const normalizedUrl = url.toLowerCase();
-
-	if (normalizedUrl.includes("/course-assets/apcs/apcs-pacing-tracks.md")) {
-		return "Track guide";
-	}
-
-	if (
-		normalizedUrl.includes(
-			"/course-assets/python/turtle-project-reference.md"
-		)
-	) {
-		if (normalizedUrl.includes("game-template")) {
-			return "Turtle game template";
-		}
-		if (normalizedUrl.includes("boundaries")) {
-			return "Turtle boundary guide";
-		}
-		if (normalizedUrl.includes("score-turtle")) {
-			return "Score turtle guide";
-		}
-
-		return "Turtle reference";
-	}
-
-	if (
-		normalizedUrl.startsWith("/course-assets/") &&
-		(normalizedUrl.includes("answer-key") ||
-			normalizedUrl.includes("rubric"))
-	) {
-		return "Rubric / answer key";
-	}
-
-	if (normalizedUrl.includes("chemistry-materials-pack")) {
-		if (normalizedUrl.includes("measurement")) {
-			return "Measurement tables";
-		}
-		if (normalizedUrl.includes("model-comparison")) {
-			return "Model cards";
-		}
-		if (
-			normalizedUrl.includes("phenomena-case") ||
-			normalizedUrl.includes("original-phenomena")
-		) {
-			return "Phenomena cases";
-		}
-		if (
-			normalizedUrl.includes("project-reference") ||
-			normalizedUrl.includes("original-project-source")
-		) {
-			return "Project reference map";
-		}
-		if (normalizedUrl.includes("matter-and-classification")) {
-			return "Matter cards";
-		}
-		if (normalizedUrl.includes("physical-and-chemical-change")) {
-			return "Change cards";
-		}
-		if (normalizedUrl.includes("isotope")) {
-			return "Isotope table";
-		}
-		if (normalizedUrl.includes("atomic-structure-checkpoint")) {
-			return "Atomic checkpoint";
-		}
-		if (normalizedUrl.includes("ion-and-formula")) {
-			return "Ion cards";
-		}
-		if (normalizedUrl.includes("nomenclature")) {
-			return "Naming cards";
-		}
-		if (normalizedUrl.includes("periodic-trend")) {
-			return "Trend table";
-		}
-		if (normalizedUrl.includes("bonding-and-formula")) {
-			return "Bonding cards";
-		}
-		if (normalizedUrl.includes("lewis-structure")) {
-			return "Lewis practice";
-		}
-		if (normalizedUrl.includes("heating-curve")) {
-			return "Heating curve data";
-		}
-		if (normalizedUrl.includes("phase-diagram")) {
-			return "Phase diagram data";
-		}
-		if (normalizedUrl.includes("gas-law")) {
-			return "Gas law scenarios";
-		}
-		if (normalizedUrl.includes("energy-phase-and-gas")) {
-			return "Energy checkpoint";
-		}
-		if (normalizedUrl.includes("intermolecular")) {
-			return "Property cards";
-		}
-		if (normalizedUrl.includes("reaction-type")) {
-			return "Reaction cards";
-		}
-		if (normalizedUrl.includes("reaction-energy-and-rate")) {
-			return "Energy and rate cases";
-		}
-		if (normalizedUrl.includes("equilibrium")) {
-			return "Equilibrium cases";
-		}
-		if (normalizedUrl.includes("redox")) {
-			return "Redox cases";
-		}
-		if (normalizedUrl.includes("concentration-and-ph")) {
-			return "Solution tables";
-		}
-		if (normalizedUrl.includes("molar-mass")) {
-			return "Mole practice set";
-		}
-		if (normalizedUrl.includes("water-formation-stoichiometry")) {
-			return "Water stoichiometry case";
-		}
-		if (normalizedUrl.includes("quantitative-chemistry")) {
-			return "Quantitative checkpoint";
-		}
-		if (normalizedUrl.includes("stoichiometry-error")) {
-			return "Error cases";
-		}
-		if (normalizedUrl.includes("remote-investigation")) {
-			return "Investigation checklist";
-		}
-		if (normalizedUrl.includes("capstone-evidence")) {
-			return "Evidence seeds";
-		}
-		if (normalizedUrl.includes("capstone-defense")) {
-			return "Capstone defense";
-		}
-
-		return "Chemistry materials";
-	}
-
-	if (normalizedUrl.startsWith("/course-assets/")) {
-		return "Course asset";
-	}
-
-	if (normalizedUrl.includes("periodictable")) {
-		return "ACS periodic table";
-	}
-
-	if (normalizedUrl.includes("middle-and-high-school-chemistry")) {
-		return "ACS chemistry guidelines";
-	}
-
-	if (normalizedUrl.includes("acs.org")) {
-		return "ACS chemistry reference";
-	}
-
-	if (normalizedUrl.includes("nist.gov")) {
-		return "NIST SI units";
-	}
-
-	if (normalizedUrl.includes("nextgenscience.org")) {
-		return "NGSS appendices";
-	}
-
-	if (normalizedUrl.includes("openstax.org")) {
-		return "OpenStax reference";
-	}
-
-	if (normalizedUrl.includes("pubchem.ncbi.nlm.nih.gov")) {
-		return "Chemistry database";
-	}
-
-	if (
-		normalizedUrl.includes("nasa.gov") ||
-		normalizedUrl.includes("noaa.gov") ||
-		normalizedUrl.includes("usgs.gov") ||
-		normalizedUrl.includes("biointeractive.org")
-	) {
-		return "Science resource";
-	}
-
-	return "Dataset";
-}
-
 function mediaLabel(url: string) {
 	const normalizedUrl = url.toLowerCase();
-
-	if (normalizedUrl.includes("phet.colorado.edu/en/simulations/filter")) {
-		return "Simulation collection";
-	}
-
-	if (normalizedUrl.includes("phet.colorado.edu")) {
-		return "PhET simulation";
-	}
 
 	if (
 		normalizedUrl.includes("youtube.com") ||
@@ -1299,128 +574,28 @@ function mediaLabel(url: string) {
 		return "Demo video";
 	}
 
-	if (normalizedUrl.includes("javalab.org")) {
-		return "Interactive simulation";
-	}
-
 	return "Media resource";
 }
 
 function resourceLinks(item: CourseModuleItem): ResourceLink[] {
-	const links: ResourceLink[] = [];
-	const projectUrl = item.projectLink?.trim();
-	const solutionUrl = item.solutionLink?.trim();
-	const datasetUrl = item.datasetLink?.trim();
 	const mediaUrl = item.mediaLink?.trim();
 
-	if (projectUrl && isSourceRepositoryRootLink(projectUrl)) {
-		if (isRepositoryArchiveReference(item)) {
-			links.push({
-				kind: "reference",
-				label: repositoryArchiveLabel(item),
-				url: projectUrl,
-				host: linkHost(projectUrl)
-			});
-		}
-	} else if (projectUrl) {
-		links.push({
-			kind: projectUrl.startsWith("/course-assets/")
-				? "asset"
-				: "project",
-			label: projectLabel(item, projectUrl),
-			url: projectUrl,
-			host: linkHost(projectUrl)
-		});
-	}
-
-	if (
-		canViewSolutions.value &&
-		solutionUrl &&
-		!isSourceRepositoryRootLink(solutionUrl) &&
-		(!projectUrl || !sameResourceTarget(solutionUrl, projectUrl))
-	) {
-		links.push({
-			kind: "solution",
-			label: solutionLabel(solutionUrl),
-			url: solutionUrl,
-			host: linkHost(solutionUrl)
-		});
-	}
-
-	if (datasetUrl) {
-		links.push({
-			kind: datasetUrl.startsWith("/course-assets/")
-				? "asset"
-				: "dataset",
-			label: datasetLabel(datasetUrl),
-			url: datasetUrl,
-			host: linkHost(datasetUrl)
-		});
-	}
-
 	if (mediaUrl && !isEmbeddedMedia(mediaUrl)) {
-		links.push({
-			kind: "media",
-			label: mediaLabel(mediaUrl),
-			url: mediaUrl,
-			host: linkHost(mediaUrl)
-		});
+		return [
+			{
+				kind: "media",
+				label: mediaLabel(mediaUrl),
+				url: mediaUrl,
+				host: linkHost(mediaUrl)
+			}
+		];
 	}
 
-	return links;
-}
-
-function codePreviewResources(item: CourseModuleItem): CodePreviewResource[] {
-	return resourceLinks(item)
-		.filter(
-			(
-				resource
-			): resource is ResourceLink & {
-				kind: "project" | "solution";
-			} =>
-				(resource.kind === "project" || resource.kind === "solution") &&
-				resource.host === "github.com"
-		)
-		.map(resource => ({
-			kind: resource.kind,
-			label: resource.label,
-			url: resource.url,
-			host: resource.host
-		}));
-}
-
-function pythonIdeStarterHref(item: CourseModuleItem, resource: ResourceLink) {
-	if (
-		!selectedCourse.value ||
-		!pythonIdeCourseMode.value ||
-		resource.kind !== "project" ||
-		resource.host !== "github.com" ||
-		!STARTER_RE.test(`${resource.label} ${resource.url}`)
-	) {
-		return "";
-	}
-
-	const params = new URLSearchParams({
-		course: selectedCourse.value.id,
-		mode: pythonIdeCourseMode.value,
-		projectKey: `${selectedCourse.value.id}:${item.id}:starter`,
-		starterUrl: resource.url,
-		starterTitle: item.title,
-		starterLabel: resource.label
-	});
-	return `/python-ide?${params.toString()}`;
-}
-
-function courseAssetPreviewResources(
-	item: CourseModuleItem
-): CourseAssetResource[] {
-	return resourceLinks(item).filter(resource =>
-		resource.url.startsWith("/course-assets/")
-	);
+	return [];
 }
 
 function resourceOpenUrl(resource: ResourceLink) {
-	return courseAssetViewerUrl(resource.url, resource.label);
+	return resource.url;
 }
 
 watch(selectedCourseId, value => {
@@ -1428,41 +603,14 @@ watch(selectedCourseId, value => {
 	writeStoredValue(COURSE_SELECTION_STORAGE_KEY, value);
 });
 
-watch(selectedLearnerId, value => {
-	if (!isStorageReady.value || !isStaffContext.value) return;
-	writeStoredValue(LEARNER_SELECTION_STORAGE_KEY, value);
-});
-
 watch([activeModuleId, selectedCourseId], ([moduleId, courseId]) => {
 	if (!isStorageReady.value || !courseId) return;
 	writeStoredValue(moduleSelectionStorageKey(courseId), moduleId);
 });
 
-function syncReducedMotionPreference(event?: MediaQueryListEvent) {
-	prefersReducedMotion.value =
-		event?.matches ?? reducedMotionQuery?.matches ?? false;
-}
-
 onMounted(() => {
 	syncHashAnchor();
 	isStorageReady.value = true;
-	if (
-		typeof window !== "undefined" &&
-		typeof window.matchMedia === "function"
-	) {
-		reducedMotionQuery = window.matchMedia(
-			"(prefers-reduced-motion: reduce)"
-		);
-		syncReducedMotionPreference();
-		reducedMotionQuery.addEventListener(
-			"change",
-			syncReducedMotionPreference
-		);
-	}
-
-	if (typeof document !== "undefined") {
-		document.addEventListener("visibilitychange", handleVisibilityChange);
-	}
 
 	if (typeof window !== "undefined") {
 		window.addEventListener("hashchange", syncHashAnchor);
@@ -1470,32 +618,10 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-	if (progressSaveTimer) {
-		clearTimeout(progressSaveTimer);
-		progressSaveTimer = null;
-	}
-	void flushPendingProgressSave();
-	reducedMotionQuery?.removeEventListener(
-		"change",
-		syncReducedMotionPreference
-	);
-	reducedMotionQuery = null;
-	if (typeof document !== "undefined") {
-		document.removeEventListener(
-			"visibilitychange",
-			handleVisibilityChange
-		);
-	}
 	if (typeof window !== "undefined") {
 		window.removeEventListener("hashchange", syncHashAnchor);
 	}
 });
-
-function handleVisibilityChange() {
-	if (document.visibilityState === "hidden") {
-		void flushPendingProgressSave();
-	}
-}
 
 function moduleSelectionStorageKey(courseId: string) {
 	return `${MODULE_SELECTION_STORAGE_KEY_PREFIX}${courseId}`;
@@ -1532,74 +658,8 @@ function writeStoredValue(key: string, value: string) {
 			<header v-if="selectedCourse" class="course-hero">
 				<div class="course-hero-copy">
 					<h2>{{ selectedCourse.name }}</h2>
-					<div v-if="pythonIdeCourseHref" class="course-ide-action">
-						<a
-							class="site-button site-button--secondary course-ide-link"
-							:href="pythonIdeCourseHref"
-						>
-							{{ pythonIdeCourseLabel }}
-						</a>
-					</div>
 				</div>
 			</header>
-
-			<div v-if="isStaffContext" class="staff-context-bar">
-				<label class="control-block" for="learner-select">
-					<span class="control-label">Learner context</span>
-					<select
-						id="learner-select"
-						v-model="selectedLearnerId"
-						class="course-select"
-						:disabled="
-							managedLearnersLoading ||
-							managedLearners.length === 0
-						"
-					>
-						<option disabled value="">
-							{{
-								managedLearnersLoading
-									? "Loading learners..."
-									: "Select a learner"
-							}}
-						</option>
-						<option
-							v-for="(learner, index) in managedLearners"
-							:key="learner._id"
-							:value="learner._id"
-						>
-							{{ learnerOptionLabel(learner, index) }}
-						</option>
-					</select>
-				</label>
-
-				<div class="staff-context-status">
-					<p
-						class="progress-save-status"
-						:class="`is-${progressSaveStatus}`"
-						:role="
-							progressSaveStatus === 'error' ? 'alert' : 'status'
-						"
-						aria-live="polite"
-					>
-						{{ progressSaveStatusText }}
-					</p>
-					<p
-						v-if="managedLearnersError"
-						class="progress-save-status is-error"
-						role="alert"
-					>
-						{{ managedLearnersError }}
-					</p>
-					<button
-						v-if="progressSaveStatus === 'error'"
-						class="retry-save"
-						type="button"
-						@click="retryProgressSave"
-					>
-						Retry save
-					</button>
-				</div>
-			</div>
 
 			<div class="course-toolbar">
 				<label class="control-block" for="course-select">
@@ -1684,11 +744,8 @@ function writeStoredValue(key: string, value: string) {
 								:aria-label="`Show ${moduleKindLabel(module).toLowerCase()} ${module.position}: ${module.title}`"
 								class="outline-button"
 								:class="{
-									'is-complete':
-										hasProgressTracking &&
-										isCoreModule(module) &&
-										isModuleComplete(module),
-									'is-reference': isAppendixModule(module)
+									'is-reference': isAppendixModule(module),
+									'is-transition': isTransitionModule(module)
 								}"
 								type="button"
 								@click="selectModule(module.id)"
@@ -1708,16 +765,6 @@ function writeStoredValue(key: string, value: string) {
 										<span v-if="module.isFiltered">
 											visible out of
 											{{ module.totalItemCount }}
-										</span>
-										<span
-											v-if="
-												hasProgressTracking &&
-												isCoreModule(module) &&
-												isModuleComplete(module)
-											"
-											class="complete-pill"
-										>
-											Complete
 										</span>
 									</small>
 								</span>
@@ -1753,41 +800,6 @@ function writeStoredValue(key: string, value: string) {
 								{{ activeModule.position }}
 							</p>
 							<h3>{{ activeModule.title }}</h3>
-							<label
-								v-if="canEditActiveModuleProgress"
-								class="progress-toggle is-module"
-							>
-								<input
-									:checked="isModuleComplete(activeModule)"
-									type="checkbox"
-									@change="
-										toggleModuleProgress(
-											activeModule,
-											($event.target as HTMLInputElement)
-												.checked
-										)
-									"
-								/>
-								<span>
-									Mark
-									{{
-										moduleKindLabel(
-											activeModule
-										).toLowerCase()
-									}}
-									complete
-								</span>
-							</label>
-							<p
-								v-if="
-									hasProgressTracking &&
-									isCoreModule(activeModule) &&
-									isModuleComplete(activeModule)
-								"
-								class="module-complete-note"
-							>
-								Completed
-							</p>
 						</div>
 
 						<div
@@ -1872,34 +884,6 @@ function writeStoredValue(key: string, value: string) {
 											<p class="lesson-kicker">Lesson</p>
 											<h5>{{ item.title }}</h5>
 										</div>
-										<span
-											v-if="
-												hasProgressTracking &&
-												isCoreModule(activeModule) &&
-												isItemComplete(item)
-											"
-											class="item-complete-badge"
-										>
-											Done
-										</span>
-										<label
-											v-if="canEditActiveModuleProgress"
-											class="progress-toggle is-item"
-										>
-											<input
-												:checked="isItemComplete(item)"
-												type="checkbox"
-												@change="
-													toggleItemProgress(
-														item,
-														(
-															$event.target as HTMLInputElement
-														).checked
-													)
-												"
-											/>
-											<span>Done</span>
-										</label>
 									</header>
 
 									<LazyMarkdownContent
@@ -1940,52 +924,8 @@ function writeStoredValue(key: string, value: string) {
 													{{ resource.host }}
 												</small>
 											</a>
-											<a
-												v-if="
-													pythonIdeStarterHref(
-														item,
-														resource
-													)
-												"
-												class="resource-link is-ide-starter"
-												:href="
-													pythonIdeStarterHref(
-														item,
-														resource
-													)
-												"
-											>
-												<span
-													class="resource-link-label"
-												>
-													Start in IDE
-												</span>
-												<small
-													class="resource-link-host"
-												>
-													Browser workspace
-												</small>
-											</a>
 										</template>
 									</div>
-
-									<CourseAssetPreview
-										v-if="
-											courseAssetPreviewResources(item)
-												.length > 0
-										"
-										:resources="
-											courseAssetPreviewResources(item)
-										"
-									/>
-
-									<CodePreview
-										v-if="
-											codePreviewResources(item).length >
-											0
-										"
-										:resources="codePreviewResources(item)"
-									/>
 
 									<div
 										v-if="
@@ -1995,37 +935,7 @@ function writeStoredValue(key: string, value: string) {
 										"
 										class="item-media"
 									>
-										<video
-											v-if="isVideo(item.mediaLink)"
-											class="item-media-video"
-											:autoplay="!prefersReducedMotion"
-											:controls="prefersReducedMotion"
-											:loop="!prefersReducedMotion"
-											muted
-											playsinline
-											:preload="
-												prefersReducedMotion
-													? 'metadata'
-													: 'auto'
-											"
-											:aria-label="`Demo video for ${item.title}`"
-											@error="
-												markStaticMediaUnavailable(
-													item.mediaLink
-												)
-											"
-										>
-											<source
-												:src="item.mediaLink"
-												@error="
-													markStaticMediaUnavailable(
-														item.mediaLink
-													)
-												"
-											/>
-										</video>
 										<img
-											v-else-if="isImage(item.mediaLink)"
 											:src="item.mediaLink"
 											:alt="`Project demo media for ${item.title}`"
 											class="item-media-image"
@@ -2107,34 +1017,6 @@ function writeStoredValue(key: string, value: string) {
 											</p>
 											<h5>{{ item.title }}</h5>
 										</div>
-										<span
-											v-if="
-												hasProgressTracking &&
-												isCoreModule(activeModule) &&
-												isItemComplete(item)
-											"
-											class="item-complete-badge"
-										>
-											Done
-										</span>
-										<label
-											v-if="canEditActiveModuleProgress"
-											class="progress-toggle is-item"
-										>
-											<input
-												:checked="isItemComplete(item)"
-												type="checkbox"
-												@change="
-													toggleItemProgress(
-														item,
-														(
-															$event.target as HTMLInputElement
-														).checked
-													)
-												"
-											/>
-											<span>Done</span>
-										</label>
 									</header>
 
 									<LazyMarkdownContent
@@ -2175,52 +1057,8 @@ function writeStoredValue(key: string, value: string) {
 													{{ resource.host }}
 												</small>
 											</a>
-											<a
-												v-if="
-													pythonIdeStarterHref(
-														item,
-														resource
-													)
-												"
-												class="resource-link is-ide-starter"
-												:href="
-													pythonIdeStarterHref(
-														item,
-														resource
-													)
-												"
-											>
-												<span
-													class="resource-link-label"
-												>
-													Start in IDE
-												</span>
-												<small
-													class="resource-link-host"
-												>
-													Browser workspace
-												</small>
-											</a>
 										</template>
 									</div>
-
-									<CourseAssetPreview
-										v-if="
-											courseAssetPreviewResources(item)
-												.length > 0
-										"
-										:resources="
-											courseAssetPreviewResources(item)
-										"
-									/>
-
-									<CodePreview
-										v-if="
-											codePreviewResources(item).length >
-											0
-										"
-										:resources="codePreviewResources(item)"
-									/>
 
 									<div
 										v-if="
@@ -2230,37 +1068,7 @@ function writeStoredValue(key: string, value: string) {
 										"
 										class="item-media"
 									>
-										<video
-											v-if="isVideo(item.mediaLink)"
-											class="item-media-video"
-											:autoplay="!prefersReducedMotion"
-											:controls="prefersReducedMotion"
-											:loop="!prefersReducedMotion"
-											muted
-											playsinline
-											:preload="
-												prefersReducedMotion
-													? 'metadata'
-													: 'auto'
-											"
-											:aria-label="`Demo video for ${item.title}`"
-											@error="
-												markStaticMediaUnavailable(
-													item.mediaLink
-												)
-											"
-										>
-											<source
-												:src="item.mediaLink"
-												@error="
-													markStaticMediaUnavailable(
-														item.mediaLink
-													)
-												"
-											/>
-										</video>
 										<img
-											v-else-if="isImage(item.mediaLink)"
 											:src="item.mediaLink"
 											:alt="`Project demo media for ${item.title}`"
 											class="item-media-image"
@@ -2311,10 +1119,7 @@ function writeStoredValue(key: string, value: string) {
 				</div>
 			</div>
 
-			<div
-				v-else-if="isCourseLoading && !publicCatalog"
-				class="reader-empty"
-			>
+			<div v-else-if="isCourseLoading" class="reader-empty">
 				<h3>Loading course</h3>
 				<p>Opening the selected course.</p>
 			</div>
@@ -2324,13 +1129,13 @@ function writeStoredValue(key: string, value: string) {
 				<p>{{ courseLoadError }}</p>
 			</div>
 
-			<div v-else-if="!publicCatalog" class="reader-empty">
+			<div v-else class="reader-empty">
 				<h3>{{ emptyTitle }}</h3>
 				<p>{{ emptyHint }}</p>
 			</div>
 		</div>
 
-		<div v-else-if="!publicCatalog" class="course-empty">
+		<div v-else class="course-empty">
 			<p>{{ emptyTitle }}</p>
 			<p class="hint">{{ emptyHint }}</p>
 		</div>
@@ -2385,7 +1190,7 @@ function writeStoredValue(key: string, value: string) {
 	width: 100%;
 	box-sizing: border-box;
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(24rem, 31rem);
+	grid-template-columns: minmax(0, 1fr);
 	align-items: center;
 	gap: 1rem 1.5rem;
 	padding: 0.2rem 0.15rem 0.05rem;
@@ -2399,8 +1204,6 @@ function writeStoredValue(key: string, value: string) {
 	min-width: 0;
 }
 
-.course-eyebrow,
-.outline-eyebrow,
 .reader-eyebrow,
 .section-eyebrow,
 .lesson-kicker {
@@ -2425,89 +1228,10 @@ function writeStoredValue(key: string, value: string) {
 	line-height: 1.08;
 }
 
-.course-description,
-.outline-header p,
 .reader-copy p,
 .reader-empty p {
 	margin: 0;
 	line-height: 1.7;
-	color: var(--course-text-soft);
-}
-
-.course-description {
-	max-width: 46rem;
-	font-size: 0.98rem;
-}
-
-.course-ide-action {
-	display: flex;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 0.6rem 0.85rem;
-	margin-top: 0.15rem;
-	color: var(--course-text-soft);
-	font-size: 0.9rem;
-	line-height: 1.5;
-}
-
-.course-ide-link {
-	flex: 0 0 auto;
-}
-
-.course-stats {
-	width: 100%;
-	max-width: 31rem;
-	min-width: 0;
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(6.8rem, 1fr));
-	gap: 0;
-	margin: 0;
-	border-radius: 16px;
-	overflow: hidden;
-	background: rgba(255, 255, 255, 0.72);
-	border: 1px solid rgba(148, 163, 184, 0.22);
-	box-shadow: 0 18px 32px -28px rgba(15, 23, 42, 0.18);
-}
-
-.stat {
-	padding: 1rem 1.15rem 1.15rem;
-	background: transparent;
-	border-right: 1px solid rgba(148, 163, 184, 0.18);
-	min-height: 100%;
-	min-width: 0;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-}
-
-.stat:last-child {
-	border-right: none;
-}
-
-.stat.is-progress {
-	background: rgba(236, 253, 245, 0.72);
-}
-
-.stat dt {
-	margin: 0;
-	font-size: clamp(0.68rem, 0.78vw, 0.8rem);
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	color: #0f766e;
-}
-
-.stat dd {
-	margin: 0.45rem 0 0;
-	font-size: clamp(1.3rem, 3vw, 1.8rem);
-	font-weight: 700;
-	color: var(--course-text);
-}
-
-.stat small {
-	display: block;
-	margin-top: 0.35rem;
-	line-height: 1.35;
 	color: var(--course-text-soft);
 }
 
@@ -2522,58 +1246,6 @@ function writeStoredValue(key: string, value: string) {
 	border-radius: 20px;
 	background: rgba(255, 255, 255, 0.72);
 	border: 1px solid rgba(148, 163, 184, 0.18);
-}
-
-.staff-context-bar {
-	width: 100%;
-	box-sizing: border-box;
-	display: grid;
-	grid-template-columns: minmax(16rem, 25rem) minmax(0, 1fr);
-	gap: 1rem 1.25rem;
-	align-items: end;
-	padding: 1.1rem 1.15rem;
-	border-radius: 20px;
-	background: rgba(236, 253, 245, 0.72);
-	border: 1px solid rgba(15, 118, 110, 0.18);
-}
-
-.staff-context-status {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: flex-end;
-	align-items: center;
-	gap: 0.65rem;
-	min-width: 0;
-}
-
-.progress-save-status {
-	margin: 0;
-	padding: 0.65rem 0.85rem;
-	border-radius: 999px;
-	background: rgba(255, 255, 255, 0.76);
-	color: #134e4a;
-	font-weight: 800;
-	line-height: 1.2;
-}
-
-.progress-save-status.is-error {
-	background: rgba(254, 226, 226, 0.9);
-	color: #991b1b;
-}
-
-.progress-save-status.is-saving,
-.progress-save-status.is-unsaved {
-	background: rgba(254, 243, 199, 0.9);
-	color: #78350f;
-}
-
-.retry-save {
-	border: 1px solid rgba(153, 27, 27, 0.22);
-	border-radius: 999px;
-	padding: 0.65rem 0.9rem;
-	background: rgba(255, 255, 255, 0.84);
-	color: #991b1b;
-	font-weight: 800;
 }
 
 .control-block {
@@ -2661,9 +1333,7 @@ function writeStoredValue(key: string, value: string) {
 .outline-reset:focus-visible,
 .outline-button:focus-visible,
 .resource-link:focus-visible,
-.jump-link:focus-visible,
-.retry-save:focus-visible,
-.progress-toggle:focus-within {
+.jump-link:focus-visible {
 	outline: 2px solid var(--focus-ring-color);
 	outline-offset: 3px;
 }
@@ -2785,14 +1455,14 @@ function writeStoredValue(key: string, value: string) {
 	box-shadow: 0 16px 28px -24px rgba(15, 118, 110, 0.22);
 }
 
-.outline-button.is-complete {
-	border-color: rgba(22, 163, 74, 0.2);
-	background: rgba(240, 253, 244, 0.78);
-}
-
 .outline-button.is-reference {
 	border-color: rgba(100, 116, 139, 0.12);
 	background: rgba(248, 250, 252, 0.62);
+}
+
+.outline-button.is-transition {
+	border-color: rgba(124, 58, 237, 0.14);
+	background: rgba(245, 243, 255, 0.62);
 }
 
 .outline-position,
@@ -2826,6 +1496,16 @@ function writeStoredValue(key: string, value: string) {
 	color: #1d4ed8;
 }
 
+.outline-button.is-transition .outline-position {
+	background: rgba(124, 58, 237, 0.12);
+	color: #6d28d9;
+}
+
+.outline-button.is-transition[aria-current="true"] .outline-position {
+	background: rgba(124, 58, 237, 0.18);
+	color: #5b21b6;
+}
+
 .outline-copy {
 	display: flex;
 	flex-direction: column;
@@ -2845,29 +1525,6 @@ function writeStoredValue(key: string, value: string) {
 	align-items: center;
 	color: var(--course-text-soft);
 	line-height: 1.5;
-}
-
-.complete-pill,
-.module-complete-note,
-.item-complete-badge {
-	display: inline-flex;
-	align-items: center;
-	width: fit-content;
-	border-radius: 999px;
-	background: rgba(22, 163, 74, 0.12);
-	color: #166534;
-	font-weight: 700;
-}
-
-.complete-pill {
-	padding: 0.1rem 0.45rem;
-	font-size: 0.72rem;
-}
-
-.module-complete-note {
-	padding: 0.35rem 0.65rem;
-	font-size: 0.82rem;
-	line-height: 1.2;
 }
 
 .outline-empty,
@@ -3104,46 +1761,6 @@ function writeStoredValue(key: string, value: string) {
 	max-width: 100%;
 }
 
-.item-complete-badge {
-	margin-left: auto;
-	padding: 0.4rem 0.65rem;
-	font-size: 0.78rem;
-	line-height: 1.2;
-	flex: 0 0 auto;
-}
-
-.progress-toggle {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.45rem;
-	width: fit-content;
-	border: 1px solid rgba(15, 118, 110, 0.16);
-	border-radius: 999px;
-	background: rgba(236, 253, 245, 0.75);
-	color: #134e4a;
-	font-weight: 800;
-	line-height: 1.2;
-}
-
-.progress-toggle.is-module {
-	padding: 0.45rem 0.7rem;
-	font-size: 0.86rem;
-}
-
-.progress-toggle.is-item {
-	margin-left: auto;
-	padding: 0.4rem 0.65rem;
-	font-size: 0.78rem;
-	flex: 0 0 auto;
-}
-
-.progress-toggle input {
-	width: 1rem;
-	height: 1rem;
-	margin: 0;
-	accent-color: var(--course-accent);
-}
-
 .lesson-index.is-supplemental {
 	background: rgba(245, 158, 11, 0.14);
 	color: #b45309;
@@ -3199,84 +1816,11 @@ function writeStoredValue(key: string, value: string) {
 	word-break: break-word;
 }
 
-.resource-link.is-project {
-	--course-resource-bg: var(
-		--course-project-resource-bg,
-		rgba(236, 253, 245, 0.92)
-	);
-	--course-resource-bg-hover: var(
-		--course-project-resource-bg-hover,
-		rgba(220, 252, 231, 0.96)
-	);
-	--course-resource-text: var(--course-project-resource-text, #134e4a);
-	--course-resource-host: var(--course-project-resource-host, #47736d);
-}
-
-.resource-link.is-ide-starter {
-	--course-resource-bg: rgba(220, 252, 231, 0.96);
-	--course-resource-bg-hover: rgba(187, 247, 208, 0.98);
-	--course-resource-text: #14532d;
-	--course-resource-host: #3f6f50;
-}
-
-.resource-link.is-solution {
-	--course-resource-bg: var(
-		--course-solution-resource-bg,
-		rgba(239, 246, 255, 0.94)
-	);
-	--course-resource-bg-hover: var(
-		--course-solution-resource-bg-hover,
-		rgba(219, 234, 254, 0.96)
-	);
-	--course-resource-text: var(--course-solution-resource-text, #1e3a8a);
-	--course-resource-host: var(--course-solution-resource-host, #486a9c);
-}
-
-.resource-link.is-dataset {
-	--course-resource-bg: var(
-		--course-dataset-resource-bg,
-		rgba(255, 247, 237, 0.94)
-	);
-	--course-resource-bg-hover: var(
-		--course-dataset-resource-bg-hover,
-		rgba(254, 235, 200, 0.96)
-	);
-	--course-resource-text: var(--course-dataset-resource-text, #7c2d12);
-	--course-resource-host: var(--course-dataset-resource-host, #925f35);
-}
-
-.resource-link.is-asset {
-	--course-resource-bg: var(
-		--course-asset-resource-bg,
-		rgba(240, 253, 250, 0.94)
-	);
-	--course-resource-bg-hover: var(
-		--course-asset-resource-bg-hover,
-		rgba(204, 251, 241, 0.96)
-	);
-	--course-resource-text: var(--course-asset-resource-text, #115e59);
-	--course-resource-host: var(--course-asset-resource-host, #47736d);
-}
-
-.resource-link.is-reference {
-	--course-resource-bg: var(
-		--course-reference-resource-bg,
-		rgba(248, 250, 252, 0.94)
-	);
-	--course-resource-bg-hover: var(
-		--course-reference-resource-bg-hover,
-		rgba(241, 245, 249, 0.96)
-	);
-	--course-resource-text: var(--course-reference-resource-text, #334155);
-	--course-resource-host: var(--course-reference-resource-host, #64748b);
-}
-
 .item-media {
 	width: 100%;
 	max-width: 100%;
 }
 
-.item-media-video,
 .item-media-image {
 	display: block;
 	width: 100%;
@@ -3360,20 +1904,13 @@ function writeStoredValue(key: string, value: string) {
 
 @media (max-width: 1500px) {
 	.course-hero,
-	.course-toolbar,
-	.staff-context-bar {
+	.course-toolbar {
 		display: grid;
 		grid-template-columns: 1fr;
 	}
 
-	.course-toolbar,
-	.staff-context-bar {
+	.course-toolbar {
 		gap: 0.9rem;
-	}
-
-	.course-stats {
-		width: 100%;
-		max-width: none;
 	}
 }
 
@@ -3382,14 +1919,9 @@ function writeStoredValue(key: string, value: string) {
 		overflow: visible;
 	}
 
-	.course-stats {
-		grid-template-columns: 1fr;
-	}
-
 	.search-shell,
 	.lesson-header,
-	.section-header,
-	.staff-context-status {
+	.section-header {
 		flex-direction: column;
 		align-items: stretch;
 	}
@@ -3398,14 +1930,6 @@ function writeStoredValue(key: string, value: string) {
 	.jump-link {
 		width: 100%;
 		justify-content: space-between;
-	}
-
-	.item-complete-badge {
-		margin-left: 0;
-	}
-
-	.progress-toggle.is-item {
-		margin-left: 0;
 	}
 
 	.outline-button {

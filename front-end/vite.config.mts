@@ -5,7 +5,6 @@ import { fileURLToPath } from "node:url";
 import { unheadVueComposablesImports } from "@unhead/vue";
 import Vue from "@vitejs/plugin-vue";
 
-import Unocss from "unocss/vite";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { defineConfig } from "vite";
@@ -17,9 +16,12 @@ import { generateProductionSitemap } from "./scripts/sitemap.mts";
 import { rewriteStaticHead } from "./scripts/static-head.mts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const pythonIdePreloadChunkRE = /(?:^|\/)python-ide-runtime-[^/]+\.js$/;
 
 export default defineConfig(({ command }) => ({
+	optimizeDeps: {
+		include: ["markdown-it"]
+	},
+
 	resolve: {
 		alias: {
 			"~": `${path.resolve(__dirname, "src")}/`,
@@ -47,7 +49,6 @@ export default defineConfig(({ command }) => ({
 			// ⚠️ remove @vueuse/head to avoid duplicate helpers
 			imports: [
 				"vue",
-				"vue-i18n",
 				"@vueuse/core",
 				unheadVueComposablesImports, // supplies useHead / useSeoMeta
 				VueRouterAutoImports,
@@ -68,10 +69,7 @@ export default defineConfig(({ command }) => ({
 			extensions: ["vue"],
 			include: [/\.vue$/, /\.vue\?vue/, /\.md$/],
 			dts: "src/components.d.ts"
-		}),
-
-		/* 6️⃣  CSS / Markdown / Misc */
-		Unocss()
+		})
 	],
 
 	/* vitest */
@@ -95,46 +93,6 @@ export default defineConfig(({ command }) => ({
 		},
 		onFinished() {
 			generateProductionSitemap(generateSitemap);
-		}
-	},
-
-	ssr: {
-		// TODO: workaround until they support native ESM
-		noExternal: ["workbox-window", /vue-i18n/]
-	},
-
-	build: {
-		modulePreload: {
-			resolveDependencies(_filename, deps, context) {
-				if (context.hostType !== "html") return deps;
-
-				return deps.filter(dep => !pythonIdePreloadChunkRE.test(dep));
-			}
-		},
-		rolldownOptions: {
-			output: {
-				codeSplitting: {
-					includeDependenciesRecursively: false,
-					groups: [
-						{
-							name: "python-ide-runtime",
-							test: /src\/modules\/pythonIdeRuntime\.ts$/
-						}
-					]
-				}
-			}
-		}
-	},
-
-	server: {
-		proxy: {
-			"/api": {
-				target:
-					process.env.VITE_API_PROXY_TARGET ??
-					"http://localhost:3008",
-				changeOrigin: true,
-				rewrite: p => p.replace(/^\/api/, "") // strip /api
-			}
 		}
 	}
 }));

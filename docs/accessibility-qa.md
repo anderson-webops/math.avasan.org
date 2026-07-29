@@ -1,34 +1,20 @@
-# Accessibility QA Checklist
+# Accessibility QA
 
-This checklist complements the automated `npm run a11y` axe smoke suite. Run it before shipping changes to public navigation, the five-course reader, Graph Sketcher, the Python IDE, course-resource rendering, or Julio's private teacher account.
+This checklist complements the automated `npm run a11y` axe smoke suite.
 
-## Screen Reader Pass
-
-- On macOS with VoiceOver, open `/`, `/graph-sketcher`, `/python-ide`, `/course-resource?asset=%2Fcourse-assets%2Fpython%2Fturtle-project-reference.md%23turtle-command-reference&label=Turtle+command+reference`, and `/admin`. Use `VO + Right Arrow`, then navigate by headings, landmarks, buttons, form controls, and links.
-- On Windows with NVDA, repeat the public-route pass in Firefox or Chrome when a Windows machine is available. Verify that browse mode and focus mode both announce the active control and its destination.
-- On `/`, confirm the selector announces exactly Scratch Levels 1 and 2, Python Levels 1 and 2, and PyGames. Confirm the selected course, section controls, lesson links, and resource labels are understandable without visual context.
-- On `/graph-sketcher`, confirm the editor tabs, graph canvas, selected series, point controls, zoom and fit controls, import/export actions, save state, and validation messages are announced clearly.
-- Open `/admin` while logged out. Confirm the teacher sign-in fields, remember-me checkbox, submit button, and any validation error are announced clearly.
-- With Julio's code-provisioned teacher session, open `/admin` and confirm the teacher heading and account-security fields are announced clearly.
-
-## Keyboard Pass
-
-- Start at the browser address bar and move through every public page without a mouse.
-- Verify visible focus on the skip link, header navigation, `/admin` sign-in form, course selector, course outline buttons, resource links, and Python IDE controls.
-- On `/graph-sketcher`, create and move a point using only the keyboard, switch editor tabs, select a series, use zoom and fit, download the graph, and activate **Clear for next student**. Confirm the custom graph canvas does not trap focus and its status updates are understandable.
-- Confirm the public course library never requires an account prompt and does not expose a signup control.
-- Confirm no hidden control receives focus and no keyboard trap occurs in the teacher sign-in form, course reader, or Python IDE.
-
-## Contrast And Motion Pass
-
-- Check light and dark mode at mobile, tablet, and desktop widths, including `/graph-sketcher` at 390 CSS pixels wide.
-- Verify primary text, muted text, buttons, form controls, alerts, code, canvas labels, and course resource links remain readable.
-- With reduced motion enabled, confirm animation is not the only status cue, Graph Sketcher remains operable, and IDE output remains understandable.
-
-## Required Automated Evidence
-
-- `npm run a11y`
-- `npm run -w front-end test`
-- `npm run lint`
-- `npm run typecheck`
-- `npm run build`
+- Test `/`, `/graph-sketcher`, `/courses`, and the unlisted `/admin` handoff
+  with keyboard-only navigation and a screen reader.
+- Confirm the skip link, two-item header navigation, graph toolbar, inspector
+  tabs, editable data table, course selector, outline buttons, and resource
+  links have visible focus and meaningful accessible names.
+- On narrow and wide screens, confirm the graph, tools, inspector, and course
+  reader remain usable without clipped controls or horizontal page scrolling.
+- Verify inspector tabs support arrow keys, Home, and End, and that focus does
+  not enter hidden panels.
+- Exercise New, Clear for next student, import, and export confirmation paths.
+  Status changes must be announced without moving focus unexpectedly.
+- Confirm reduced-motion and dark-mode preferences do not obscure focus,
+  selected states, graph labels, or validation messages.
+- Confirm `/admin` provides a clear keyboard-accessible handoff to Julio’s
+  protected Admin, while `/python-ide` and `/student-privacy` render the
+  missing-page response. None should appear in navigation or the sitemap.

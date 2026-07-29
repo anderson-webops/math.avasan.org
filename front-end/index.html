@@ -6,7 +6,7 @@
 			content="width=device-width, initial-scale=1.0"
 			name="viewport"
 		/>
-		<title>Classes with Julio</title>
+		<title>Math with Julio</title>
 
 		<!-- Favicons -->
 		<link href="/favicon.svg" rel="icon" type="image/svg+xml" />
@@ -33,22 +33,12 @@
 		<meta content="#0f766e" name="msapplication-TileColor" />
 		<meta content="#0f766e" name="theme-color" />
 		<meta
-			content="Scratch, Python, and PyGames courses from grade-school teacher Julio."
+			content="Graph, explore, and learn with a browser-based Graph Sketcher and math courses from elementary through AP Calculus."
 			name="description"
 		/>
 		<meta content="index,follow" name="robots" />
 
-		<script>
-			(function () {
-				const prefersDark =
-					window.matchMedia &&
-					window.matchMedia("(prefers-color-scheme: dark)").matches;
-				const setting =
-					localStorage.getItem("vueuse-color-scheme") || "auto";
-				if (setting === "dark" || (prefersDark && setting !== "light"))
-					document.documentElement.classList.toggle("dark", true);
-			})();
-		</script>
+		<script src="/theme.js"></script>
 	</head>
 
 	<body class="font-sans">

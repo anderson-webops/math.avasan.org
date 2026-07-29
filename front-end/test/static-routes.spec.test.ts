@@ -22,7 +22,7 @@ describe("static route normalization", () => {
 	});
 
 	it("creates nested index files for clean static URLs", async () => {
-		const tempDir = await mkdtemp(join(tmpdir(), "classes-routes-"));
+		const tempDir = await mkdtemp(join(tmpdir(), "math-routes-"));
 		tempDirs.push(tempDir);
 		const { normalizeStaticRoutes } =
 			(await import("../scripts/normalize-static-routes.mjs")) as {
@@ -31,67 +31,79 @@ describe("static route normalization", () => {
 
 		await writeFile(join(tempDir, "index.html"), "<main>Home</main>");
 		await writeFile(
-			join(tempDir, "course-resource.html"),
-			"<main>Course Resource</main>"
-		);
-		await writeFile(
 			join(tempDir, "graph-sketcher.html"),
 			"<main>Graph Sketcher</main>"
 		);
-		await writeFile(join(tempDir, "admin.html"), "<main>Admin</main>");
+		await writeFile(
+			join(tempDir, "courses.html"),
+			"<main>Math courses</main>"
+		);
+		await writeFile(
+			join(tempDir, "admin.html"),
+			"<main>Julio’s Admin</main>"
+		);
 
 		await normalizeStaticRoutes(tempDir);
 
 		await expect(
-			readFile(join(tempDir, "course-resource", "index.html"), "utf8")
-		).resolves.toBe("<main>Course Resource</main>");
-		await expect(
-			readFile(join(tempDir, "admin", "index.html"), "utf8")
-		).resolves.toBe("<main>Admin</main>");
-		await expect(
 			readFile(join(tempDir, "graph-sketcher", "index.html"), "utf8")
 		).resolves.toBe("<main>Graph Sketcher</main>");
 		await expect(
+			readFile(join(tempDir, "courses", "index.html"), "utf8")
+		).resolves.toBe("<main>Math courses</main>");
+		await expect(
+			readFile(join(tempDir, "admin", "index.html"), "utf8")
+		).resolves.toBe("<main>Julio’s Admin</main>");
+		await expect(
 			stat(join(tempDir, "index", "index.html"))
 		).rejects.toThrow();
+		for (const removedRoute of [
+			"course-resource",
+			"python-ide",
+			"student-privacy"
+		]) {
+			await expect(
+				stat(join(tempDir, removedRoute, "index.html"))
+			).rejects.toThrow();
+		}
 	});
 
 	it.each([
 		[
 			"/",
-			"Classes with Julio",
+			"Math with Julio",
 			"index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1",
-			"https://cs.avasan.org/"
+			"https://math.avasan.org/"
+		],
+		[
+			"/courses",
+			"Math Courses | Math with Julio",
+			"index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1",
+			"https://math.avasan.org/courses"
 		],
 		[
 			"/python-ide",
-			"Python IDE | Classes with Julio",
+			"Page Not Found | Math with Julio",
 			"noindex,nofollow",
-			"https://cs.avasan.org/python-ide"
-		],
-		[
-			"/course-resource",
-			"Course Resource | Classes with Julio",
-			"noindex,nofollow",
-			"https://cs.avasan.org/course-resource"
+			"https://math.avasan.org/python-ide"
 		],
 		[
 			"/graph-sketcher",
-			"Graph Sketcher | Classes with Julio",
+			"Graph Sketcher | Math with Julio",
 			"index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1",
-			"https://cs.avasan.org/graph-sketcher"
+			"https://math.avasan.org/"
 		],
 		[
 			"/admin",
-			"Teacher Admin | Classes with Julio",
+			"Teacher Admin | Math with Julio",
 			"noindex,nofollow",
-			"https://cs.avasan.org/admin"
+			"https://math.avasan.org/admin"
 		],
 		[
 			"/student-privacy",
-			"Student Privacy | Classes with Julio",
-			"index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1",
-			"https://cs.avasan.org/student-privacy"
+			"Page Not Found | Math with Julio",
+			"noindex,nofollow",
+			"https://math.avasan.org/student-privacy"
 		]
 	])(
 		"writes the route-aware static head for %s",
@@ -137,16 +149,12 @@ describe("static route normalization", () => {
 		generateProductionSitemap(options => calls.push(options));
 
 		expect(options.hostname).toBe(SITE_URL);
-		expect(options.hostname).toBe("https://cs.avasan.org");
+		expect(options.hostname).toBe("https://math.avasan.org");
 		expect(options.hostname).not.toContain("localhost");
 		expect(options.generateRobotsTxt).toBe(false);
 		expect(options.exclude).toEqual(SITEMAP_EXCLUDED_ROUTES);
-		expect(options.exclude).toEqual([
-			"/admin",
-			"/course-resource",
-			"/python-ide"
-		]);
-		expect(options.exclude).not.toContain("/graph-sketcher");
+		expect(options.exclude).toEqual(["/admin", "/graph-sketcher"]);
+		expect(options.exclude).not.toContain("/courses");
 		expect(calls).toEqual([options]);
 	});
 });

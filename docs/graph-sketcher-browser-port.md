@@ -3,14 +3,14 @@
 ## Decision
 
 The original GraphSketcher cannot be deployed directly on the
-`cs.avasan.org` Linux host. Its shared model and user interfaces are
+`math.avasan.org` Linux host. Its shared model and user interfaces are
 Objective-C code coupled to Cocoa, UIKit, OmniGroup frameworks, and an Xcode
 5.1-era build. The most
 substantial upstream fork modernizes the macOS application but remains
 Apple-only. A newer JavaScript project with the same name is an unrelated chart
 maker, not a port.
 
-The `cs.avasan.org` integration is therefore an independent browser adaptation.
+The `math.avasan.org` integration is therefore an independent browser adaptation.
 It keeps graph editing in Vue, TypeScript, and SVG and never starts a drawing,
 conversion, or compilation process on the back end. The Linux server only
 serves static frontend assets.

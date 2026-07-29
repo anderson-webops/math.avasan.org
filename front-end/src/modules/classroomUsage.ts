@@ -1,13 +1,24 @@
-export type ClassroomUsageEvent = "course-open" | "ide-open";
+export type MathClassroomUsageEvent = "course-open" | "graph-open";
 
+const MATH_SITE_ID = "math";
 const allowedCourseIds = new Set([
-	"scratch-level-1",
-	"scratch-level-2",
-	"python-level-1",
-	"python-level-2",
-	"pygames"
+	"early-elementary-a-math",
+	"early-elementary-b-math",
+	"late-elementary-a-math",
+	"late-elementary-b-math",
+	"pre-algebra-a",
+	"pre-algebra-b",
+	"algebra-1a",
+	"algebra-1b",
+	"geometry-a",
+	"geometry-b",
+	"algebra-2a",
+	"algebra-2b",
+	"pre-calculus-a",
+	"pre-calculus-b",
+	"ap-calculus"
 ]);
-const storageKeyPrefix = "cs-avasan:classroom-usage";
+const storageKeyPrefix = "math-avasan:classroom-usage";
 
 interface PrivacyAwareNavigator extends Navigator {
 	globalPrivacyControl?: boolean;
@@ -38,6 +49,7 @@ function privacySignalIsEnabled() {
 			? null
 			: (window as PrivacyAwareWindow).doNotTrack
 	];
+
 	return signals.some(signal => {
 		const normalized = signal?.toLowerCase();
 		return normalized === "1" || normalized === "yes";
@@ -53,18 +65,18 @@ function utcDate() {
 	return new Date().toISOString().slice(0, 10);
 }
 
-function reportStorageKey(event: ClassroomUsageEvent, courseId?: string) {
+function reportStorageKey(event: MathClassroomUsageEvent, courseId?: string) {
 	return [storageKeyPrefix, utcDate(), event, courseId ?? "none"].join(":");
 }
 
 /**
- * Reports one anonymous classroom-use count per tab, event, course, and UTC
- * date. This deliberately omits account, project, page, referrer, and device
- * data. If privacy signals, browser storage, or the endpoint are unavailable,
- * the classroom keeps working without reporting.
+ * Reports at most one anonymous aggregate count per tab, event, course, and
+ * UTC date. The payload has no student, account, graph, page, device, or
+ * referrer data. Reporting is disabled unless the classroom explicitly opts
+ * in, and browser privacy signals always win.
  */
-export async function reportClassroomUsage(
-	event: ClassroomUsageEvent,
+export async function reportMathClassroomUsage(
+	event: MathClassroomUsageEvent,
 	courseId?: string | null
 ) {
 	if (
@@ -82,8 +94,9 @@ export async function reportClassroomUsage(
 	}
 
 	const safeCourseId = allowedCourseId(courseId);
-	const storageKey = reportStorageKey(event, safeCourseId);
+	if (event === "course-open" && !safeCourseId) return;
 
+	const storageKey = reportStorageKey(event, safeCourseId);
 	try {
 		if (window.sessionStorage.getItem(storageKey)) return;
 		window.sessionStorage.setItem(storageKey, "1");
@@ -91,9 +104,11 @@ export async function reportClassroomUsage(
 		return;
 	}
 
-	const payload = safeCourseId
-		? { event, courseId: safeCourseId }
-		: { event };
+	const payload = {
+		siteID: MATH_SITE_ID,
+		event,
+		...(safeCourseId ? { courseId: safeCourseId } : {})
+	};
 
 	try {
 		await globalThis.fetch("/api/classroom-usage", {
@@ -111,6 +126,6 @@ export async function reportClassroomUsage(
 			referrerPolicy: "no-referrer"
 		});
 	} catch {
-		// Usage reporting must never interrupt anonymous course or IDE access.
+		// Aggregate reporting must never interrupt Graph Sketcher or a course.
 	}
 }

@@ -7,7 +7,6 @@ import type {
 import { defineStore } from "pinia";
 
 import { computed } from "vue";
-import { useAppStore } from "./app";
 import {
 	archivedCourseCatalog,
 	courseCatalog,
@@ -373,7 +372,7 @@ function mergeAdjacentSupportItems(items: CourseModuleItemDraft[]) {
 function normalizeCourse(
 	course: RawCourse,
 	courseId = slugify(course.name),
-	options: NormalizeCourseOptions = { includeSolutions: true }
+	options: NormalizeCourseOptions = { includeSolutions: false }
 ) {
 	return {
 		id: courseId,
@@ -519,32 +518,18 @@ const archivedCourseSummaries: CourseSummary[] = archivedCourseCatalog.map(
 	})
 );
 
-const normalizedLearnerCourseCache = new Map<string, CourseDefinition>();
-const normalizedStaffCourseCache = new Map<string, CourseDefinition>();
-
-function courseCacheFor(includeSolutions: boolean) {
-	return includeSolutions
-		? normalizedStaffCourseCache
-		: normalizedLearnerCourseCache;
-}
+const normalizedCourseCache = new Map<string, CourseDefinition>();
 
 export const useCoursesStore = defineStore("courses", () => {
 	const courses = computed(() => courseSummaries);
 	const archivedCourses = computed(() => archivedCourseSummaries);
-	const appStore = useAppStore();
-
-	const canViewSolutions = computed(
-		() => !!appStore.currentTutor || !!appStore.currentAdmin
-	);
 
 	function getCourseById(id: string) {
-		return courseCacheFor(canViewSolutions.value).get(id) ?? null;
+		return normalizedCourseCache.get(id) ?? null;
 	}
 
 	async function loadCourseById(id: string) {
-		const includeSolutions = canViewSolutions.value;
-		const courseCache = courseCacheFor(includeSolutions);
-		const cachedCourse = courseCache.get(id);
+		const cachedCourse = normalizedCourseCache.get(id);
 
 		if (cachedCourse) {
 			return cachedCourse;
@@ -557,10 +542,10 @@ export const useCoursesStore = defineStore("courses", () => {
 		}
 
 		const normalizedCourse = normalizeCourse(rawCourse, id, {
-			includeSolutions
+			includeSolutions: false
 		});
 
-		courseCache.set(id, normalizedCourse);
+		normalizedCourseCache.set(id, normalizedCourse);
 
 		return normalizedCourse;
 	}

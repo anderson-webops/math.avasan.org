@@ -17,22 +17,13 @@ const socialImageUrl = computed(() =>
 );
 const pageTitle = computed(() => pageTitleForPath(route.path || "/"));
 const robotsContent = computed(() => pageRobotsForPath(route.path || "/"));
-const structuredData = computed(() => [
-	{
-		"@context": "https://schema.org",
-		"@type": "EducationalOrganization",
-		description: SITE_DESCRIPTION,
-		name: "Classes with Julio",
-		url: siteUrl
-	},
-	{
-		"@context": "https://schema.org",
-		"@type": "WebSite",
-		description: SITE_DESCRIPTION,
-		name: "Classes with Julio",
-		url: siteUrl
-	}
-]);
+const structuredData = computed(() => ({
+	"@context": "https://schema.org",
+	"@type": "WebSite",
+	description: SITE_DESCRIPTION,
+	name: "Math with Julio",
+	url: siteUrl
+}));
 
 useHead(
 	() =>
@@ -45,7 +36,7 @@ useHead(
 				},
 				{
 					property: "og:title",
-					content: "Classes with Julio"
+					content: "Math with Julio"
 				},
 				{
 					property: "og:description",
@@ -66,7 +57,7 @@ useHead(
 				{
 					property: "og:image:alt",
 					content:
-						"Classes with Julio: Scratch, Python, and PyGames for young coders"
+						"Math with Julio: Graph Sketcher and math courses from elementary through AP Calculus"
 				},
 				{
 					name: "twitter:card",
@@ -74,7 +65,7 @@ useHead(
 				},
 				{
 					name: "twitter:title",
-					content: "Classes with Julio"
+					content: "Math with Julio"
 				},
 				{
 					name: "twitter:description",
@@ -125,11 +116,13 @@ useHead(
 					href: canonicalUrl.value
 				}
 			],
-			script: structuredData.value.map((entry, index) => ({
-				innerHTML: JSON.stringify(entry),
-				key: `ld-json-${index}`,
-				type: "application/ld+json"
-			}))
+			script: [
+				{
+					innerHTML: JSON.stringify(structuredData.value),
+					key: "site-json-ld",
+					type: "application/ld+json"
+				}
+			]
 		}) as any
 );
 </script>

@@ -1,4 +1,5 @@
 import type { RawCourse } from "./types";
+import { configureMathCourseFlow } from "./mathCourseFlow";
 import { pendingStaticMediaNotice, staticMediaUrl } from "./staticMedia";
 
 const MEDIA_BASE = "https://static.classes.jacobdanderson.net/algebra-1b";
@@ -109,8 +110,18 @@ const sourceStaticFilenames = [
 	"checkin2_app_5.png"
 ] as const;
 
-function createLesson(title: string, content: string, mediaLink?: string) {
-	return mediaLink ? { title, content, mediaLink } : { title, content };
+function createLesson(
+	title: string,
+	content: string,
+	mediaLink?: string,
+	aliases?: string[]
+) {
+	return {
+		title,
+		content,
+		...(mediaLink ? { mediaLink } : {}),
+		...(aliases?.length ? { aliases } : {})
+	};
 }
 
 function createModule(
@@ -136,7 +147,7 @@ function sourceMediaReferences() {
 export const algebra1BCourse: RawCourse = {
 	name: "Algebra 1B",
 	modules: [
-		createModule("Algebra 1B Kick-Off Project", [
+		createModule("Algebra 1B Kick-Off and Placement", [
 			createLesson(
 				"Kick-Off Overview",
 				`
@@ -321,7 +332,11 @@ This lesson emphasizes method-first fraction work and uses fully readable exampl
 - \`1/x + 1/z^2 = (z^2 + x)/(xz^2)\`
 - \`x/2 - 5/x^2 = (x^3 - 10)/(2x^2)\`
 - \`z - 1/z = (z^2 - 1)/z\`
-				`.trim()
+				`.trim(),
+				undefined,
+				[
+					"algebra-1b-ab3-fractions-with-polynomials-curriculum-fractions-with-polynomials-core-concepts"
+				]
 			),
 			createLesson(
 				"Fractions with Polynomial Denominators",
@@ -542,7 +557,7 @@ Finish by sketching a half-court shot model and explaining which form of the qua
 				)
 			]
 		),
-		createModule("Check-in #1", [
+		createModule("Check-In #1", [
 			createLesson(
 				"Review Targets",
 				`
@@ -1042,7 +1057,7 @@ This module works best as a short presentation-style demo rather than as a writt
 				`.trim()
 			)
 		]),
-		createModule("Check-in #2", [
+		createModule("Check-In #2", [
 			createLesson(
 				"Review Overview",
 				`
@@ -1166,3 +1181,342 @@ ${sourceMediaReferences()}
 		])
 	]
 };
+
+configureMathCourseFlow(algebra1BCourse, {
+	courseId: "algebra-1b",
+	modules: [
+		{
+			title: "Algebra 1B Kick-Off and Placement",
+			legacyTitle: "Algebra 1B Kick-Off Project",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"polynomial readiness",
+				"quadratic readiness",
+				"function readiness",
+				"modeling readiness",
+				"practice goal"
+			],
+			flowNote:
+				"Use the overview to select one placement route rather than completing both long amusement-park projects. Project 1 checks polynomial and quadratic foundations; Project 2 is a broader challenge covering graphs, functions, variation, exponentials, and residuals.",
+			choiceCurriculumTitles: ["Project 1: Amusement Park Shenanigans"],
+			challengeCurriculumTitles: ["Project 2: Ride Paths and Snack Break"]
+		},
+		{
+			title: "AB1 Introduction to Polynomials",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"term / coefficient",
+				"degree",
+				"like terms",
+				"standard form",
+				"polynomial boundary"
+			],
+			flowNote:
+				"Classify terms before combining them, preserve exponent structure, and rewrite each polynomial in standard form. Explain why expressions with negative variable exponents fall outside the polynomial family."
+		},
+		{
+			title: "AB2 Multiplying Polynomials",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"distributive property",
+				"monomial product",
+				"binomial product",
+				"special product",
+				"like-term check"
+			],
+			flowNote:
+				"Connect every polynomial product to distribution, record all partial products, and combine like terms only after the expansion is complete. Use special products as recognizable structures, not memorized shortcuts without verification."
+		},
+		{
+			title: "AB3 Fractions with Polynomials",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"factor denominator",
+				"excluded value",
+				"least common denominator",
+				"simplify rational expression",
+				"equivalence check"
+			],
+			flowNote:
+				"Factor before canceling, record excluded values from the original denominator, and verify equivalent rational expressions at an allowed input. Rationalizing denominators is an optional challenge after the polynomial-fraction foundation is secure.",
+			challengeCurriculumTitles: ["Rationalizing Denominators"]
+		},
+		{
+			title: "AB4 Module Project: Smart and Elegant (with Amy Katz)",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"cost / revenue",
+				"profit function",
+				"polynomial model",
+				"constraint",
+				"decision evidence"
+			],
+			flowNote:
+				"Define costs, revenue, and domain before comparing event plans. Preserve the first independent model and open the answer and profit notes only for verification or targeted repair.",
+			choiceCurriculumTitles: ["Answer Key and Profit Models"]
+		},
+		{
+			title: "AB5 Solving Quadratics by Factoring",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"greatest common factor",
+				"quadratic factor pair",
+				"zero-product property",
+				"root",
+				"solution check"
+			],
+			flowNote:
+				"Write the equation in zero form, factor completely, apply the zero-product property, and verify both roots in the original equation. Separate algebraic roots from values excluded by a physical context."
+		},
+		{
+			title: "AB6 Special Factorizations",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"perfect-square trinomial",
+				"difference of squares",
+				"pattern recognition",
+				"factored form",
+				"expansion check"
+			],
+			flowNote:
+				"Identify the coefficient pattern before selecting a special factorization and multiply the result back out. Use the pattern only when every term matches its conditions."
+		},
+		{
+			title: "AB7 Solving Quadratics by Completing the Square",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"normalize leading coefficient",
+				"half the linear coefficient",
+				"perfect square",
+				"square-root property",
+				"vertex connection"
+			],
+			flowNote:
+				"Keep the equation balanced while creating a perfect square, solve both square-root branches, and connect the completed-square form to the quadratic's vertex."
+		},
+		{
+			title: "AB8 Quadratic Formula",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"a / b / c",
+				"quadratic formula",
+				"discriminant",
+				"two / one / no real roots",
+				"substitution check"
+			],
+			flowNote:
+				"Put the equation in standard form before identifying coefficients, calculate the discriminant first, and use it to predict the real-root count before completing the formula."
+		},
+		{
+			title: "AB9 Module Project: The Half-Court Challenge (with Ian Kennedy)",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"projectile quadratic",
+				"root interpretation",
+				"maximum / vertex",
+				"unit conversion",
+				"model limitation"
+			],
+			flowNote:
+				"Translate the robot-shot scenario into a quadratic, interpret only physically meaningful roots, and distinguish the classroom projectile model from a complete real-world motion prediction."
+		},
+		{
+			title: "Check-In #1",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"polynomial operation",
+				"rational expression",
+				"factor method",
+				"complete the square",
+				"quadratic formula"
+			],
+			flowNote:
+				"Solve one quadratic with each major method, explain why the selected method fits, and correct one factor, sign, or coefficient error. Continue to graphing when roots and methods agree."
+		},
+		{
+			title: "AB10 Graphing Vertex Form",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"vertex form",
+				"vertex",
+				"axis of symmetry",
+				"opening / stretch",
+				"point verification"
+			],
+			flowNote:
+				"Read the vertex and axis directly, predict opening and width from the leading factor, and verify the graph with symmetric point pairs."
+		},
+		{
+			title: "AB11 Graphing Standard Form",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"standard form",
+				"axis formula",
+				"vertex",
+				"intercepts",
+				"equivalent form"
+			],
+			flowNote:
+				"Find the axis and vertex from standard form, calculate intercepts when possible, and convert to another form to verify the same graph features."
+		},
+		{
+			title: "AB12 Transformations",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"horizontal shift",
+				"vertical shift",
+				"reflection",
+				"stretch / compression",
+				"transformation order"
+			],
+			flowNote:
+				"Predict each transformation before graphing, apply one change at a time, and compare a reference point or vertex after every step."
+		},
+		{
+			title: "AB13 Module Project: Put Me in Coach! (with Tom Dethlefs)",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"athletic dataset",
+				"quadratic graph",
+				"data repair",
+				"transformation",
+				"evidence-based interpretation"
+			],
+			flowNote:
+				"Keep an unchanged source-data copy, identify and justify any repair, then compare graph features before and after a transformation. Keep performance conclusions within the supplied classroom dataset."
+		},
+		{
+			title: "AB14 Introduction to Functions",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"function",
+				"input / output",
+				"domain / range",
+				"function notation",
+				"vertical-line test"
+			],
+			flowNote:
+				"Connect function notation to a machine with one output per allowed input, identify domain and range from multiple representations, and justify graph decisions with the vertical-line test."
+		},
+		{
+			title: "AB15 Function Composition and Inverse Functions",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"composition",
+				"inside / outside function",
+				"inverse",
+				"one-to-one",
+				"domain restriction"
+			],
+			flowNote:
+				"Trace composition from the inside function outward, verify an inverse in both composition orders, and state any domain restriction needed to make the original function one-to-one."
+		},
+		{
+			title: "AB16 Module Project: J.T. Phone Home",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"function pipeline",
+				"composition order",
+				"inverse operation",
+				"input constraint",
+				"verification"
+			],
+			flowNote:
+				"Build and trace a communication-function pipeline, compare the two composition orders, and verify the recovery rule. Open the worked solution only after recording the independent trace.",
+			choiceCurriculumTitles: ["Worked Solution"]
+		},
+		{
+			title: "AB17 Absolute Value and Exponential Functions",
+			estimatedTime: "3–4 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"absolute-value distance",
+				"piecewise behavior",
+				"graph transformation",
+				"exponential growth / decay",
+				"parameter interpretation"
+			],
+			flowNote:
+				"Complete the absolute-value distance and transformation sequence before comparing exponential growth and decay. For each family, connect equation parameters to visible graph behavior and test a context input."
+		},
+		{
+			title: "AB18 Direct and Inverse Variation",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"direct variation",
+				"inverse variation",
+				"constant of variation",
+				"domain",
+				"context check"
+			],
+			flowNote:
+				"Decide whether quantities scale together or reciprocally, solve for the constant of variation from one known pair, and verify the model with a second value and stated domain."
+		},
+		{
+			title: "AB19 Data Modeling",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"scatter plot",
+				"trend line",
+				"prediction",
+				"residual",
+				"model limitation"
+			],
+			flowNote:
+				"Describe the visible association before fitting a trend, calculate residual as actual minus predicted, and distinguish interpolation from unsupported extrapolation."
+		},
+		{
+			title: "AB20 Module Project: The Mysteries of Light (with Blake Eaton)",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"photon-count data",
+				"graph shape",
+				"inverse proportionality",
+				"scientific notation",
+				"model boundary"
+			],
+			flowNote:
+				"Use the supplied photon counts as a classroom dataset, compare candidate curve shapes without overstating experimental evidence, and connect the inverse wavelength relationship to mass and speed with units."
+		},
+		{
+			title: "AB21 Module Project: Radiofungi (with Sunanda Sharma)",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"exponential model",
+				"initial value",
+				"growth factor",
+				"quadratic transformation",
+				"scenario limitation"
+			],
+			flowNote:
+				"Treat the biology and space details as a simplified classroom model, calculate the initial values from the stated growth targets, and verify every canopy transformation from the parent quadratic."
+		},
+		{
+			title: "Check-In #2",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"quadratic graph",
+				"transformation",
+				"function / inverse",
+				"variation / exponential",
+				"data-model explanation"
+			],
+			flowNote:
+				"Complete one quadratic, function, transformation, variation, and data-model task without notes. Correct one representation error and use the visual reference only for graph prompts that need it.",
+			choiceCurriculumTitles: ["Check-In Visual Reference"]
+		},
+		{
+			title: "AB22 Master Project: Algebra 1B",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"independent concept",
+				"real-world application",
+				"two original problems",
+				"multiple representations",
+				"Algebra 2A handoff"
+			],
+			flowNote:
+				"Begin after the comprehensive checkpoint. Explain one Algebra 1B concept through at least two representations, create and solve two original problems, and finish with evidence that supports the next Algebra 2A learning target."
+		}
+	],
+	appendixTitles: ["Reference Archive: Algebra 1B"]
+});

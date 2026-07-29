@@ -32,8 +32,6 @@ import {
 const knownPending = new Set(KNOWN_PENDING_STATIC_MEDIA_FILENAMES);
 const urls = new Map();
 const scanRoots = [
-	"back-end/.env.EXAMPLE",
-	"back-end/src",
 	"front-end/public",
 	"front-end/src",
 	"package.json"
@@ -255,13 +253,9 @@ const auditFile = join(tempDir, "audit.ts");
 try {
 	await writeFile(auditFile, auditSource);
 
-	const child = spawn(
-		"npm",
-		["exec", "-w", "front-end", "--", "vite-node", auditFile],
-		{
-			stdio: "inherit"
-		}
-	);
+	const child = spawn("npm", ["exec", "-w", "front-end", "--", "vite-node", auditFile], {
+		stdio: "inherit"
+	});
 
 	const exitCode = await new Promise((resolve, reject) => {
 		child.once("error", reject);

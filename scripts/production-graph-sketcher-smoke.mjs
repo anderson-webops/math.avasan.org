@@ -1,8 +1,8 @@
 import { pathToFileURL } from "node:url";
 
-const origin = process.env.CLASSES_SITE_ORIGIN || "https://cs.avasan.org";
-const timeoutMs = Number(process.env.CLASSES_SITE_SMOKE_TIMEOUT_MS || 15000);
-const smokePath = "/graph-sketcher";
+const origin = process.env.MATH_SITE_ORIGIN || "https://math.avasan.org";
+const timeoutMs = Number(process.env.MATH_SITE_SMOKE_TIMEOUT_MS || 15000);
+const smokePath = "/";
 
 async function fetchText(url) {
 	const controller = new AbortController();
@@ -48,7 +48,7 @@ export function containsGraphSketcherRuntimeMarkers(source) {
 		source.includes("Plot function") &&
 		source.includes(".graphsketch") &&
 		source.includes(".ograph") &&
-		source.includes("cs-avasan-graph-sketcher-session-v1") &&
+		source.includes("math-avasan-graph-sketcher-session-v1") &&
 		source.includes("All rendering, imports, and") &&
 		source.includes("exports run in this browser.") &&
 		source.includes("https://github.com/Jacoba1100254352/GraphSketcher.Linux")
@@ -92,7 +92,7 @@ export async function runProductionGraphSketcherSmoke() {
 	if (!containsGraphSketcherRuntimeMarkers(combinedSource)) {
 		throw new Error(`${pageUrl.href} did not reference the current client-side Graph Sketcher bundle`);
 	}
-	const runtimeAsset = assetSources.find(asset => asset.source.includes("cs-avasan-graph-sketcher-session-v1"));
+	const runtimeAsset = assetSources.find(asset => asset.source.includes("math-avasan-graph-sketcher-session-v1"));
 	if (!runtimeAsset) {
 		throw new Error(`${pageUrl.href} did not reference the current Graph Sketcher runtime asset`);
 	}

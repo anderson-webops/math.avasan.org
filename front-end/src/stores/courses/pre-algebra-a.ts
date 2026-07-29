@@ -1,4 +1,5 @@
 import type { RawCourse } from "./types";
+import { configureMathCourseFlow } from "./mathCourseFlow";
 import { pendingStaticMediaNotice, staticMediaUrl } from "./staticMedia";
 
 const KICKOFF_INVENTORY = "paa_kickoff_0.png";
@@ -653,9 +654,128 @@ export const preAlgebraACourse: RawCourse = {
 			"One error-analysis section with corrected reasoning"
 		],
 		recommendedNextWork: [
-			"Review Pre-Algebra B alongside Pre-Algebra A for sequencing, pacing, and handoff clarity",
-			"Cross-link Geometry A/B and Pre-Calculus A/B readiness checkpoints from the visible math pathway",
+			"Keep the Pre-Algebra B entry diagnostic aligned with this course's capstone evidence and remaining-practice reflection",
+			"Create printable number-line, fraction-model, ratio-table, and exponent error-analysis sheets for the core checkpoints",
 			"Upload reserved kickoff images to the static classes host"
 		]
 	}
 };
+
+configureMathCourseFlow(preAlgebraACourse, {
+	courseId: "pre-algebra-a",
+	modules: [
+		{
+			title: "Pre-Algebra A Kick-Off",
+			estimatedTime: "1–2 sessions · 45–60 minutes each",
+			keyBlocks: [
+				"readiness inventory",
+				"worked evidence",
+				"error analysis",
+				"placement decision",
+				"practice goal"
+			],
+			flowNote:
+				"Complete the short readiness inventory first, correct one error, and name the first skill that needs review. Choose Starting a Gardening Business for a broader applied diagnostic or Growing the Gardening Business for an additional challenge; completing both projects is not required before instruction begins.",
+			choiceCurriculumTitles: ["Project: Starting a Gardening Business"],
+			challengeCurriculumTitles: [
+				"Project: Growing the Gardening Business"
+			]
+		},
+		{
+			title: "PAA1-PAA2 Arithmetic Foundations",
+			estimatedTime: "2 sessions · 45–60 minutes each",
+			keyBlocks: [
+				"signed number",
+				"number line",
+				"absolute value",
+				"order of operations",
+				"reasonableness check"
+			],
+			flowNote:
+				"Model signed values on a labeled number line before calculating, then show one operation per line. Use High and Low Species only after the reference point, sign, and absolute distance can each be explained."
+		},
+		{
+			title: "PAA3-PAA7 Fractions and Arithmetic",
+			estimatedTime: "3–4 sessions · 45–60 minutes each",
+			keyBlocks: [
+				"place value",
+				"quotient / remainder",
+				"equivalent fraction",
+				"common denominator",
+				"reciprocal"
+			],
+			flowNote:
+				"Secure multi-digit multiplication and division before combining fraction operations. Include a visual or verbal reason for the common-denominator or reciprocal step, then use Mochi's Product Adventure as choose-one transfer practice."
+		},
+		{
+			title: "PAA8-PAA12 Decimals, Percents, Ratios, and Rates",
+			estimatedTime: "3–4 sessions · 45–60 minutes each",
+			keyBlocks: [
+				"fraction / decimal / percent",
+				"ratio table",
+				"proportion",
+				"unit conversion",
+				"distance = rate × time"
+			],
+			flowNote:
+				"Keep units attached through every conversion and identify the original quantity before calculating a percent change. Cookie Catering is the applied choice; the route plan is a challenge after proportional and unit reasoning is dependable.",
+			challengeSupplementalTitles: [
+				"Challenge: Rate-Time-Distance Route Plan"
+			]
+		},
+		{
+			title: "Check-In #1",
+			estimatedTime: "1 session · 45–60 minutes",
+			keyBlocks: [
+				"signed arithmetic",
+				"fraction operation",
+				"decimal / percent",
+				"ratio / proportion",
+				"unit-aware explanation"
+			],
+			flowNote:
+				"Attempt the mixed evidence set without notes, correct one error with a named reason, and assign only the smallest review strand that remains unstable. Continue when the model, calculation, units, and explanation agree."
+		},
+		{
+			title: "PAA13-PAA17 Expressions and Sequences",
+			estimatedTime: "3 sessions · 45–60 minutes each",
+			keyBlocks: [
+				"variable",
+				"like terms",
+				"distributive property",
+				"factoring",
+				"arithmetic sequence"
+			],
+			flowNote:
+				"Move between words, tables, and equivalent expressions before using a formula. Verify distribution by factoring back and verify an arithmetic-sequence rule against at least two known terms."
+		},
+		{
+			title: "PAA18-PAA23 Exponents, Roots, and Scientific Notation",
+			estimatedTime: "3–4 sessions · 45–60 minutes each",
+			keyBlocks: [
+				"exponent rule",
+				"zero / negative exponent",
+				"root",
+				"fractional exponent",
+				"scientific notation"
+			],
+			flowNote:
+				"Expand one example before applying each exponent rule, state base restrictions, and check scale when converting scientific notation. Choose Symptom Spree for supported transfer or Red Hot Chilli Chicken for a broader modeling challenge.",
+			challengeSupplementalTitles: ["Project: Red Hot Chilli Chicken"]
+		},
+		{
+			title: "Check-In #2 and Capstone",
+			estimatedTime: "3 sessions · 45–60 minutes each",
+			keyBlocks: [
+				"mixed readiness gate",
+				"multiple representations",
+				"error analysis",
+				"capstone evidence",
+				"Pre-Algebra B handoff"
+			],
+			flowNote:
+				"Pass the expressions-and-exponents readiness sample before beginning the capstone. The capstone must connect every major strand, include one corrected error, and end with a handoff note naming evidence that is secure and one target to revisit in Pre-Algebra B."
+		}
+	],
+	appendixTitles: ["Pre-Algebra A Reference Archive", "Pending Static Assets"]
+});

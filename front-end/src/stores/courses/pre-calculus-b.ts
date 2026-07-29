@@ -1,4 +1,5 @@
 import type { RawCourse } from "./types";
+import { configureMathCourseFlow } from "./mathCourseFlow";
 import {
 	pendingStaticMediaNotice,
 	preCalculusBStaticFilenames,
@@ -1132,6 +1133,28 @@ export const preCalculusBCourse: RawCourse = {
 						extension:
 							"Add one sample AP-style prompt and identify the prerequisite skill behind it."
 					})
+				),
+				lesson(
+					"Challenge: Timed Readiness Defense",
+					practiceSet({
+						goal: "Use timed evidence to defend a focused AP Calculus readiness plan.",
+						steps: [
+							"Select one trigonometry or coordinate task and one limit or rate-of-change task.",
+							"Complete both under a stated time limit without notes.",
+							"Classify every missed or uncertain step as concept, setup, calculation, representation, or explanation.",
+							"Correct the work and name the prerequisite that controls each correction.",
+							"Present a short readiness defense with two secure skills and two targeted review actions."
+						],
+						outcome:
+							"The defense turns a general readiness impression into a specific evidence-based review plan.",
+						checkpoints: [
+							"Timed and corrected work are both retained.",
+							"Each correction names the controlling prerequisite.",
+							"Review actions identify a topic and a concrete practice task."
+						],
+						extension:
+							"Add one calculator-active task and compare its setup demands with a no-calculator task."
+					})
 				)
 			]
 		),
@@ -1214,9 +1237,223 @@ export const preCalculusBCourse: RawCourse = {
 			"A final modeling portfolio includes multiple representation types, exact and approximate reasoning, checked calculations, and a calculus-readiness reflection."
 		],
 		recommendedNextWork: [
-			"Add AP Calculus to continue from limits and rates of change into derivative and integral reasoning.",
+			"Use AP Calculus to continue from limits and rates of change into derivative and integral reasoning.",
 			"Add source-safe graph cards or course assets for trig graphs, polar curves, parametric paths, matrix systems, and limits.",
 			"Add a cumulative Algebra 2B through Pre-Calculus B readiness checkpoint for accelerated learners."
 		]
 	}
 };
+
+configureMathCourseFlow(preCalculusBCourse, {
+	courseId: "pre-calculus-b",
+	modules: [
+		{
+			title: "PCTB1 Trigonometry Basics",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"degree / radian",
+				"unit-circle coordinate",
+				"reference angle",
+				"quadrant sign",
+				"triangle solution"
+			],
+			flowNote:
+				"Locate the angle and reference angle before evaluating, derive exact values from coordinates, and label known sides or angles before selecting a triangle relationship."
+		},
+		{
+			title: "PCTB2 Graphs of Sine and Cosine",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"parent cycle",
+				"amplitude",
+				"period",
+				"midline",
+				"phase shift"
+			],
+			flowNote:
+				"Identify every transformation before plotting a cycle, place quarter-period landmarks, and verify the graph's range, midline, and repetition against the equation."
+		},
+		{
+			title: "PCTB3 Other Trigonometric Graphs",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"tangent period",
+				"vertical asymptote",
+				"reciprocal graph",
+				"restricted inverse domain",
+				"graph transformation"
+			],
+			flowNote:
+				"Build tangent and reciprocal graphs from zeros and asymptotes, then connect inverse-trigonometric domains and ranges to the restrictions that make inversion valid."
+		},
+		{
+			title: "PCTB4 Trigonometric Equations and Identities",
+			estimatedTime: "3–4 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"reciprocal / quotient identity",
+				"Pythagorean identity",
+				"algebraic transformation",
+				"interval solution",
+				"extraneous check"
+			],
+			flowNote:
+				"Transform only one side when proving an identity, solve for a base trig value before listing interval solutions, and check candidates in the original equation."
+		},
+		{
+			title: "PCTB5 Polar Coordinates",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"polar point",
+				"equivalent coordinate",
+				"rectangular conversion",
+				"polar graph",
+				"complex polar form"
+			],
+			flowNote:
+				"Plot radius and angle together, explain equivalent coordinates through rotation or a negative radius, and verify conversions in both coordinate systems.",
+			challengeSupplementalTitles: ["Project: Polar Design Studio"]
+		},
+		{
+			title: "PCTB6 Parametric Equations",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"parameter table",
+				"traced direction",
+				"parameter elimination",
+				"restricted path",
+				"motion interpretation"
+			],
+			flowNote:
+				"Build a parameter table before sketching, mark direction and domain restrictions, and distinguish the full rectangular curve from the portion actually traced."
+		},
+		{
+			title: "Check-In #1: Trigonometry and Coordinate Models",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"exact trig value",
+				"transformed graph",
+				"identity / equation",
+				"polar conversion",
+				"parametric path"
+			],
+			flowNote:
+				"Complete one task from each trigonometric and coordinate strand without notes, repair the first unsupported transformation or graph feature, and use the optional comparison work only for targeted review.",
+			challengeSupplementalTitles: [
+				"Project: Coordinate Model Comparison"
+			]
+		},
+		{
+			title: "PCTB7 Vectors",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"component form",
+				"magnitude / direction",
+				"vector operation",
+				"dot product",
+				"navigation interpretation"
+			],
+			flowNote:
+				"Move deliberately between geometric and component forms, check magnitude and direction, and interpret vector operations or dot products in the original context."
+		},
+		{
+			title: "PCTB8 Matrices Review",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"matrix dimension",
+				"entry operation",
+				"row-by-column product",
+				"determinant / inverse",
+				"identity check"
+			],
+			flowNote:
+				"Check dimensions before calculating, show representative row-by-column work, and verify an inverse by recovering the identity matrix."
+		},
+		{
+			title: "PCTB9 Applications of Matrices",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"system representation",
+				"augmented matrix",
+				"row operation",
+				"solution type",
+				"context check"
+			],
+			flowNote:
+				"Translate the system into a labeled matrix, preserve equivalence through row operations, and interpret unique, none, or infinitely many solutions in context.",
+			challengeSupplementalTitles: ["Project: Linear System Case File"]
+		},
+		{
+			title: "PCTB10 Partial Fraction Decomposition",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"proper rational expression",
+				"denominator factor",
+				"decomposition form",
+				"coefficient system",
+				"recombination check"
+			],
+			flowNote:
+				"Divide first when needed, choose terms from the denominator's factor types, solve the coefficient system, and recombine the result to verify the source expression."
+		},
+		{
+			title: "PCTB11 Probability",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"sample space",
+				"permutation / combination",
+				"compound probability",
+				"complement",
+				"fairness claim"
+			],
+			flowNote:
+				"Define outcomes and order assumptions before counting, select a probability rule from the event structure, and support any fairness claim with a calculation."
+		},
+		{
+			title: "PCTB12 Limits",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"left-hand limit",
+				"right-hand limit",
+				"function value",
+				"algebraic simplification",
+				"continuity"
+			],
+			flowNote:
+				"Compare table, graph, and algebra evidence from both sides, keep approached value separate from function value, and test all continuity conditions explicitly."
+		},
+		{
+			title: "PCTB13 Rates of Change",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"average rate",
+				"secant slope",
+				"shrinking interval",
+				"tangent estimate",
+				"rate units"
+			],
+			flowNote:
+				"Compute and interpret average rates over stated intervals, compare secant slopes as intervals shrink, and label instantaneous-rate results as estimates or limit-based previews."
+		},
+		{
+			title: "Check-In #2 and Pre-Calculus B Capstone",
+			estimatedTime: "4–5 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"readiness review",
+				"multi-representation portfolio",
+				"exact / approximate reasoning",
+				"limit / rate evidence",
+				"AP Calculus handoff"
+			],
+			flowNote:
+				"Use both review sections to select final practice, then complete the required modeling portfolio with checked representations and a calculus-readiness reflection. The readiness map remains optional planning.",
+			coreSupplementalTitles: [
+				"Capstone: Pre-Calculus B Modeling Portfolio"
+			],
+			challengeSupplementalTitles: ["Challenge: Timed Readiness Defense"]
+		}
+	],
+	appendixTitles: [
+		"Pre-Calculus B Reference Archive",
+		"Pending Static Assets"
+	]
+});

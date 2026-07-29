@@ -1,4 +1,5 @@
 import type { RawCourse } from "./types";
+import { configureMathCourseFlow } from "./mathCourseFlow";
 import { pendingStaticMediaNotice, staticMediaUrl } from "./staticMedia";
 
 const MEDIA_BASE = "https://static.classes.jacobdanderson.net/algebra-2b";
@@ -76,12 +77,13 @@ function createLesson(title: string, content: string, mediaLink?: string) {
 
 function createModule(
 	title: string,
-	curriculum: Array<ReturnType<typeof createLesson>>
+	curriculum: Array<ReturnType<typeof createLesson>>,
+	supplementalProjects: Array<ReturnType<typeof createLesson>> = []
 ) {
 	return {
 		title,
 		curriculum,
-		supplementalProjects: []
+		supplementalProjects
 	};
 }
 
@@ -412,7 +414,7 @@ This covers the matrix-inverse and quotient work needed for Check-in #1.
 				`.trim()
 			)
 		]),
-		createModule("Check-in #1", [
+		createModule("Check-In #1", [
 			createLesson(
 				"Review Targets",
 				`
@@ -729,7 +731,7 @@ The provided trig-graph reference covers the standard parent graphs. For any tra
 				media.trigGraphs
 			)
 		]),
-		createModule("Check-in #2", [
+		createModule("Check-In #2", [
 			createLesson(
 				"Review Targets",
 				`
@@ -769,6 +771,47 @@ Reuse the probability, statistics, unit-circle, and trig-graph references while 
 				media.trigGraphs
 			)
 		]),
+		createModule(
+			"ALB10 Algebra 2B Modeling Capstone",
+			[
+				createLesson(
+					"Capstone: Compare, Model, and Defend",
+					`
+Build one evidence-based model comparison that connects at least three Algebra 2B strands.
+
+**Required build**
+
+1. Choose a bounded classroom or fictional question involving change over time, repeated patterns, or a periodic measurement.
+2. Represent the situation with an exponential or logarithmic model and either a sequence or trigonometric model.
+3. Include a table, equation, graph or feature sketch, and a clearly labeled domain for each model.
+4. Use one probability, regression, or matrix calculation to organize evidence or evaluate the model.
+5. Compare what each representation explains well, identify one assumption or limitation, and defend the model that best answers the question.
+6. End with a Pre-Calculus handoff note naming the function, sequence, trigonometry, or rate-of-change idea that needs deeper study.
+
+**Completion evidence**
+
+- Every representation uses consistent variables, units, and input values.
+- At least two calculations are checked with substitution, technology, or an independent method.
+- The conclusion distinguishes association from causation when data is involved.
+- The final model choice follows from stated evidence and includes one limitation.
+					`.trim()
+				)
+			],
+			[
+				createLesson(
+					"Choice: Course Evidence Audit",
+					`
+Select one artifact from logarithms, sequences, matrices, probability or statistics, and trigonometry. For each artifact, name the main representation, the verification method, and one correction that improved the reasoning. Use this audit when organizing existing work would strengthen the capstone plan.
+					`.trim()
+				),
+				createLesson(
+					"Challenge: Model Stress Test",
+					`
+Change one growth rate, sequence ratio, data point, matrix entry, probability assumption, or trigonometric parameter in the capstone scenario. Recalculate both models, compare how their predictions change, and explain which conclusion is more stable.
+					`.trim()
+				)
+			]
+		),
 		createModule("Reference Archive: Algebra 2B", [
 			createLesson(
 				"Algebra 2B Reference Map",
@@ -801,3 +844,169 @@ Legacy static media is not embedded directly while those files are pending. Each
 		])
 	]
 };
+
+configureMathCourseFlow(algebra2BCourse, {
+	courseId: "algebra-2b",
+	modules: [
+		{
+			title: "ALB1 Introduction to Logarithms",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"exponential / logarithmic form",
+				"base / exponent",
+				"log property",
+				"change of base",
+				"equation check"
+			],
+			flowNote:
+				"Translate between exponential and logarithmic forms before applying properties, state domain restrictions, and check equations by returning to exponential form."
+		},
+		{
+			title: "ALB2 Exponential and Logarithmic Functions",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"growth / decay",
+				"inverse functions",
+				"domain / range",
+				"asymptote",
+				"transformation / model"
+			],
+			flowNote:
+				"Connect each logarithmic graph to its exponential inverse, predict asymptotes and transformations before graphing, and interpret parameters only within the model's stated domain."
+		},
+		{
+			title: "ALB3 Arithmetic Sequences",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"common difference",
+				"recursive rule",
+				"explicit rule",
+				"nth term",
+				"finite sum"
+			],
+			flowNote:
+				"Identify the constant difference, move between recursive and explicit descriptions, and choose the nth-term or series formula based on whether the question asks for one term or a total."
+		},
+		{
+			title: "ALB4 Geometric Sequences",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"common ratio",
+				"explicit rule",
+				"exponential connection",
+				"finite series",
+				"convergence"
+			],
+			flowNote:
+				"Verify a constant ratio before using a geometric formula, connect repeated multiplication to exponential behavior, and justify convergence from the magnitude of the ratio."
+		},
+		{
+			title: "ALB5 Matrix Operations",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"matrix dimension",
+				"entry operation",
+				"row-by-column product",
+				"determinant / inverse",
+				"operation check"
+			],
+			flowNote:
+				"Check dimensions before every operation, show one row-by-column product in full, and verify inverse work by multiplying back to the identity matrix."
+		},
+		{
+			title: "Check-In #1",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"logarithmic form",
+				"function feature",
+				"sequence model",
+				"series decision",
+				"matrix verification"
+			],
+			flowNote:
+				"Complete one logarithm, function, sequence or series, and matrix task without notes. Correct the first representation or verification mismatch before advancing to probability and data."
+		},
+		{
+			title: "ALB6 Probability",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"sample space",
+				"and / or / not",
+				"conditional probability",
+				"permutation",
+				"combination"
+			],
+			flowNote:
+				"Define the sample space first, decide whether order and replacement matter, and explain the denominator used for each simple, compound, or conditional probability."
+		},
+		{
+			title: "ALB7 Data and Statistics",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"scatter plot",
+				"correlation direction / strength",
+				"regression line",
+				"r / r²",
+				"association / causation"
+			],
+			flowNote:
+				"Describe the scatter plot before calculating, interpret slope and r² in context, and separate prediction or association from any unsupported causal claim. The visual reference is optional support.",
+			choiceCurriculumTitles: ["Data Visual References"]
+		},
+		{
+			title: "ALB8 Trigonometry Basics",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"right-triangle ratio",
+				"degree / radian",
+				"unit-circle coordinate",
+				"reciprocal identity",
+				"quadrant sign"
+			],
+			flowNote:
+				"Move from a labeled right triangle to unit-circle coordinates, convert units explicitly, and check signs from the angle's quadrant. The triangle diagram reference is optional support.",
+			choiceCurriculumTitles: ["Triangle Diagram References"]
+		},
+		{
+			title: "ALB9 Graphing Trigonometric Functions",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"parent graph",
+				"amplitude",
+				"period",
+				"midline / phase shift",
+				"feature-based graph"
+			],
+			flowNote:
+				"Identify amplitude, period, midline, shift, and reflection before plotting a cycle, then check key points and asymptotes against the transformed equation."
+		},
+		{
+			title: "Check-In #2",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"probability structure",
+				"regression interpretation",
+				"unit-circle value",
+				"trigonometric feature",
+				"evidence-based correction"
+			],
+			flowNote:
+				"Complete one probability, regression, unit-circle, and transformed-graph task without notes. Use errors to select targeted review before beginning the synthesis capstone."
+		},
+		{
+			title: "ALB10 Algebra 2B Modeling Capstone",
+			estimatedTime: "3–4 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"two mathematical models",
+				"table / equation / graph",
+				"data or matrix evidence",
+				"assumption / limitation",
+				"Pre-Calculus handoff"
+			],
+			flowNote:
+				"Build and verify two models from course methods, choose between them from evidence, and state the limits of the conclusion. The evidence audit is optional organization; the stress test is a challenge.",
+			challengeSupplementalTitles: ["Challenge: Model Stress Test"]
+		}
+	],
+	appendixTitles: ["Reference Archive: Algebra 2B"]
+});

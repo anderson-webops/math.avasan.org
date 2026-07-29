@@ -1,15 +1,6 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-
-function sourceFiles(directory: string): string[] {
-	return readdirSync(directory).flatMap(entry => {
-		const path = join(directory, entry);
-		const stats = statSync(path);
-		if (stats.isDirectory()) return sourceFiles(path);
-		return /\.(?:ts|js|vue)$/.test(entry) ? [path] : [];
-	});
-}
 
 describe("Graph Sketcher runtime boundary", () => {
 	it("loads the editor and runtime only from the frontend bundle", () => {
@@ -52,20 +43,29 @@ describe("Graph Sketcher runtime boundary", () => {
 		expect(component).toContain("All rendering, imports, and");
 		expect(component).toContain("exports run in this browser.");
 		expect(`${component}\n${runtime}\n${worker}`).not.toMatch(
-			/\b(?:fetch|WebSocket|EventSource)\s*\(|\baxios\b|\/api\//
+			/\b(?:fetch|XMLHttpRequest|sendBeacon|WebSocket|EventSource)\s*\(|\baxios\b|\/api\//
 		);
 		expect(appShell).not.toContain("cdn.jsdelivr.net");
 		expect(runtime).not.toMatch(/\beval\s*\(|\bnew\s+Function\b/);
 	});
 
-	it("has no Graph Sketcher execution path in the backend", () => {
-		const backendRoot = resolve(process.cwd(), "../back-end/src");
-		const backendSource = sourceFiles(backendRoot)
-			.map(file => readFileSync(file, "utf8"))
-			.join("\n");
-
-		expect(backendSource).not.toMatch(
-			/GraphSketcher|graph-sketcher|graphsketch|\.ograph/i
+	it("has no backend workspace or development API proxy", () => {
+		const rootPackage = JSON.parse(
+			readFileSync(resolve(process.cwd(), "../package.json"), "utf8")
+		) as { scripts: Record<string, string>; workspaces: string[] };
+		const viteConfig = readFileSync(
+			resolve(process.cwd(), "vite.config.mts"),
+			"utf8"
 		);
+		const dockerfile = readFileSync(
+			resolve(process.cwd(), "../Dockerfile"),
+			"utf8"
+		);
+
+		expect(rootPackage.workspaces).toEqual(["front-end"]);
+		expect(rootPackage.scripts).not.toHaveProperty("server");
+		expect(viteConfig).not.toContain('"/api"');
+		expect(viteConfig).not.toContain("VITE_API_PROXY_TARGET");
+		expect(dockerfile).not.toContain("back-end");
 	});
 });

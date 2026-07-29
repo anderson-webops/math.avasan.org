@@ -1,4 +1,5 @@
 import type { RawCourse } from "./types";
+import { configureMathCourseFlow } from "./mathCourseFlow";
 import { pendingStaticMediaNotice, staticMediaUrl } from "./staticMedia";
 
 const MEDIA_BASE = "https://static.classes.jacobdanderson.net/algebra-2a";
@@ -108,12 +109,13 @@ function createLesson(title: string, content: string, mediaLink?: string) {
 
 function createModule(
 	title: string,
-	curriculum: Array<ReturnType<typeof createLesson>>
+	curriculum: Array<ReturnType<typeof createLesson>>,
+	supplementalProjects: Array<ReturnType<typeof createLesson>> = []
 ) {
 	return {
 		title,
 		curriculum,
-		supplementalProjects: []
+		supplementalProjects
 	};
 }
 
@@ -397,7 +399,7 @@ For each graph-only prompt, write one sentence naming the parent function or con
 				media.quadraticTransforms
 			)
 		]),
-		createModule("Check-in #1", [
+		createModule("Check-In #1", [
 			createLesson(
 				"Review Targets",
 				`
@@ -580,7 +582,7 @@ That feature set forces a graph that crosses the x-axis three times, rises to th
 				media.polynomialBehavior
 			)
 		]),
-		createModule("Check-in #2", [
+		createModule("Check-In #2", [
 			createLesson(
 				"Review Targets",
 				`
@@ -843,7 +845,7 @@ continuity at \`x = 3\` requires \`2c + 9 = 6c + 1\`, so \`c = 2\`.
 				media.piecewiseFunctions
 			)
 		]),
-		createModule("Check-in #3", [
+		createModule("Check-In #3", [
 			createLesson(
 				"Review Targets",
 				`
@@ -893,6 +895,47 @@ The important part is the explanation: name the graph feature and connect it to 
 				media.piecewiseFunctions
 			)
 		]),
+		createModule(
+			"ALA12 Algebra 2A Function Family Capstone",
+			[
+				createLesson(
+					"Capstone: Function Family Model Portfolio",
+					`
+Build one coherent portfolio that compares how Algebra 2A function families represent structure, change, restrictions, and graph behavior.
+
+**Required build**
+
+1. Choose one applied question with a bounded classroom or fictional dataset.
+2. Build and justify two candidate models from different families: quadratic, higher-degree polynomial, rational, radical, or piecewise.
+3. Include an equation, graph or feature table, domain, intercept or zero analysis, and one transformed or equivalent form for each model.
+4. Compare where each model is defined, what its key features mean, and which model better fits the stated question.
+5. Include one rejected value, discontinuity, extraneous solution, or interval boundary and explain how the restriction is detected.
+6. End with a limitation and an Algebra 2B handoff note naming the next logarithm, sequence, matrix, statistics, or trigonometry target.
+
+**Completion evidence**
+
+- Both function families are represented correctly and checked with at least two inputs.
+- Graph features agree with the algebraic structure and domain restrictions.
+- The model choice is supported by evidence rather than appearance alone.
+- The conclusion identifies one limitation and one next-course readiness target.
+					`.trim()
+				)
+			],
+			[
+				createLesson(
+					"Choice: Portfolio Evidence Audit",
+					`
+Choose one artifact from complex numbers, quadratics, polynomials, rational functions, radicals, and piecewise functions. For each artifact, name the representation, verification method, and one revision that improved the reasoning. Use the audit only when organizing existing evidence would strengthen the capstone plan.
+					`.trim()
+				),
+				createLesson(
+					"Challenge: Cross-Family Model Stress Test",
+					`
+Change one domain boundary, data point, intercept, asymptote, or continuity condition in the capstone scenario. Refit or revise both candidate models, compare which conclusion changes, and explain which model is more stable under the changed condition.
+					`.trim()
+				)
+			]
+		),
 		createModule("Reference Archive: Algebra 2A", [
 			createLesson(
 				"Project Scenario and Context Links",
@@ -926,3 +969,211 @@ ${sourceMediaReferences()}
 		])
 	]
 };
+
+configureMathCourseFlow(algebra2ACourse, {
+	courseId: "algebra-2a",
+	modules: [
+		{
+			title: "ALA1 Complex Numbers",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"powers of i",
+				"a + bi",
+				"complex plane",
+				"complex operation",
+				"conjugate"
+			],
+			flowNote:
+				"Use the four-step power cycle before computing large powers, connect a + bi to coordinates, and verify arithmetic by separating real and imaginary parts. Division is complete only after the denominator is real."
+		},
+		{
+			title: "ALA2 Quadratic Functions",
+			estimatedTime: "3–4 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"factor / zero",
+				"complete the square",
+				"quadratic formula",
+				"discriminant",
+				"complex root"
+			],
+			flowNote:
+				"Choose a solving method from the equation structure, predict the root type from the discriminant, and check every real or complex result in the original equation."
+		},
+		{
+			title: "ALA3 Graphing Quadratic Functions",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"vertex / standard / intercept form",
+				"axis of symmetry",
+				"zero / intercept",
+				"transformation",
+				"graph-feature check"
+			],
+			flowNote:
+				"Read the easiest features from each form, convert forms to verify the same parabola, and predict transformations before graphing. The graph prompt reference is optional visual support.",
+			choiceCurriculumTitles: ["Graph Prompt Reference"]
+		},
+		{
+			title: "Check-In #1",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"complex arithmetic",
+				"quadratic method",
+				"discriminant",
+				"quadratic form",
+				"graph interpretation"
+			],
+			flowNote:
+				"Solve one complex-number operation, one quadratic by a defended method, and one quadratic graph from two forms. Correct the first sign, coefficient, or feature mismatch before advancing to higher-degree polynomials."
+		},
+		{
+			title: "ALA4 Higher Degree Polynomials",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"polynomial operation",
+				"factor structure",
+				"degree / leading term",
+				"transformation",
+				"location principle"
+			],
+			flowNote:
+				"Track degree and leading term through operations, factor where structure permits, and connect sign changes or interval evidence to the existence of real zeros without assuming their exact locations."
+		},
+		{
+			title: "ALA5 Polynomial Division",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"long division",
+				"synthetic division",
+				"quotient / remainder",
+				"divisor condition",
+				"multiplication check"
+			],
+			flowNote:
+				"Choose synthetic division only for a linear divisor in the needed form, record every coefficient including zeros, and verify quotient and remainder by reconstructing the dividend."
+		},
+		{
+			title: "ALA6 Zeros of Polynomials",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"factor / remainder theorem",
+				"rational root theorem",
+				"Descartes' rule",
+				"bounds",
+				"multiplicity"
+			],
+			flowNote:
+				"Use theorems to narrow candidates, test candidates efficiently, and distinguish possible counts from proven roots. Record multiplicity and verify the resulting factorization."
+		},
+		{
+			title: "ALA7 Graphing Polynomials",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"end behavior",
+				"zero / multiplicity",
+				"turning point",
+				"sign interval",
+				"feature-based sketch"
+			],
+			flowNote:
+				"Predict end behavior from degree and leading coefficient, mark zeros with multiplicity behavior, test intervals, and sketch only after the feature table is internally consistent."
+		},
+		{
+			title: "Check-In #2",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"polynomial structure",
+				"division",
+				"zero theorem",
+				"multiplicity",
+				"feature-based graph"
+			],
+			flowNote:
+				"Factor or divide one polynomial, locate and verify its zeros, and build a graph from end behavior and multiplicity. Continue when the algebra, feature table, and sketch agree."
+		},
+		{
+			title: "ALA8 Rational Functions",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"domain restriction",
+				"vertical / horizontal asymptote",
+				"removable discontinuity",
+				"intercept",
+				"rational graph"
+			],
+			flowNote:
+				"Factor first, record excluded values from the source expression, distinguish holes from asymptotes, and build the graph from algebraic features. Rational graph references are optional visual support.",
+			choiceCurriculumTitles: ["Rational Graph References"]
+		},
+		{
+			title: "ALA9 Rational Function Operations",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"factor / simplify",
+				"least common denominator",
+				"excluded value",
+				"rational equation",
+				"extraneous solution"
+			],
+			flowNote:
+				"Carry source-domain restrictions through every operation, factor before canceling, and test every rational-equation solution against original denominators."
+		},
+		{
+			title: "ALA10 Radical Functions",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"radical domain / range",
+				"graph transformation",
+				"isolate radical",
+				"raise to a power",
+				"extraneous check"
+			],
+			flowNote:
+				"State the real domain before graphing or solving, isolate one radical at a time, and check every candidate in the unsquared equation to reject extraneous values."
+		},
+		{
+			title: "ALA11 Piecewise Functions",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"interval condition",
+				"open / closed endpoint",
+				"piecewise evaluation",
+				"step function",
+				"continuity"
+			],
+			flowNote:
+				"Select the rule from the input interval before evaluating, graph endpoint inclusion precisely, and compare left and right behavior when testing continuity or a pricing boundary."
+		},
+		{
+			title: "Check-In #3",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"rational feature",
+				"domain restriction",
+				"radical equation",
+				"piecewise interval",
+				"extraneous / endpoint check"
+			],
+			flowNote:
+				"Complete one rational, radical, and piecewise task without notes, explain one excluded or extraneous value, and use graph references only when the prompt depends on a visual.",
+			choiceCurriculumTitles: ["Check-In Visual References"]
+		},
+		{
+			title: "ALA12 Algebra 2A Function Family Capstone",
+			estimatedTime: "3–4 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"two function families",
+				"equation / graph / feature table",
+				"domain / restriction",
+				"model comparison",
+				"Algebra 2B handoff"
+			],
+			flowNote:
+				"Build the two candidate models from independently verified course methods, compare their features and restrictions, and choose from evidence. The portfolio audit is optional organization; the stress test is a challenge.",
+			challengeSupplementalTitles: [
+				"Challenge: Cross-Family Model Stress Test"
+			]
+		}
+	],
+	appendixTitles: ["Reference Archive: Algebra 2A"]
+});

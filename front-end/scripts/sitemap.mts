@@ -1,10 +1,6 @@
-export const SITE_URL = "https://cs.avasan.org";
+export const SITE_URL = "https://math.avasan.org";
 
-export const SITEMAP_EXCLUDED_ROUTES = [
-	"/admin",
-	"/course-resource",
-	"/python-ide"
-];
+export const SITEMAP_EXCLUDED_ROUTES = ["/admin", "/graph-sketcher"];
 
 type SitemapOptions = {
 	exclude: string[];

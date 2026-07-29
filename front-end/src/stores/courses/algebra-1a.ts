@@ -1,4 +1,5 @@
 import type { RawCourse } from "./types";
+import { configureMathCourseFlow } from "./mathCourseFlow";
 import { pendingStaticMediaNotice, staticMediaUrl } from "./staticMedia";
 
 const MEDIA_BASE = "https://static.classes.jacobdanderson.net/algebra-1a";
@@ -90,7 +91,7 @@ function sourceMediaReferences() {
 export const algebra1ACourse: RawCourse = {
 	name: "Algebra 1A",
 	modules: [
-		createModule("Algebra 1A Kick-Off Projects", [
+		createModule("Algebra 1A Kick-Off and Placement", [
 			createLesson(
 				"Kick-Off Overview",
 				`
@@ -427,7 +428,7 @@ Explain why their chosen swag is likely to perform well, not just compute a corr
 				`.trim()
 			)
 		]),
-		createModule("Check-in #1", [
+		createModule("Check-In #1", [
 			createLesson(
 				"Review Set",
 				`
@@ -585,7 +586,7 @@ Reference results for checking the interpretation:
 				)
 			]
 		),
-		createModule("Check-in #2", [
+		createModule("Check-In #2", [
 			createLesson(
 				"Graphing Linear Equations: Coordinate Plane Review",
 				`
@@ -938,7 +939,7 @@ The master project closes the course with a short independent explanation.
 					`.trim()
 			)
 		]),
-		createModule("Check-in #3", [
+		createModule("Check-In #3", [
 			createLesson(
 				"Graphing Review",
 				`
@@ -1046,3 +1047,299 @@ ${sourceMediaReferences()}
 		])
 	]
 };
+
+configureMathCourseFlow(algebra1ACourse, {
+	courseId: "algebra-1a",
+	modules: [
+		{
+			title: "Algebra 1A Kick-Off and Placement",
+			legacyTitle: "Algebra 1A Kick-Off Projects",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"placement sample",
+				"equation",
+				"linear graph",
+				"system of equations",
+				"practice goal"
+			],
+			flowNote:
+				"Use the overview to choose one diagnostic route rather than completing four opening projects. Managing a Restaurant checks equation readiness, Delivery Map checks coordinate and slope readiness, and the weekly-delivery or Chef's Special routes challenge an already secure foundation.",
+			choiceCurriculumTitles: [
+				"Project 1: Managing a Restaurant",
+				"Project 2A: Delivery Map"
+			],
+			challengeCurriculumTitles: [
+				"Project 2B: Weekly Deliveries and Competition",
+				"Project 3: Chef's Special"
+			]
+		},
+		{
+			title: "AA1 Algebraic Properties",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"equality",
+				"balance",
+				"inverse operation",
+				"substitution check",
+				"equivalent statement"
+			],
+			flowNote:
+				"Treat an equation as a balance, record the same operation on both sides, and verify each result by substitution. Guess-and-check is a bridge to formal solving, not the final method."
+		},
+		{
+			title: "AA2 Solving Single-Step Linear Equations",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"addition / subtraction",
+				"multiplication / division",
+				"exponent / root",
+				"isolate the variable",
+				"substitution check"
+			],
+			flowNote:
+				"Name the operation attached to the variable, apply its inverse to both sides, and substitute the result into the original equation. Keep context units attached to the final answer."
+		},
+		{
+			title: "AA3 Module Project: Movie Star Status (with Maddie Van Beek)",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"variable definition",
+				"budget equation",
+				"unit rate",
+				"one-step equation",
+				"decision evidence"
+			],
+			flowNote:
+				"Build one film-budget model from named variables and units, solve it with the AA1–AA2 process, and defend one budget decision. Open the answer checks only after preserving the independent attempt.",
+			choiceCurriculumTitles: ["Answer Key and Open-Ended Checks"]
+		},
+		{
+			title: "AA4 Solving Multi-Step Linear Equations",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"distribute",
+				"combine like terms",
+				"variables on both sides",
+				"inequality reversal",
+				"solution classification"
+			],
+			flowNote:
+				"Simplify each side before moving terms, record why an inequality sign reverses, and distinguish one solution, no solution, and infinitely many solutions from the resulting statement."
+		},
+		{
+			title: "AA5 Module Project: Free Swag! (with Amisha Sisodiya)",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"cost equation",
+				"product mix",
+				"inequality",
+				"whole-number constraint",
+				"written justification"
+			],
+			flowNote:
+				"Define each product count before writing the cost equation, test that the mix satisfies the budget, and use an inequality to connect production rate with event time. Use the guidance only after recording the first model.",
+			choiceCurriculumTitles: ["Open-Ended Guidance"]
+		},
+		{
+			title: "Check-In #1",
+			estimatedTime: "1 session · 50–65 minutes",
+			keyBlocks: [
+				"balanced equation",
+				"single-step equation",
+				"multi-step equation",
+				"inequality",
+				"word-model check"
+			],
+			flowNote:
+				"Complete the mixed equation and inequality sample without notes, correct one error by naming the broken equivalence step, and revisit only the smallest unstable equation family before beginning linear graphs."
+		},
+		{
+			title: "AA6 Slope and Rate of Change",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"rise / run",
+				"ordered pair",
+				"rate of change",
+				"parallel slope",
+				"perpendicular slope"
+			],
+			flowNote:
+				"Calculate slope from two points, interpret its sign and units in context, and distinguish equal slopes from negative reciprocals before writing line equations."
+		},
+		{
+			title: "AA7 Module Project: Community Data Analysis (with Davin Lee)",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"ordered-pair dataset",
+				"coordinate graph",
+				"slope calculation",
+				"trend comparison",
+				"evidence-based recommendation"
+			],
+			flowNote:
+				"Plot one transparent classroom or fictional dataset, calculate and interpret a meaningful slope, compare two trends, and keep the final recommendation within what the selected data supports."
+		},
+		{
+			title: "AA8 Slope-Intercept Form",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"y = mx + b",
+				"slope",
+				"y-intercept",
+				"table / graph / equation",
+				"context interpretation"
+			],
+			flowNote:
+				"Move among table, graph, equation, and context while keeping slope and initial value distinct. Verify the model against at least two points."
+		},
+		{
+			title: "AA9 Point-Slope Form",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"point-slope form",
+				"given point",
+				"given slope",
+				"equivalent linear forms",
+				"substitution check"
+			],
+			flowNote:
+				"Build point-slope form directly from one point and one slope, then convert it to slope-intercept and standard form. Substitute the original point to verify every representation."
+		},
+		{
+			title: "AA10 Graphing Inequalities",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"boundary line",
+				"solid / dashed",
+				"test point",
+				"shaded region",
+				"context constraint"
+			],
+			flowNote:
+				"Graph the boundary first, decide whether equality includes it, test one point, and shade only the satisfying region. Translate the final region back into the context constraint."
+		},
+		{
+			title: "AA11 Module Project: Predicting Avalanches (with Ruby Lee)",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"slope classification",
+				"risk curve",
+				"inequality threshold",
+				"model limitation",
+				"evidence-based decision"
+			],
+			flowNote:
+				"Read axes and units before comparing modeled risk curves, use the stated threshold to justify a closure interval, and label the result as a classroom model rather than a real-world safety forecast. Reference notes are for post-attempt checking.",
+			choiceCurriculumTitles: ["Reference Notes"]
+		},
+		{
+			title: "Check-In #2",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"coordinate plane",
+				"slope",
+				"linear form",
+				"inequality graph",
+				"representation check"
+			],
+			flowNote:
+				"Complete one coordinate, slope, line-form, and inequality task without notes. Explain the same line in two representations, correct one graphing error, and use Additional Practice only for the diagnosed gap.",
+			choiceCurriculumTitles: ["Additional Practice"]
+		},
+		{
+			title: "AA12 Solving Linear Systems by Graphing",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"intersection",
+				"one / none / infinite solutions",
+				"graphing system",
+				"system of inequalities",
+				"substitution check"
+			],
+			flowNote:
+				"Predict the number of solutions from line relationships, graph both constraints, and verify every intersection in the original equations. For inequalities, interpret the overlap as the feasible region."
+		},
+		{
+			title: "AA13 Solving Linear Systems by Substitution",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"isolate a variable",
+				"substitute expression",
+				"solve one variable",
+				"ordered pair",
+				"system check"
+			],
+			flowNote:
+				"Choose substitution when one variable is already isolated or inexpensive to isolate, preserve parentheses around the substituted expression, and check the ordered pair in both original equations."
+		},
+		{
+			title: "AA14 Solving Linear Systems by Elimination",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"align equations",
+				"opposite coefficients",
+				"add / subtract equations",
+				"ordered pair",
+				"method selection"
+			],
+			flowNote:
+				"Choose the variable with the simplest cancellation path, multiply whole equations when needed, and track signs carefully. Compare graphing, substitution, and elimination before selecting a method."
+		},
+		{
+			title: "AA15 Module Project: Cytogenetics Quest (with Dr. Renu Bajaj)",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"define variables",
+				"system from constraints",
+				"substitution / elimination",
+				"constraint check",
+				"model assumption"
+			],
+			flowNote:
+				"Treat every biological detail as a simplified classroom scenario, translate only the stated numerical constraints, and check the solved values in every original equation before comparing assumptions. The answer key is post-attempt support.",
+			choiceCurriculumTitles: ["Answer Key"]
+		},
+		{
+			title: "AA16 Module Project: Battle of the Publications (with Konstantin Kaganovsky)",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"linear function",
+				"combined model",
+				"system of equations",
+				"inequality comparison",
+				"domain / limitation"
+			],
+			flowNote:
+				"Build and combine the publication models, solve the relationship system, and distinguish the fixed algebraic solution from the open-ended comparison model. Open the answer key after preserving calculations and assumptions.",
+			choiceCurriculumTitles: ["Answer Key"]
+		},
+		{
+			title: "Check-In #3",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"graphing method",
+				"substitution method",
+				"elimination method",
+				"special solution case",
+				"method defense"
+			],
+			flowNote:
+				"Solve one system by each method, explain one no-solution or infinite-solution case, and defend the most efficient method for a changed system. Additional Practice follows only if a named method remains unreliable.",
+			choiceCurriculumTitles: ["Additional Practice"]
+		},
+		{
+			title: "AA17 Master Project: Algebra 1A",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"independent concept",
+				"real-world model",
+				"two original problems",
+				"multiple representations",
+				"Algebra 1B handoff"
+			],
+			flowNote:
+				"Begin only after the systems checkpoint. Build a concise portfolio artifact with one Algebra 1A concept, a real use, two original solved problems, and at least two representations; finish by naming the evidence that supports readiness for Algebra 1B."
+		}
+	],
+	appendixTitles: ["Reference Archive: Algebra 1A"]
+});

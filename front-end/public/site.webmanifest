@@ -1,7 +1,7 @@
 {
-	"name": "Classes with Julio",
-	"short_name": "Julio CS",
-	"description": "Scratch, Python, and PyGames courses for young coders.",
+	"name": "Math with Julio",
+	"short_name": "Julio Math",
+	"description": "Graph Sketcher and math courses from elementary through AP Calculus.",
 	"theme_color": "#0f766e",
 	"background_color": "#f3faf8",
 	"display": "standalone",

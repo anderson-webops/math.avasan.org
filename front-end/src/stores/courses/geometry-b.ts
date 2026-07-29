@@ -1,4 +1,5 @@
 import type { RawCourse } from "./types";
+import { configureMathCourseFlow } from "./mathCourseFlow";
 import {
 	geometryBStaticFilenames,
 	pendingStaticMediaNotice,
@@ -683,9 +684,8 @@ export const geometryBCourse: RawCourse = {
 		sourcePolicy:
 			"Built from the Geometry B sequence with neutral wording and no direct legacy static image embeds.",
 		assessmentCadence: [
-			"Check-In #1 after quadrilaterals and polygon foundations.",
-			"Check-In #2 after circles, transformations, and symmetry.",
-			"Check-In #3 after solids and cumulative geometry modeling."
+			"Check-In #1 after quadrilaterals, polygons, circle measurement, and circle theorems.",
+			"Check-In #2 after transformations and solids, immediately before the cumulative design defense."
 		],
 		toolchain: [
 			"Paper or shared diagram sketches",
@@ -706,7 +706,124 @@ export const geometryBCourse: RawCourse = {
 		recommendedNextWork: [
 			"Replace legacy diagrams with owned or source-safe static.classes assets when available.",
 			"Add optional dynamic-geometry exploration links for transformations and circle theorems.",
-			"Build a Geometry A to Geometry B cumulative assessment once both courses have rendered review evidence."
+			"Keep the Algebra 2 and Pre-Calculus handoff map aligned with transformation, conic, measurement, and modeling evidence from Geometry A and B."
 		]
 	}
 };
+
+configureMathCourseFlow(geometryBCourse, {
+	courseId: "geometry-b",
+	modules: [
+		{
+			title: "GEOB1-GEOB2 Quadrilaterals and Parallelograms",
+			estimatedTime: "4 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"quadrilateral hierarchy",
+				"parallel / congruent evidence",
+				"trapezoid",
+				"diagonal property",
+				"classification proof"
+			],
+			flowNote:
+				"Classify from marked properties rather than appearance, list every valid family name, and use the narrowest supported name in the final claim. The case file is supported transfer; the property decision tree is the challenge route.",
+			challengeSupplementalTitles: [
+				"Project: Parallelogram Property Decision Tree"
+			]
+		},
+		{
+			title: "GEOB3-GEOB4 Polygons and Circle Measurement",
+			estimatedTime: "3–4 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"polygon angle sum",
+				"regularity condition",
+				"composite area",
+				"arc / sector",
+				"linear / square units"
+			],
+			flowNote:
+				"State whether a polygon is regular before using a single-angle formula, decompose composite regions visibly, and distinguish full-circle, arc, sector, length, and area questions before calculating. The circle design brief is the challenge application.",
+			challengeSupplementalTitles: [
+				"Project: Circle Measurement Design Brief"
+			]
+		},
+		{
+			title: "GEOB5-GEOB6 Circle Theorems and Challenge Problems",
+			estimatedTime: "3–4 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"vertex location",
+				"intercepted arc",
+				"tangent / secant / chord",
+				"theorem chain",
+				"rejected shortcut"
+			],
+			flowNote:
+				"Classify the angle from its vertex, mark the intercepted arcs, and name every theorem before writing an equation. Use the theorem sort for supported selection practice and the full walkthrough for a multi-step challenge.",
+			challengeSupplementalTitles: [
+				"Project: Circle Challenge Walkthrough"
+			]
+		},
+		{
+			title: "Check-In #1: Quadrilaterals, Polygons, and Circles",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"classification",
+				"formula selection",
+				"circle theorem",
+				"unit / angle label",
+				"error diagnosis"
+			],
+			flowNote:
+				"Complete a mixed classification, measurement, and theorem-selection set without topic labels. Correct the first invalid property or formula choice; choose the broad review set or the deeper error clinic based on that evidence.",
+			challengeSupplementalTitles: [
+				"Project: Formula and Theorem Error Clinic"
+			]
+		},
+		{
+			title: "GEOB7-GEOB8 Transformations",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"translation / rotation",
+				"reflection",
+				"dilation",
+				"coordinate rule",
+				"congruence / similarity"
+			],
+			flowNote:
+				"Predict image coordinates before graphing, record one rule per transformation, and identify which lengths, angles, orientation, perimeter, and area are preserved or scaled. The logo redesign is the composition challenge.",
+			challengeSupplementalTitles: [
+				"Project: Logo Transformation Redesign"
+			]
+		},
+		{
+			title: "GEOB9-GEOB10 Polyhedra and Round Solids",
+			estimatedTime: "3–4 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"net / exposed face",
+				"surface area",
+				"volume",
+				"vertical / slant height",
+				"composite solid"
+			],
+			flowNote:
+				"Sketch or describe the solid and exposed surfaces before selecting formulas, keep vertical and slant height distinct, and attach square or cubic units. Packaging optimization is the challenge after the formula lab is reliable.",
+			challengeSupplementalTitles: [
+				"Project: Packaging Design Optimization"
+			]
+		},
+		{
+			title: "Check-In #2 and Geometry B Capstone",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"transformation / solid gate",
+				"two-dimensional evidence",
+				"three-dimensional evidence",
+				"design defense",
+				"model limitation"
+			],
+			flowNote:
+				"Pass the transformation-and-solids readiness check, use the synthesis map to choose connected topic families, and complete the design defense as the required capstone. The portfolio audit remains optional evidence organization.",
+			coreSupplementalTitles: ["Capstone: Geometry B Design Defense"]
+		}
+	],
+	appendixTitles: ["Geometry B Reference Archive", "Pending Static Assets"]
+});

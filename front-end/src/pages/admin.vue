@@ -1,74 +1,56 @@
 <script lang="ts" setup>
-import { storeToRefs } from "pinia";
-import AccountManagement from "@/components/AccountManagement.vue";
-import AccountSecurity from "@/components/AccountSecurity.vue";
-import StudentManagement from "@/components/StudentManagement.vue";
-import { useAppStore } from "@/stores/app";
+defineOptions({ name: "TeacherAdminRedirectPage" });
 
-defineOptions({ name: "AdminPage" });
-
-const app = useAppStore();
-const { adminSessionRevalidating, currentAdmin } = storeToRefs(app);
+const adminUrl = "https://cs.avasan.org/admin";
 </script>
 
 <template>
-	<section class="page-shell page-shell--wide teacher-admin-page">
-		<h1 class="page-title">Admin</h1>
-
-		<section
-			v-if="adminSessionRevalidating"
-			class="admin-panel admin-panel--login site-surface"
-			aria-live="polite"
-		>
-			<p>Checking Admin access…</p>
-		</section>
-
-		<section
-			v-else-if="!currentAdmin"
-			class="admin-panel admin-panel--login site-surface"
-		>
-			<AccountManagement />
-		</section>
-
-		<div v-else class="admin-workspace">
-			<section class="admin-panel site-surface">
-				<AccountSecurity :entity-id="currentAdmin._id" />
-			</section>
-			<section class="admin-panel site-surface">
-				<StudentManagement />
-			</section>
+	<section class="page-shell admin-redirect-page">
+		<div class="site-surface admin-redirect-card">
+			<p class="page-eyebrow">Teacher access</p>
+			<h1 class="page-title">Julio’s Admin</h1>
+			<p>
+				Student access and classroom records are managed in Julio’s
+				protected classroom Admin.
+			</p>
+			<a class="admin-redirect-link" :href="adminUrl" rel="noreferrer">
+				Open Julio’s Admin
+			</a>
 		</div>
 	</section>
 </template>
 
 <style scoped>
-.teacher-admin-page {
+.admin-redirect-page {
 	display: grid;
-	gap: 1.1rem;
+	min-height: min(70vh, 44rem);
+	place-items: center;
 }
 
-.teacher-admin-page > .page-title {
-	padding-top: 1rem;
-}
-
-.admin-panel {
-	padding: clamp(1.5rem, 4vw, 2.4rem);
-}
-
-.admin-panel--login {
-	width: min(100%, var(--container-narrow));
-}
-
-.admin-workspace {
+.admin-redirect-card {
 	display: grid;
-	grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+	width: min(100%, 36rem);
 	gap: 1rem;
-	align-items: start;
+	padding: clamp(1.5rem, 4vw, 2.5rem);
+	text-align: center;
 }
 
-@media (max-width: 1050px) {
-	.admin-workspace {
-		grid-template-columns: 1fr;
-	}
+.admin-redirect-card :is(h1, p) {
+	margin: 0;
+}
+
+.admin-redirect-link {
+	justify-self: center;
+	border-radius: 999px;
+	padding: 0.8rem 1.15rem;
+	background: var(--color-button-primary-bg);
+	color: var(--color-button-primary-text);
+	font-weight: 800;
+	text-decoration: none;
+}
+
+.admin-redirect-link:focus-visible {
+	outline: 3px solid var(--color-focus);
+	outline-offset: 4px;
 }
 </style>

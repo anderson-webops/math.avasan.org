@@ -1,401 +1,37 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { courseCatalog, loadRawCourse } from "@/stores/courses/index";
 
-const testDir = dirname(fileURLToPath(import.meta.url));
-const frontEndDir = resolve(testDir, "..");
-const repoRoot = resolve(frontEndDir, "..");
-const coursesSourceDir = resolve(frontEndDir, "src/stores/courses");
-const courseAssetsDir = resolve(frontEndDir, "public/course-assets");
+const INTERNAL_COPY_RE =
+	/\b(?:admin dashboard|book a class|create an account|freelance|instructor note|log in|scheduler|sign up|student account|tutor|zoom)\b/i;
+const ALLOWED_MEDIA_HOSTS = new Set([
+	"static.classes.jacobdanderson.net",
+	"www.youtube.com",
+	"youtu.be"
+]);
 const COURSE_SWEEP_TIMEOUT = 180000;
 
-const forbiddenStudentFacingPatterns = [
-	/\bTeaching flow\b/i,
-	/\binstructor-led\b/i,
-	/\*\*Use this section:\*\*/i,
-	/\*\*Output:\*\*/i,
-	/\*\*Requirements:\*\*/i,
-	/\bThe final artifact should\b/i,
-	/\bthe final artifact should\b/i,
-	/\bartifact should\b/i,
-	/\bThe final answer should\b/i,
-	/\bthe final answer should\b/i,
-	/\bInstructor Note\b/i,
-	/\bfor instructor(?:s)?\b/i,
-	/\bAsk the student\b/i,
-	/\bAsk students\b/i,
-	/\bAsk them\b/i,
-	/\bHave the student\b/i,
-	/\bHave students\b/i,
-	/\bhave students\b/i,
-	/\bhave them\b/i,
-	/\bLet the student\b/i,
-	/\blet the student\b/i,
-	/\binstructor-provided\b/i,
-	/\binstructor-approved\b/i,
-	/\binstructor-authored\b/i,
-	/\binstructor references\b/i,
-	/\bteacher-provided\b/i,
-	/\bteacher requirement\b/i,
-	/\bstudent-facing\b/i,
-	/\bstudents should\b/i,
-	/\bstudents? will\b/i,
-	/\bstudents? can (?:inspect|see|trace|identify|distinguish|explain|compare|build|create|use|practice|complete)\b/i,
-	/\bstudents? (?:build|practice|reason|understand)\b/i,
-	/\bstudents? must\b/i,
-	/\bstudents? need to\b/i,
-	/\bthe student can\b/i,
-	/\bthe student should\b/i,
-	/\bthe student tests\b/i,
-	/\bThey should\b/,
-	/\bStudents often\b/i,
-	/\bstudents often\b/i,
-	/\bLearners often\b/i,
-	/\blearners often\b/i,
-	/\blearners? will\b/i,
-	/\blearners? can (?:inspect|see|trace|identify|distinguish|explain|compare|build|create|use|practice|complete)\b/i,
-	/\blearners? (?:build|practice|reason|understand|need|needs)\b/i,
-	/\blearners? must\b/i,
-	/\blearners? need to\b/i,
-	/\btutor-ready\b/i,
-	/\btutor-visible\b/i,
-	/\btutor notes\b/i,
-	/\btutor\b/i,
-	/\bthe tutor should\b/i,
-	/\bThe tutor should\b/i,
-	/\binstructor\b/i,
-	/\bteacher\b/i,
-	/\bCover:\b/i,
-	/\bSet expectations\b/i,
-	/\bOptional observations may be assigned\b/i,
-	/\bThe expected result should\b/i,
-	/\bthe expected result should\b/i,
-	/\*\*Readable output:\*\*/i,
-	/\bartifact should make\b/i,
-	/\bshould include one small hand-checkable case\b/i,
-	/\bshould force (?:students?|learners?) to\b/i,
-	/\bshould make [^.]{0,80}visible\b/i,
-	/\bshould feel like\b/i,
-	/\*\*Project goal:\*\*/i,
-	/\*\*Required outcome:\*\*/i,
-	/\*\*Required fields:\*\*/i,
-	/\*\*Required notes:\*\*/i,
-	/\*\*Work sequence:\*\*/i,
-	/\*\*Implementation steps:\*\*/i,
-	/\bCourse scope:\b/i,
-	/\bGaps to close:\b/i,
-	/\bTopic backlog:\b/i,
-	/\*\*Completion check:\*\*/i,
-	/\*\*Completion checks:\*\*/i,
-	/\*\*Learning sequence:\*\*/i,
-	/\*\*Mastery check:\*\*/i,
-	/\bCommon pitfalls\b/i,
-	/\*\*Readiness evidence:\*\*/i,
-	/\bSequence Triage\b/i,
-	/\bTriage guidance\b/i,
-	/\bplanning and review reference\b/i,
-	/\bmark every gap\b/i,
-	/\*\*How to use this:\*\*/i,
-	/\*\*Review method:\*\*/i,
-	/\bModule Backlog\b/i,
-	/\bReady-to-Author\b/i,
-	/\bPlanning Project\b/i,
-	/\bplanned lesson\b/i,
-	/\bfuture module\b/i,
-	/\bthen ask\b/i,
-	/\bIf the struggles\b/i,
-	/\bDiscuss with the\b/i,
-	/\bHave click on\b/i,
-	/\bTalk about how\b/i,
-	/\bPoint out that\b/i,
-	/\bMake sure to explain that\b/i,
-	/\bShow the an example\b/i,
-	/\bintroduce the to the various\b/i,
-	/\byou can use as guidance\b/i,
-	/\bCreate a new Scratch project\. Using this project as (?:a )?rough guide, introduce\b/i,
-	/\bWatch for\b/i,
-	/\bwatch for\b/i,
-	/\bBuild a readiness checkpoint\b/i,
-	/\basks for work to\b/i,
-	/\bsource-backed\b/i,
-	/\bOriginal Asset Reservations\b/i,
-	/\bOriginal Demo Media Reservations\b/i,
-	/\bOriginal Data Asset Reservations\b/i,
-	/\boriginal static asset\b/i,
-	/\boriginal .*source library\b/i,
-	/\boriginal .*source export\b/i,
-	/\bStart with\b/i,
-	/\bStart with vocabulary\b/i,
-	/\b(?:Use|Show|Walk|Stress|Teach|Demonstrate|Introduce|Cover|Review)\b[^.]{0,140}\b(?:students?|learners?)\b/i,
-	/\bUse\b[^.]{0,140}\bto teach\b/i,
-	/\bEvidence for The\b/,
-	/This lesson arc covers these sections in sequence/i,
-	/(?:^|\n|\*\*[^*]+:\*\*\s)(?:Introduce|Teach|Cover|Set expectations)\b/,
-	/\bwithout copying\b/i
-];
-
-const forbiddenRawGeneratedPatterns = [
-	/Implementation Studio/i,
-	/defines the target artifact, required behavior, and core concepts needed/i,
-	/linked starter provides the implementation artifact/i,
-	/Supplemental project connected to/i,
-	/teacher-provided/i,
-	/Recording Studio/i,
-	/\bA student should\b/i,
-	/\bThe student should\b/i,
-	/\bstudents should\b/i,
-	/Use the linked starter and solution/i,
-	/Have students finish the missing implementation/i,
-	/Close .* by checking outputs, comparing alternate approaches, and recording one improvement that would make the work more robust on a second pass\./i,
-	/Anchor the lesson in one concrete example/i,
-	/Have students test at least one custom case/i,
-	/Introduce the main goal of Applied Studio/i,
-	/Build the central artifact for Applied Studio/i,
-	/Break the work into a small sequence/i,
-	/Applied Studio \d+/i,
-	/recovered source/i,
-	/source dump/i,
-	/original screenshots/i,
-	/missing reference images/i,
-	/Use the placeholder below/i,
-	/answer-key notes/i,
-	/qualitative prompts/i,
-	/\bthey will have to program\b/i,
-	/\bwhat we will need to code\b/i,
-	/\bmistakes common mistakes\b/i,
-	/\bBe able to\b/,
-	/\bSilver Not\b/i,
-	/\band should see warnings\b/i,
-	/\bstudent-led\b/i,
-	/\bShow the a picture\b/i,
-	/\bshow the how\b/i,
-	/\bdelete of all a list\b/i,
-	/\bShow students\b/i,
-	/\bEncourage students\b/i,
-	/\bCheck whether students can\b/i,
-	/\bAsk them\b/i,
-	/\bAsk what\b/i,
-	/\bCan you remember\b/i,
-	/\bCan you show me\b/i,
-	/\bTeach students to\b/i,
-	/\bTeach each\b/i,
-	/\bRequire students to\b/i,
-	/\bMake students explain\b/i,
-	/\bGive students\b/i,
-	/\bGive examples where students must\b/i,
-	/\bTeach managing\b/i,
-	/\bShow how\b/,
-	/\bDemonstrate how\b/,
-	/\bTalk about\b/i,
-	/\bDiscuss with\b/i,
-	/\bLet's\b/i,
-	/\bLet’s\b/i,
-	/\bwe need\b/i,
-	/\bwe should\b/i,
-	/\bwe want\b/i,
-	/\bwe can\b/i,
-	/\bwe will\b/i,
-	/\bwe have\b/i,
-	/\bwe're\b/i,
-	/\bwe'll\b/i,
-	/\bwe've\b/i,
-	/\bourselves\b/i,
-	/Finally, share/i,
-	/Great work/i,
-	/\bIf the struggles\b/i,
-	/\bshow the the\b/i,
-	/\bthe the understands\b/i,
-	/\bInstructional note\b/i,
-	/\bteacher-authored\b/i,
-	/missing-image-placeholder\.svg/i,
-	/\bplaceholder image below\b/i,
-	/\bcourse placeholder asset\b/i
-];
-
-const forbiddenScratchRawPatterns = [
-	/\bIntroduce the concept\b/i,
-	/\bShow how to\b/i,
-	/\bDemonstrate how\b/i,
-	/\bDiscuss real-life examples\b/i,
-	/\bCan you remember\b/i,
-	/\bCan you show me\b/i,
-	/\bClick on the Events section\b/i,
-	/\bTalk about how\b/i,
-	/\bWhat do you think an event listener\b/i,
-	/\bLet's make\b/i,
-	/\bLet’s make\b/i,
-	/\bwe need\b/i,
-	/\bwe should\b/i,
-	/\bwe want\b/i,
-	/\bwe can\b/i,
-	/\bwe're\b/i,
-	/\bwe have\b/i,
-	/\bRemember, if we\b/i,
-	/\bHave you ever heard\b/i,
-	/Finally, share the project!/i,
-	/Great work!/i,
-	/\(Introduce the /i
-];
-
-const publishedCourseSourceFiles = [
-	"scratch-level-1.ts",
-	"scratch-level-2.ts",
-	"python-level-1.ts",
-	"python-level-2.ts",
-	"pygames.ts"
-].map(file => resolve(coursesSourceDir, file));
-
-const publishedCourseAssetMarkdownFiles = [
-	resolve(courseAssetsDir, "python/turtle-project-reference.md")
-];
-
-function snippet(value: string, pattern: RegExp) {
-	const match = value.match(pattern);
-
-	if (!match || match.index === undefined) {
-		return value.slice(0, 180).replace(/\s+/g, " ");
-	}
-
-	const start = Math.max(0, match.index - 70);
-	return value.slice(start, start + 180).replace(/\s+/g, " ");
-}
-
-function escapeRegExp(value: string) {
-	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-describe("student-facing course copy", () => {
-	it("keeps generated boilerplate and recovery notes out of raw course source", () => {
-		const failures: string[] = [];
-
-		for (const file of publishedCourseSourceFiles) {
-			const source = readFileSync(file, "utf8");
-
-			for (const pattern of forbiddenRawGeneratedPatterns) {
-				if (!pattern.test(source)) continue;
-
-				failures.push(
-					`${file.replace(`${repoRoot}/`, "")}: ${snippet(source, pattern)}`
-				);
-			}
-		}
-
-		expect(failures).toEqual([]);
-	});
-
-	it("keeps Scratch raw course copy neutral instead of instructor-scripted", () => {
-		const files = [
-			resolve(coursesSourceDir, "scratch-level-1.ts"),
-			resolve(coursesSourceDir, "scratch-level-2.ts")
-		];
-		const failures: string[] = [];
-
-		for (const file of files) {
-			const source = readFileSync(file, "utf8");
-
-			for (const pattern of forbiddenScratchRawPatterns) {
-				if (!pattern.test(source)) continue;
-
-				failures.push(
-					`${file.replace(`${repoRoot}/`, "")}: ${snippet(source, pattern)}`
-				);
-			}
-		}
-
-		expect(failures).toEqual([]);
-	});
-
-	it("keeps internal planning markdown out of the course source directory", () => {
-		const planningFiles = readdirSync(coursesSourceDir).filter(
-			file =>
-				file.endsWith("-expansion-audit-plan.md") ||
-				file.endsWith("-repo-alignment-plan.md") ||
-				file.endsWith("rework-plan.md")
-		);
-		expect(planningFiles).toEqual([]);
-	});
-
-	it("keeps public course asset markdown free of internal recovery wording", () => {
-		const forbiddenAssetPatterns = [
-			/\bsource-backed\b/i,
-			/\brecovered source\b/i,
-			/\bsource dump\b/i,
-			/\boriginal prompt restored\b/i,
-			/\bhidden materials\b/i,
-			/\bversion-aware\b/i,
-			/\blearner-created\b/i,
-			/\bexpected readiness level\b/i,
-			/\bInstructor Note\b/i,
-			/\bHQ Support\b/i,
-			/\bSlack\b/i,
-			/\bRecording Studio\b/i
-		];
-		const failures: string[] = [];
-
-		for (const file of publishedCourseAssetMarkdownFiles) {
-			const source = readFileSync(file, "utf8");
-
-			for (const pattern of forbiddenAssetPatterns) {
-				if (!pattern.test(source)) continue;
-
-				failures.push(
-					`${file.replace(`${repoRoot}/`, "")}: ${snippet(source, pattern)}`
-				);
-			}
-		}
-
-		expect(failures).toEqual([]);
-	});
-
+describe("student-facing math course copy", () => {
 	it(
-		"keeps visible catalog lessons neutral instead of instructor-facing",
+		"keeps internal product and teacher-management language out of lessons",
 		async () => {
 			const failures: string[] = [];
 
 			for (const entry of courseCatalog) {
 				const course = await loadRawCourse(entry.id);
-
 				if (!course) {
 					failures.push(`${entry.id}: failed to load`);
 					continue;
 				}
 
 				for (const module of course.modules) {
-					const fields = [
-						{
-							label: "module title",
-							value: module.title
-						},
-						...module.curriculum.flatMap(item => [
-							{
-								label: `curriculum title: ${item.title}`,
-								value: item.title
-							},
-							{
-								label: `curriculum content: ${item.title}`,
-								value: item.content
-							}
-						]),
-						...module.supplementalProjects.flatMap(item => [
-							{
-								label: `supplemental title: ${item.title}`,
-								value: item.title
-							},
-							{
-								label: `supplemental content: ${item.title}`,
-								value: item.content
-							}
-						])
-					];
-
-					for (const field of fields) {
-						for (const pattern of forbiddenStudentFacingPatterns) {
-							if (!pattern.test(field.value)) continue;
-
+					for (const item of [
+						...module.curriculum,
+						...module.supplementalProjects
+					]) {
+						const visibleCopy = `${module.title}\n${item.title}\n${item.content}`;
+						if (INTERNAL_COPY_RE.test(visibleCopy)) {
 							failures.push(
-								`${entry.id} / ${module.title} / ${field.label}: ${snippet(field.value, pattern)}`
+								`${entry.id} / ${module.title} / ${item.title}`
 							);
 						}
 					}
@@ -408,60 +44,36 @@ describe("student-facing course copy", () => {
 	);
 
 	it(
-		"does not prepend awkward indefinite articles to exact course names",
+		"publishes only the image and video resources used by the math catalog",
 		async () => {
 			const failures: string[] = [];
 
 			for (const entry of courseCatalog) {
 				const course = await loadRawCourse(entry.id);
-
-				if (!course) {
-					failures.push(`${entry.id}: failed to load`);
-					continue;
-				}
-
-				const forbiddenCourseArticlePattern = new RegExp(
-					`(^|[^A-Za-z])(A|a) ${escapeRegExp(course.name)}\\b`
-				);
+				if (!course) continue;
 
 				for (const module of course.modules) {
-					const fields = [
-						{
-							label: "module title",
-							value: module.title
-						},
-						...module.curriculum.flatMap(item => [
-							{
-								label: `curriculum title: ${item.title}`,
-								value: item.title
-							},
-							{
-								label: `curriculum content: ${item.title}`,
-								value: item.content
-							}
-						]),
-						...module.supplementalProjects.flatMap(item => [
-							{
-								label: `supplemental title: ${item.title}`,
-								value: item.title
-							},
-							{
-								label: `supplemental content: ${item.title}`,
-								value: item.content
-							}
-						])
-					];
+					for (const item of [
+						...module.curriculum,
+						...module.supplementalProjects
+					]) {
+						if (
+							item.projectLink ||
+							item.solutionLink ||
+							item.datasetLink
+						) {
+							failures.push(
+								`${entry.id} / ${item.title}: unexpected project, solution, or dataset link`
+							);
+						}
 
-					for (const field of fields) {
-						const match = field.value.match(
-							forbiddenCourseArticlePattern
-						);
-
-						if (!match) continue;
-
-						failures.push(
-							`${entry.id} / ${module.title} / ${field.label}: ${match[0].trim()}`
-						);
+						if (!item.mediaLink) continue;
+						const hostname = new URL(item.mediaLink).hostname;
+						if (!ALLOWED_MEDIA_HOSTS.has(hostname)) {
+							failures.push(
+								`${entry.id} / ${item.title}: unexpected media host ${hostname}`
+							);
+						}
 					}
 				}
 			}

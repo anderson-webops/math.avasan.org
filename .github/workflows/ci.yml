@@ -8,27 +8,6 @@ on:
         branches: [main]
 
 jobs:
-    backend-install:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v7
-
-            - uses: actions/setup-node@v7
-              with:
-                  node-version: 22.x
-                  cache: npm
-                  cache-dependency-path: back-end/package-lock.json
-
-            - name: Pin npm version
-              run: |
-                  npm -v
-                  npm i -g npm@11.12.0
-                  npm -v
-
-            - name: Install backend deps with backend lockfile
-              working-directory: back-end
-              run: npm ci
-
     lint:
         runs-on: ubuntu-latest
         steps:
@@ -49,7 +28,6 @@ jobs:
             - name: Install deps
               run: npm ci
 
-            # Root "lint" runs front-end and back-end lint
             - name: Lint
               run: npm run lint
 
@@ -108,11 +86,6 @@ jobs:
               run: |
                   ulimit -n 4096 || true
                   npm run -w front-end test:unit
-
-            - name: Backend tests
-              env:
-                  VITEST_WATCH: "false"
-              run: npm run -w back-end test
 
     accessibility:
         runs-on: ubuntu-latest

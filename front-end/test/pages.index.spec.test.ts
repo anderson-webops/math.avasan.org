@@ -1,28 +1,21 @@
 import { flushPromises, mount } from "@vue/test-utils";
 import { describe, expect, it, vi } from "vitest";
+import TeacherAdminRedirectPage from "@/pages/admin.vue";
 import HomePage from "@/pages/index.vue";
+import MathCoursesPage from "@/pages/courses.vue";
 
 vi.mock("@unhead/vue", () => ({
 	useHead: vi.fn()
 }));
 
 describe("public home page", () => {
-	it("opens the course explorer as a public catalog", async () => {
+	it("opens Graph Sketcher as the primary homepage", async () => {
 		const wrapper = mount(HomePage, {
 			global: {
 				stubs: {
-					CourseExplorer: {
-						props: {
-							publicCatalog: Boolean
-						},
-						template: `
-							<div
-								data-testid="course-explorer"
-								:data-public-catalog="String(publicCatalog)"
-							>
-								Course explorer
-							</div>
-						`
+					GraphSketcherWorkspace: {
+						template:
+							'<section data-testid="graph-sketcher"><h1>Graph Sketcher</h1></section>'
 					}
 				}
 			}
@@ -30,21 +23,22 @@ describe("public home page", () => {
 
 		await flushPromises();
 
-		expect(wrapper.get("h1").text()).toBe("Courses");
-		expect(wrapper.text()).not.toContain("No student account is needed.");
-		expect(
-			wrapper
-				.get('[data-testid="course-explorer"]')
-				.attributes("data-public-catalog")
-		).toBe("true");
+		expect(wrapper.get("h1").text()).toBe("Graph Sketcher");
+		expect(wrapper.get('[data-testid="graph-sketcher"]').exists()).toBe(
+			true
+		);
+		expect(wrapper.find('[data-testid="course-explorer"]').exists()).toBe(
+			false
+		);
 	});
 
-	it("does not present account or scheduler gates", async () => {
-		const wrapper = mount(HomePage, {
+	it("keeps the math catalog on its secondary page", async () => {
+		const wrapper = mount(MathCoursesPage, {
 			global: {
 				stubs: {
 					CourseExplorer: {
-						template: "<div>Course explorer</div>"
+						template:
+							'<div data-testid="course-explorer">Course explorer</div>'
 					}
 				}
 			}
@@ -52,8 +46,20 @@ describe("public home page", () => {
 
 		await flushPromises();
 
-		expect(wrapper.text()).not.toMatch(
-			/Log in|Sign up|Book a Class|Open Scheduler|assigned to your account/i
+		expect(wrapper.get("h1").text()).toBe("Math courses");
+		expect(wrapper.get('[data-testid="course-explorer"]').exists()).toBe(
+			true
 		);
+		expect(wrapper.text()).not.toMatch(/Log in|Sign up|Book a Class/i);
+	});
+
+	it("hands /admin to the existing protected classroom Admin", () => {
+		const wrapper = mount(TeacherAdminRedirectPage);
+		const link = wrapper.get("a");
+
+		expect(wrapper.get("h1").text()).toBe("Julio’s Admin");
+		expect(link.attributes("href")).toBe("https://cs.avasan.org/admin");
+		expect(link.attributes("rel")).toBe("noreferrer");
+		expect(wrapper.text()).not.toMatch(/password|username|access code/i);
 	});
 });

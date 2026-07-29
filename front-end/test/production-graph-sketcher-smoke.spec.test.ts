@@ -10,12 +10,12 @@ import {
 describe("production Graph Sketcher smoke helpers", () => {
 	it("checks the public Graph Sketcher route", () => {
 		expect(
-			graphSketcherSmokePageUrl("https://cs.avasan.org").pathname
-		).toBe("/graph-sketcher");
+			graphSketcherSmokePageUrl("https://math.avasan.org").pathname
+		).toBe("/");
 	});
 
 	it("extracts only same-origin JavaScript and CSS assets", () => {
-		const pageUrl = new URL("https://cs.avasan.org/graph-sketcher");
+		const pageUrl = new URL("https://math.avasan.org/");
 		const html = [
 			'<link rel="stylesheet" href="/assets/app.css">',
 			'<script type="module" src="/assets/GraphSketcherWorkspace-a1.js"></script>',
@@ -23,8 +23,8 @@ describe("production Graph Sketcher smoke helpers", () => {
 		].join("");
 
 		expect(pageAssetUrls(html, pageUrl)).toEqual([
-			"https://cs.avasan.org/assets/app.css",
-			"https://cs.avasan.org/assets/GraphSketcherWorkspace-a1.js"
+			"https://math.avasan.org/assets/app.css",
+			"https://math.avasan.org/assets/GraphSketcherWorkspace-a1.js"
 		]);
 	});
 
@@ -36,7 +36,7 @@ describe("production Graph Sketcher smoke helpers", () => {
 			"Plot function",
 			".graphsketch",
 			".ograph",
-			"cs-avasan-graph-sketcher-session-v1",
+			"math-avasan-graph-sketcher-session-v1",
 			"All rendering, imports, and",
 			"exports run in this browser.",
 			"https://github.com/Jacoba1100254352/GraphSketcher.Linux"
@@ -49,7 +49,7 @@ describe("production Graph Sketcher smoke helpers", () => {
 	});
 
 	it("requires the bounded same-origin archive worker", () => {
-		const pageUrl = new URL("https://cs.avasan.org/graph-sketcher");
+		const pageUrl = new URL("https://math.avasan.org/");
 		const runtime =
 			'new Worker("/assets/graphSketcherArchive.worker-a1.js")';
 		const worker = [
@@ -59,7 +59,7 @@ describe("production Graph Sketcher smoke helpers", () => {
 		].join("\n");
 
 		expect(graphSketcherWorkerAssetUrls(runtime, pageUrl)).toEqual([
-			"https://cs.avasan.org/assets/graphSketcherArchive.worker-a1.js"
+			"https://math.avasan.org/assets/graphSketcherArchive.worker-a1.js"
 		]);
 		expect(containsGraphSketcherWorkerMarkers(worker)).toBe(true);
 		expect(containsGraphSketcherWorkerMarkers("contents.xml")).toBe(false);

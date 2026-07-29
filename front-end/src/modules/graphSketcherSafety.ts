@@ -1,5 +1,5 @@
 export const GRAPH_SKETCHER_SESSION_STORAGE_KEY =
-	"cs-avasan-graph-sketcher-session-v1";
+	"math-avasan-graph-sketcher-session-v1";
 export const MAX_INTERACTIVE_GRAPH_POINTS = 5_000;
 export const MAX_GRAPH_HISTORY_ENTRIES = 60;
 export const MAX_GRAPH_HISTORY_ESTIMATED_BYTES = 24 * 1024 * 1024;

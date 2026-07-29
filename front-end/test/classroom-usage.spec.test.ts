@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { reportClassroomUsage } from "@/modules/classroomUsage";
+import { reportMathClassroomUsage } from "@/modules/classroomUsage";
 
 function setNavigatorPrivacySignal(
 	name: "doNotTrack" | "globalPrivacyControl" | "msDoNotTrack",
@@ -11,7 +11,7 @@ function setNavigatorPrivacySignal(
 	});
 }
 
-describe("privacy-first classroom usage", () => {
+describe("privacy-first Math classroom usage", () => {
 	beforeEach(() => {
 		vi.useFakeTimers();
 		vi.setSystemTime(new Date("2026-07-29T20:15:00.000Z"));
@@ -30,47 +30,47 @@ describe("privacy-first classroom usage", () => {
 		window.sessionStorage.clear();
 	});
 
-	it("sends only a whitelisted course and deduplicates by UTC date", async () => {
-		await reportClassroomUsage("course-open", "python-level-1");
-		await reportClassroomUsage("course-open", "python-level-1");
+	it("sends only the fixed site, event, and whitelisted course", async () => {
+		await reportMathClassroomUsage("course-open", "algebra-1a");
+		await reportMathClassroomUsage("course-open", "algebra-1a");
 
 		expect(fetch).toHaveBeenCalledOnce();
 		expect(fetch).toHaveBeenCalledWith(
 			"/api/classroom-usage",
 			expect.objectContaining({
 				body: JSON.stringify({
+					siteID: "math",
 					event: "course-open",
-					courseId: "python-level-1"
+					courseId: "algebra-1a"
 				}),
 				credentials: "omit",
-				headers: {
-					"Content-Type": "application/json",
-					"X-Classroom-Request": "1"
-				},
 				method: "POST",
 				mode: "same-origin",
 				redirect: "error",
 				referrerPolicy: "no-referrer"
 			})
 		);
-		expect([...Object.keys(window.sessionStorage)]).toEqual([
-			"cs-avasan:classroom-usage:2026-07-29:course-open:python-level-1"
-		]);
 	});
 
-	it("removes an unknown course instead of sending arbitrary data", async () => {
-		await reportClassroomUsage(
-			"ide-open",
-			"student-name-or-untrusted-value"
+	it("reports only a coarse graph-open event", async () => {
+		await reportMathClassroomUsage(
+			"graph-open",
+			"untrusted graph expression"
 		);
 
 		const request = vi.mocked(fetch).mock.calls[0];
 		expect(JSON.parse(String(request?.[1]?.body))).toEqual({
-			event: "ide-open"
+			siteID: "math",
+			event: "graph-open"
 		});
-		expect(String(request?.[1]?.body)).not.toContain(
-			"student-name-or-untrusted-value"
-		);
+		expect(String(request?.[1]?.body)).not.toContain("untrusted");
+	});
+
+	it("drops an unknown course instead of sending arbitrary data", async () => {
+		await reportMathClassroomUsage("course-open", "student-name");
+
+		expect(fetch).not.toHaveBeenCalled();
+		expect(window.sessionStorage.length).toBe(0);
 	});
 
 	it.each([
@@ -80,26 +80,26 @@ describe("privacy-first classroom usage", () => {
 	] as const)("does not report when %s is enabled", async (_label, key, value) => {
 		setNavigatorPrivacySignal(key, value);
 
-		await reportClassroomUsage("ide-open", "pygames");
+		await reportMathClassroomUsage("graph-open");
 
 		expect(fetch).not.toHaveBeenCalled();
 		expect(window.sessionStorage.length).toBe(0);
 	});
 
-	it("does not report until classroom usage collection is enabled", async () => {
+	it("does not report until collection is explicitly enabled", async () => {
 		vi.stubEnv("VITE_CLASSROOM_USAGE_ENABLED", "false");
 
-		await reportClassroomUsage("course-open", "python-level-1");
+		await reportMathClassroomUsage("graph-open");
 
 		expect(fetch).not.toHaveBeenCalled();
 		expect(window.sessionStorage.length).toBe(0);
 	});
 
-	it("fails silently when reporting is unavailable", async () => {
+	it("fails silently when the aggregate endpoint is unavailable", async () => {
 		vi.mocked(fetch).mockRejectedValueOnce(new Error("offline"));
 
 		await expect(
-			reportClassroomUsage("ide-open", "python-level-2")
+			reportMathClassroomUsage("graph-open")
 		).resolves.toBeUndefined();
 	});
 });

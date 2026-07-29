@@ -1,4 +1,5 @@
 import type { RawCourse } from "./types";
+import { configureMathCourseFlow } from "./mathCourseFlow";
 import { pendingStaticMediaNotice, staticMediaUrl } from "./staticMedia";
 
 const MARCO_GRAPH = "pab5_0.png";
@@ -729,9 +730,139 @@ export const preAlgebraBCourse: RawCourse = {
 			"One evidence-based recommendation with a limitation"
 		],
 		recommendedNextWork: [
-			"Cross-link Geometry A/B and Algebra 1A readiness checkpoints from the visible math pathway",
+			"Keep Geometry A and Algebra 1A entry diagnostics aligned with the geometry, modeling, and explanation evidence in this capstone",
+			"Create printable graph-choice, formula-audit, factor-tree, and sample-space sheets for the three checkpoints",
 			"Upload reserved Pre-Algebra B images to the static classes host",
-			"Review external map/video links for source-safe alternatives where useful"
+			"Review external map and video links for source-safe alternatives where useful"
 		]
 	}
 };
+
+configureMathCourseFlow(preAlgebraBCourse, {
+	courseId: "pre-algebra-b",
+	modules: [
+		{
+			title: "Pre-Algebra B Kick-Off",
+			estimatedTime: "1 session · 45–60 minutes",
+			keyBlocks: [
+				"data summary",
+				"geometry classification",
+				"factor / multiple",
+				"sample space",
+				"placement goal"
+			],
+			flowNote:
+				"Complete the compact readiness sample first and correct one error. Use the readiness-map project only when a broader portfolio-style diagnostic would help; it is not another required unit before the data sequence begins.",
+			choiceCurriculumTitles: ["Project: Pre-Algebra B Readiness Map"]
+		},
+		{
+			title: "PAB1-PAB5 Data, Averages, and Graphs",
+			estimatedTime: "3 sessions · 45–60 minutes each",
+			keyBlocks: [
+				"range / median / mode / mean",
+				"ordered dataset",
+				"graph choice",
+				"axis / scale / units",
+				"evidence limitation"
+			],
+			flowNote:
+				"Summarize the same dataset numerically and visually, then explain which statistic and graph answer the stated question. Choose the Marco project for applied transfer or the error-repair project for targeted correction; both are not required."
+		},
+		{
+			title: "Check-In #1: Pre-Algebra B Data and Graphing",
+			estimatedTime: "1 session · 45–60 minutes",
+			keyBlocks: [
+				"ordered values",
+				"summary statistic",
+				"graph selection",
+				"scale / label audit",
+				"supported conclusion"
+			],
+			flowNote:
+				"Use one dataset to produce an ordered list, statistics table, graph, and evidence-based conclusion. Continue when the display and calculation agree; choose one supplemental review only for the specific statistic or graph decision that remains unstable."
+		},
+		{
+			title: "PAB6-PAB9 Lines, Angles, Triangles, and Similarity",
+			estimatedTime: "3 sessions · 45–60 minutes each",
+			keyBlocks: [
+				"line relationship",
+				"angle classification",
+				"right triangle",
+				"congruence / similarity",
+				"scale factor"
+			],
+			flowNote:
+				"Label the diagram and relationship before calculating. Verify that corresponding sides use one consistent scale factor, then choose the gymnastics project to combine rotation, similarity, graph reading, and right-triangle evidence."
+		},
+		{
+			title: "PAB10-PAB14 Polygons, Area, Circles, and Solids",
+			estimatedTime: "3 sessions · 45–60 minutes each",
+			keyBlocks: [
+				"polygon classification",
+				"perimeter / area",
+				"radius / diameter",
+				"surface area / volume",
+				"linear / square / cubic units"
+			],
+			flowNote:
+				"Identify the requested measurement before choosing a formula, and keep linear, square, and cubic units distinct. Use the transportation project as optional transfer after route segments and region measurements can be audited from a labeled diagram."
+		},
+		{
+			title: "Check-In #2: Pre-Algebra B Geometry",
+			estimatedTime: "1 session · 45–60 minutes",
+			keyBlocks: [
+				"labeled diagram",
+				"relationship / theorem",
+				"formula selection",
+				"unit check",
+				"error correction"
+			],
+			flowNote:
+				"Complete one relationship, one similarity or right-triangle case, and one measurement case without notes. Correct the first formula, correspondence, or unit error found, then choose only the matching audit or transfer practice before continuing."
+		},
+		{
+			title: "PAB15-PAB19 Factors, Multiples, and Number Structure",
+			estimatedTime: "3 sessions · 45–60 minutes each",
+			keyBlocks: [
+				"factor / multiple",
+				"divisibility",
+				"prime factorization",
+				"greatest common factor",
+				"least common multiple"
+			],
+			flowNote:
+				"Verify every prime factorization by multiplying back, then decide whether each context asks for equal grouping or synchronized cycles. The theme-park project is the choose-one application after that distinction is secure."
+		},
+		{
+			title: "PAB20-PAB23 Counting, Probability, and Applied Modeling",
+			estimatedTime: "3–4 sessions · 45–60 minutes each",
+			keyBlocks: [
+				"organized sample space",
+				"multiplication principle",
+				"theoretical / experimental probability",
+				"data model",
+				"limitation"
+			],
+			flowNote:
+				"Build the sample space before calculating probability and count every outcome once. Choose eSmash for a structured probability model or Airtable Revamped for a broader dashboard challenge; one carefully explained application is sufficient.",
+			challengeSupplementalTitles: ["Project: Airtable Revamped"]
+		},
+		{
+			title: "Check-In #3 and Capstone: Pre-Algebra B",
+			estimatedTime: "3 sessions · 45–60 minutes each",
+			keyBlocks: [
+				"number-structure gate",
+				"probability model",
+				"multi-strand capstone",
+				"evidence limitation",
+				"Algebra 1A / Geometry A handoff"
+			],
+			flowNote:
+				"Pass the number-structure and probability readiness sample before building the capstone. Use the optional evidence plan when more scaffolding is useful, and end the final project with a handoff note choosing Algebra 1A or Geometry A from the evidence rather than from speed alone.",
+			challengeSupplementalTitles: [
+				"Supplemental Project 1: Probability Fairness Audit"
+			]
+		}
+	],
+	appendixTitles: ["Pre-Algebra B Reference Archive"]
+});

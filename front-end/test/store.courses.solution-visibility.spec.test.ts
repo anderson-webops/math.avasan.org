@@ -1,7 +1,6 @@
 import type { CourseDefinition } from "@/stores/courses";
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it } from "vitest";
-import { useAppStore } from "@/stores/app";
 import { useCoursesStore } from "@/stores/courses";
 import { courseCatalog } from "@/stores/courses/index";
 
@@ -55,27 +54,4 @@ describe("course solution visibility", () => {
 		},
 		COURSE_SWEEP_TIMEOUT
 	);
-
-	it("shows answer material only in Julio's teacher session", async () => {
-		const appStore = useAppStore();
-		appStore.setCurrentAdmin({
-			_id: "julio",
-			name: "Julio",
-			email: "julio@example.com",
-			editAdmins: false,
-			saveEdit: "Save"
-		});
-		const course = await useCoursesStore().loadCourseById(
-			"python-level-1"
-		);
-		const solutionLinks = items(course!)
-			.map(item => item.solutionLink)
-			.filter(Boolean);
-
-		expect(course).not.toBeNull();
-		expect(solutionLinks.length).toBeGreaterThan(0);
-		expect(solutionLinks.some(link => SOLUTION_PATH_RE.test(link!))).toBe(
-			true
-		);
-	});
 });

@@ -1,4 +1,5 @@
 import type { RawCourse } from "./types";
+import { configureMathCourseFlow } from "./mathCourseFlow";
 import {
 	apCalculusStaticFilenames,
 	pendingStaticMediaNotice,
@@ -24,6 +25,278 @@ function moduleCode(title: string) {
 	return title.split(/\s+/)[0] ?? title;
 }
 
+const calculusModuleKeyBlocks: Record<string, string[]> = {
+	APCA0: [
+		"AB / BC route",
+		"diagnostic",
+		"function fluency",
+		"calculator policy",
+		"practice calendar"
+	],
+	APC1: [
+		"limit notation",
+		"one-sided limit",
+		"graph / table evidence",
+		"function value",
+		"written conclusion"
+	],
+	APC2: [
+		"limit law",
+		"direct substitution",
+		"indeterminate form",
+		"limit at infinity",
+		"algebraic check"
+	],
+	APC3: [
+		"continuity conditions",
+		"discontinuity",
+		"infinite limit",
+		"IVT hypothesis",
+		"interval conclusion"
+	],
+	APC4: [
+		"one-sided behavior",
+		"limit procedure",
+		"continuity",
+		"theorem hypothesis",
+		"correction log"
+	],
+	APC5: [
+		"average / instantaneous rate",
+		"derivative definition",
+		"tangent slope",
+		"differentiability",
+		"units"
+	],
+	APC6: [
+		"power rule",
+		"product / quotient rule",
+		"constant multiple",
+		"rule selection",
+		"derivative check"
+	],
+	APC7: [
+		"trigonometric derivative",
+		"exponential derivative",
+		"logarithmic derivative",
+		"domain",
+		"function-rule match"
+	],
+	APC8: [
+		"chain rule",
+		"implicit derivative",
+		"inverse derivative",
+		"higher-order derivative",
+		"notation"
+	],
+	APC9: [
+		"definition / rule",
+		"chain factor",
+		"implicit relation",
+		"inverse slope",
+		"correction log"
+	],
+	APC10: [
+		"derivative units",
+		"related rates",
+		"variable definition",
+		"linear approximation",
+		"context conclusion"
+	],
+	APC11: [
+		"MVT / EVT hypothesis",
+		"critical point",
+		"sign chart",
+		"concavity",
+		"endpoint check"
+	],
+	APC12: [
+		"function / derivative graph",
+		"optimization",
+		"implicit relation",
+		"candidate comparison",
+		"graph justification"
+	],
+	APC13: [
+		"rate model",
+		"theorem use",
+		"function analysis",
+		"optimization",
+		"AP conclusion"
+	],
+	APC14: [
+		"Riemann sum",
+		"signed area",
+		"accumulation",
+		"definite integral",
+		"FTC"
+	],
+	APC15: [
+		"antiderivative",
+		"definite integral",
+		"constant / bounds",
+		"substitution",
+		"BC method extension"
+	],
+	APC16: [
+		"approximation",
+		"FTC",
+		"antiderivative",
+		"net change",
+		"correction log"
+	],
+	APC17: [
+		"differential equation",
+		"initial condition",
+		"slope field",
+		"solution check",
+		"BC Euler extension"
+	],
+	APC18: [
+		"separation of variables",
+		"initial-value problem",
+		"exponential model",
+		"logistic extension",
+		"model interpretation"
+	],
+	APC19: [
+		"slope field",
+		"solution verification",
+		"initial condition",
+		"model behavior",
+		"correction log"
+	],
+	APC20: [
+		"net change",
+		"area between curves",
+		"intersection / bound",
+		"integrand meaning",
+		"units"
+	],
+	APC21: [
+		"cross-section area",
+		"disc / washer",
+		"radius definition",
+		"axis of rotation",
+		"BC arc-length extension"
+	],
+	APC22: [
+		"integral setup",
+		"bounds / units",
+		"volume / area",
+		"AB mixed review",
+		"AB readiness portfolio"
+	],
+	APC23: [
+		"parametric derivative",
+		"vector motion",
+		"polar slope / area",
+		"representation choice",
+		"BC interpretation"
+	],
+	APC24: [
+		"parametric motion",
+		"vector-valued function",
+		"polar calculus",
+		"formula selection",
+		"BC correction log"
+	],
+	APC25: [
+		"convergence / divergence",
+		"test hypothesis",
+		"absolute / conditional",
+		"remainder bound",
+		"BC justification"
+	],
+	APC26: [
+		"partial sum",
+		"power series",
+		"Taylor polynomial",
+		"interval of convergence",
+		"approximation error"
+	],
+	APC27: [
+		"convergence test",
+		"endpoint check",
+		"Taylor approximation",
+		"error bound",
+		"BC readiness portfolio"
+	]
+};
+
+function examReadinessPortfolio(code: string) {
+	if (code === "APC22") {
+		return lesson(
+			"AP Calculus AB Exam Readiness Portfolio",
+			`
+Build a final AB evidence portfolio before ending the AB route or continuing into the BC extension.
+
+**Required evidence**
+
+1. Include one corrected item from limits and continuity, differentiation, derivative applications, integration, differential equations, and integration applications.
+2. Include both calculator-active and no-calculator work, plus at least one graph or table interpretation.
+3. For every item, record the prompt type, representation, theorem or rule, final conclusion, and one correction or verification note.
+4. Complete one timed mixed set and sort each missed point by concept, setup, calculation, justification, or communication.
+5. End with three targeted review actions and a decision to finish the AB route or continue with APC23–APC27 for BC.
+
+**Completion evidence:** The portfolio covers every AB strand, shows corrected reasoning rather than answer-only work, and turns the timed-set results into a specific review plan.
+			`.trim()
+		);
+	}
+
+	if (code === "APC27") {
+		return lesson(
+			"AP Calculus BC Exam Readiness Portfolio",
+			`
+Complete the BC route with a portfolio that integrates the full AB core and the BC representation and series extensions.
+
+**Required evidence**
+
+1. Reuse the AB portfolio or select one corrected item from each AB strand.
+2. Add one parametric or vector-valued motion item, one polar calculus item, one convergence-test item, and one power or Taylor series item.
+3. Include one calculator-active and one no-calculator BC task, with notation and representation-specific formulas visible.
+4. Complete one timed mixed BC set and classify every missed point by concept, setup, calculation, justification, or communication.
+5. End with a prioritized review plan that names one AB dependency and one BC-specific target.
+
+**Completion evidence:** The portfolio distinguishes AB foundations from BC extensions, checks convergence hypotheses and endpoints, and supports the review priorities with timed evidence.
+			`.trim()
+		);
+	}
+
+	return null;
+}
+
+function calculusModuleFlow(data: CalculusModuleData) {
+	const code = moduleCode(data.title);
+
+	if (code === "APCA0") {
+		return "Choose the AB or BC route from diagnostic evidence. The AB route continues through APC22 and its readiness portfolio; the BC route completes that same core before APC23–APC27 and the BC portfolio.";
+	}
+	if (code === "APC22") {
+		return "Treat this as the AB endpoint: complete mixed integration review and the required AB readiness portfolio. Finish here for AB, or use the portfolio targets before continuing into APC23–APC27 for BC.";
+	}
+	if (code === "APC27") {
+		return "Treat this as the BC endpoint: complete mixed series review and the required BC readiness portfolio, then use timed evidence to choose final exam review priorities.";
+	}
+	if (data.bcOnly) {
+		return "This module is required on the BC route after the full AB core. Connect each new representation or series method to its AB prerequisite and verify every representation-specific condition.";
+	}
+	if (data.review) {
+		return "Use a mixed set to identify the first conceptual, setup, calculation, or justification gap. Repair that gap and record the evidence before advancing.";
+	}
+	return "This module belongs to both AB and BC routes. Build the definition or theorem first, connect analytical work to another representation, and finish with an AP-style justified conclusion.";
+}
+
+function calculusEstimatedTime(data: CalculusModuleData) {
+	const code = moduleCode(data.title);
+	if (code === "APCA0") return "2 sessions · 50–70 minutes each";
+	if (code === "APC22" || code === "APC27") {
+		return "4–5 sessions · 50–70 minutes each";
+	}
+	if (data.review) return "2 sessions · 50–70 minutes each";
+	return "3 sessions · 50–70 minutes each";
+}
+
 function module({
 	assessment,
 	bcOnly,
@@ -43,42 +316,45 @@ function module({
 		? `${topic} consolidates earlier modules through mixed AP-style reasoning.`
 		: `${topic} develops one major AP Calculus strand through definitions, representation changes, computation, and justification.`;
 	const code = moduleCode(title);
+	const curriculum = [
+		lesson(
+			"Concept Path",
+			[
+				`**Track:** ${trackLabel}`,
+				`**Focus:** ${focus}`,
+				`**Core ideas:**\n${concepts.map(concept => `- ${concept}`).join("\n")}`,
+				"**Representation habit:** Use graphical, numerical, analytical, and verbal evidence when the problem type allows it.",
+				"**AP habit:** State hypotheses, domains, intervals, units, and conclusion language explicitly before using a theorem or formula."
+			].join("\n\n")
+		),
+		lesson(
+			"Worked Reasoning Map",
+			[
+				`**Goal:** Build a reproducible reasoning path for ${topic}.`,
+				"**Sequence:**",
+				"1. Identify what is known, what is being asked, and which representation is most useful.",
+				"2. Name any theorem, definition, derivative rule, integral rule, convergence test, or modeling assumption before applying it.",
+				"3. Complete the calculation or argument with units, intervals, or endpoint behavior visible.",
+				"4. Verify the result against a graph, table, sign chart, limiting behavior, or contextual interpretation.",
+				"5. Write the final sentence in AP style: claim, evidence, and reason."
+			].join("\n\n")
+		),
+		lesson(
+			"Module Problem Set",
+			[
+				`**Practice target:** ${practice.join(" ")}`,
+				"**Required mix:** include one direct computation, one graph or table interpretation, one theorem or definition justification, and one short written explanation.",
+				`**Assessment check:** ${assessment}`,
+				"**Calculator policy:** Graphing technology can support exploration or checking, but the written solution still records the mathematical reason."
+			].join("\n\n")
+		)
+	];
+	const portfolio = examReadinessPortfolio(code);
+	if (portfolio) curriculum.push(portfolio);
 
 	return {
 		title,
-		curriculum: [
-			lesson(
-				"Concept Path",
-				[
-					`**Track:** ${trackLabel}`,
-					`**Focus:** ${focus}`,
-					`**Core ideas:**\n${concepts.map(concept => `- ${concept}`).join("\n")}`,
-					"**Representation habit:** Use graphical, numerical, analytical, and verbal evidence when the problem type allows it.",
-					"**AP habit:** State hypotheses, domains, intervals, units, and conclusion language explicitly before using a theorem or formula."
-				].join("\n\n")
-			),
-			lesson(
-				"Worked Reasoning Map",
-				[
-					`**Goal:** Build a reproducible reasoning path for ${topic}.`,
-					"**Sequence:**",
-					"1. Identify what is known, what is being asked, and which representation is most useful.",
-					"2. Name any theorem, definition, derivative rule, integral rule, convergence test, or modeling assumption before applying it.",
-					"3. Complete the calculation or argument with units, intervals, or endpoint behavior visible.",
-					"4. Verify the result against a graph, table, sign chart, limiting behavior, or contextual interpretation.",
-					"5. Write the final sentence in AP style: claim, evidence, and reason."
-				].join("\n\n")
-			),
-			lesson(
-				"Module Problem Set",
-				[
-					`**Practice target:** ${practice.join(" ")}`,
-					"**Required mix:** include one direct computation, one graph or table interpretation, one theorem or definition justification, and one short written explanation.",
-					`**Assessment check:** ${assessment}`,
-					"**Calculator policy:** Graphing technology can support exploration or checking, but the written solution still records the mathematical reason."
-				].join("\n\n")
-			)
-		],
+		curriculum,
 		supplementalProjects: [
 			lesson(
 				`${code} Error Audit`,
@@ -142,6 +418,8 @@ const moduleData: CalculusModuleData[] = [
 			"AP Calculus AB and BC both require strong function, algebra, trigonometry, graph interpretation, and notation fluency.",
 			"AB centers on limits, derivatives, integrals, differential equations, and applications of change and accumulation.",
 			"BC includes all AB content plus additional integration techniques, parametric and polar calculus, vector-valued functions, and infinite series.",
+			"The AB route runs from APCA0 through APC22 and ends with the AB readiness portfolio.",
+			"The BC route completes the AB core, continues through APC23–APC27, and ends with the BC readiness portfolio.",
 			"Exam practice uses both multiple-choice and free-response formats, with calculator and no-calculator reasoning separated."
 		],
 		practice: [
@@ -691,8 +969,30 @@ export const apCalculusCourse: RawCourse = {
 		],
 		recommendedNextWork: [
 			"Add owned or source-safe graph cards for common AP Calculus visual prompts.",
-			"Add separate accelerated AB, BC, and exam-review pacing tracks.",
+			"Refine accelerated AB, BC, and exam-review pacing from actual completion and assessment evidence.",
 			"Add selected AP Calculus diagrams as static media assets become available."
 		]
 	}
 };
+
+configureMathCourseFlow(apCalculusCourse, {
+	courseId: "ap-calculus",
+	modules: moduleData.map(data => {
+		const code = moduleCode(data.title);
+		const keyBlocks = calculusModuleKeyBlocks[code];
+		if (!keyBlocks) {
+			throw new Error(
+				`Expected AP Calculus key blocks for ${data.title}.`
+			);
+		}
+
+		return {
+			title: data.title,
+			estimatedTime: calculusEstimatedTime(data),
+			keyBlocks,
+			flowNote: calculusModuleFlow(data),
+			challengeSupplementalTitles: [`${code} AP Practice Plan`]
+		};
+	}),
+	appendixTitles: ["AP Calculus Reference Archive", "Pending Static Assets"]
+});

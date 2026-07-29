@@ -52,9 +52,9 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    '/course-resource': RouteRecordInfo<
-      '/course-resource',
-      '/course-resource',
+    '/courses': RouteRecordInfo<
+      '/courses',
+      '/courses',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -62,20 +62,6 @@ declare module 'vue-router/auto-routes' {
     '/graph-sketcher': RouteRecordInfo<
       '/graph-sketcher',
       '/graph-sketcher',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/python-ide': RouteRecordInfo<
-      '/python-ide',
-      '/python-ide',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/student-privacy': RouteRecordInfo<
-      '/student-privacy',
-      '/student-privacy',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -117,9 +103,9 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/pages/course-resource.vue': {
+    'src/pages/courses.vue': {
       routes:
-        | '/course-resource'
+        | '/courses'
       views:
         | never
       pathParamNames:
@@ -128,22 +114,6 @@ declare module 'vue-router/auto-routes' {
     'src/pages/graph-sketcher.vue': {
       routes:
         | '/graph-sketcher'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/pages/python-ide.vue': {
-      routes:
-        | '/python-ide'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/pages/student-privacy.vue': {
-      routes:
-        | '/student-privacy'
       views:
         | never
       pathParamNames:

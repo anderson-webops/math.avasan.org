@@ -1,4 +1,5 @@
 import type { RawCourse } from "./types";
+import { configureMathCourseFlow } from "./mathCourseFlow";
 import {
 	pendingStaticMediaNotice,
 	preCalculusAStaticFilenames,
@@ -1144,6 +1145,28 @@ export const preCalculusACourse: RawCourse = {
 						extension:
 							"Add a conic-intersection or inverse-domain problem that produces an extraneous or rejected value."
 					})
+				),
+				lesson(
+					"Challenge: Portfolio Model Stress Test",
+					practiceSet({
+						goal: "Test whether one capstone conclusion survives a meaningful change to its assumptions or constraints.",
+						steps: [
+							"Choose one polynomial, sequence, rational, logarithmic, or conic model from the portfolio.",
+							"Change one domain boundary, parameter, data value, or geometric constraint.",
+							"Recalculate the affected result and update its graph, table, or feature list.",
+							"Compare the original and changed conclusions.",
+							"Explain which assumption controls the model's reliability."
+						],
+						outcome:
+							"The stress test distinguishes a stable mathematical conclusion from one that depends heavily on a chosen assumption.",
+						checkpoints: [
+							"The changed condition is stated before recalculation.",
+							"Both versions use the same variables and units.",
+							"The comparison identifies what stayed stable and what changed."
+						],
+						extension:
+							"Test a second model from a different function family and compare sensitivity."
+					})
 				)
 			]
 		),
@@ -1224,9 +1247,240 @@ export const preCalculusACourse: RawCourse = {
 			"A final modeling portfolio includes multiple function families, at least one restriction or domain argument, checked calculations, and a representation comparison."
 		],
 		recommendedNextWork: [
-			"Add Pre-Calculus and Trigonometry B to complete the pre-calculus bridge into AP Calculus.",
+			"Use Pre-Calculus and Trigonometry B to continue the trigonometry, vectors, limits, and rates-of-change bridge into AP Calculus.",
 			"Add source-safe graph cards or course assets for conics, rational functions, and polynomial graph behavior.",
-			"Add a cumulative Algebra 2B to Pre-Calculus A readiness checkpoint."
+			"Align the Algebra 2B handoff evidence with the first Pre-Calculus A checkpoint."
 		]
 	}
 };
+
+configureMathCourseFlow(preCalculusACourse, {
+	courseId: "pre-calculus-a",
+	modules: [
+		{
+			title: "PCTA1 Piecewise Functions",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"domain condition",
+				"piece selection",
+				"open / closed endpoint",
+				"piecewise graph",
+				"continuity"
+			],
+			flowNote:
+				"Choose the interval before evaluating, graph each rule only on its stated domain, and use endpoint evidence to describe continuity or a jump."
+		},
+		{
+			title: "PCTA2 Higher-Degree Polynomials",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"degree / leading term",
+				"polynomial operation",
+				"factor structure",
+				"special product",
+				"algebraic check"
+			],
+			flowNote:
+				"Keep terms in standard form, track degree and leading coefficient through operations, and verify a factorization by multiplication."
+		},
+		{
+			title: "PCTA3 Polynomial Division",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"long division",
+				"synthetic division",
+				"divisor form",
+				"quotient / remainder",
+				"reconstruction check"
+			],
+			flowNote:
+				"Select a division method from the divisor, include zero coefficients where terms are missing, and reconstruct the dividend to check quotient and remainder."
+		},
+		{
+			title: "PCTA4 Zeros of Polynomials",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"factor / remainder theorem",
+				"rational-zero candidate",
+				"multiplicity",
+				"complex zero",
+				"factorization check"
+			],
+			flowNote:
+				"Use polynomial structure and theorems to narrow candidates, test each candidate efficiently, and record multiplicity before verifying the complete factorization."
+		},
+		{
+			title: "PCTA5 Graphing Polynomials",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"end behavior",
+				"zero / multiplicity",
+				"turning point",
+				"sign interval",
+				"feature-based sketch"
+			],
+			flowNote:
+				"Build a feature table from degree, leading coefficient, zeros, and multiplicities before sketching, then use technology only to verify the algebraic prediction."
+		},
+		{
+			title: "PCTA6 Arithmetic and Geometric Sequences",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"difference / ratio",
+				"recursive rule",
+				"explicit rule",
+				"finite sum",
+				"infinite convergence"
+			],
+			flowNote:
+				"Classify the sequence from its repeated operation, distinguish a requested term from a requested total, and justify infinite-series convergence before applying a sum formula."
+		},
+		{
+			title: "PCTA7 Area Under a Curve",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"partition",
+				"left / right / midpoint rule",
+				"rectangle area",
+				"approximation error",
+				"accumulation units"
+			],
+			flowNote:
+				"State the partition and sample-point rule, show how each rectangle contributes to the sum, and interpret the approximation with units and an over-or-under estimate.",
+			challengeSupplementalTitles: [
+				"Project: Accumulation Approximation Lab"
+			]
+		},
+		{
+			title: "PCTA8 The Binomial Theorem",
+			estimatedTime: "2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"Pascal's triangle",
+				"combination coefficient",
+				"exponent pattern",
+				"sign pattern",
+				"selected term"
+			],
+			flowNote:
+				"Write coefficient, exponent, and sign patterns separately before combining terms, and check a selected term or small expansion independently."
+		},
+		{
+			title: "Check-In #1: Polynomial and Sequence Foundations",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"piecewise boundary",
+				"polynomial zero / graph",
+				"sequence / series",
+				"area approximation",
+				"binomial pattern"
+			],
+			flowNote:
+				"Complete one task from each major strand without notes, identify the first unsupported step, and use targeted practice or error analysis before moving to rational and logarithmic functions.",
+			challengeSupplementalTitles: [
+				"Project: Polynomial and Sequence Error Analysis"
+			]
+		},
+		{
+			title: "PCTA9 Rational Functions",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"source restriction",
+				"hole / asymptote",
+				"intercept",
+				"end behavior",
+				"feature-based graph"
+			],
+			flowNote:
+				"Record excluded values before cancellation, distinguish holes from vertical asymptotes, and build the graph from algebraic features before checking it with technology."
+		},
+		{
+			title: "PCTA10 Rational Function Operations",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"factor / simplify",
+				"common denominator",
+				"source restriction",
+				"rational equation",
+				"extraneous solution"
+			],
+			flowNote:
+				"Carry source restrictions through every operation, use a valid common denominator, and test every equation solution in the original expression."
+		},
+		{
+			title: "PCTA11 Logarithms and Exponents",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"exponential / logarithmic form",
+				"log identity",
+				"positive argument",
+				"inverse graph",
+				"growth / decay model"
+			],
+			flowNote:
+				"Translate forms before solving, preserve base and positive-argument requirements, and connect the algebraic result to graph behavior or a bounded model."
+		},
+		{
+			title: "PCTA12 Function Inverses and Composition",
+			estimatedTime: "2–3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"composition order",
+				"composite domain",
+				"one-to-one condition",
+				"inverse formula",
+				"composition check"
+			],
+			flowNote:
+				"Track which function acts first, carry domain restrictions through the pipeline, and verify every inverse claim by composition on the stated domain."
+		},
+		{
+			title: "PCTA13 Circles and Ellipses",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"standard form",
+				"complete the square",
+				"center / radius",
+				"axis / vertex",
+				"focus"
+			],
+			flowNote:
+				"Convert to standard form, extract features with their geometric meanings, and check that every labeled point or distance agrees with the equation."
+		},
+		{
+			title: "PCTA14 Parabolas and Hyperbolas",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"conic classification",
+				"focus / directrix",
+				"center / vertex",
+				"asymptote",
+				"intersection check"
+			],
+			flowNote:
+				"Classify the conic from equation structure, translate standard-form parameters into graph features, and verify every intersection in both original equations.",
+			challengeSupplementalTitles: ["Project: Conic Design Brief"]
+		},
+		{
+			title: "Check-In #2 and Pre-Calculus A Capstone",
+			estimatedTime: "4–5 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"readiness check",
+				"multi-family portfolio",
+				"restriction / domain",
+				"representation comparison",
+				"Pre-Calculus B handoff"
+			],
+			flowNote:
+				"Use the check-in to select final review, then complete the required modeling portfolio with checked representations and an explicit Pre-Calculus B readiness note. The shorter defense remains an optional alternative artifact.",
+			coreSupplementalTitles: [
+				"Capstone: Pre-Calculus A Modeling Portfolio"
+			],
+			challengeSupplementalTitles: [
+				"Challenge: Portfolio Model Stress Test"
+			]
+		}
+	],
+	appendixTitles: [
+		"Pre-Calculus A Reference Archive",
+		"Pending Static Assets"
+	]
+});

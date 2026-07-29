@@ -5,7 +5,6 @@ export default antfu(
 	{
 		root: true,
 		env: { browser: true, node: true, es2021: true },
-		unocss: true,
 		stylistic: { indent: "tab", quotes: "double", semi: true, linebreak: "unix" },
 		formatters: {
 			prettier: {

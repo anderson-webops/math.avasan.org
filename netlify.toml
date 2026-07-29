@@ -6,9 +6,26 @@ command = "npm run build"
 NODE_VERSION = "20"
 
 [[redirects]]
+from = "/admin"
+to = "https://cs.avasan.org/admin"
+status = 302
+force = true
+
+[[redirects]]
 from = "/*"
 to = "/index.html"
 status = 200
+
+[[headers]]
+for = "/*"
+
+[headers.values]
+Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()"
+Referrer-Policy = "strict-origin-when-cross-origin"
+Strict-Transport-Security = "max-age=31536000"
+X-Content-Type-Options = "nosniff"
+X-Frame-Options = "DENY"
 
 [[headers]]
 for = "/site.webmanifest"

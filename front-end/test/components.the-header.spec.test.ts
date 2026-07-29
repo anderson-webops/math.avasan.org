@@ -1,89 +1,45 @@
 import { mount } from "@vue/test-utils";
-import { createPinia, setActivePinia } from "pinia";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import TheHeader from "@/components/TheHeader.vue";
-import { useAppStore } from "@/stores/app";
 
 vi.mock("vue-router", () => ({
 	useRoute: () => ({ path: "/" })
 }));
 
 describe("TheHeader.vue", () => {
-	beforeEach(() => {
-		setActivePinia(createPinia());
-	});
-
-	function mountHeader(pinia = createPinia()) {
-		setActivePinia(pinia);
+	function mountHeader() {
 		return mount(TheHeader, {
 			global: {
-				plugins: [pinia],
 				stubs: {
 					RouterLink: {
 						props: ["to"],
 						template: '<a :href="to"><slot /></a>'
-					},
-					StudentAccess: {
-						template:
-							'<div data-testid="student-access">Student access</div>'
 					}
 				}
 			}
 		});
 	}
 
-	it("shows only public classroom navigation when logged out", () => {
+	it("shows only Graph Sketcher and math-course navigation", () => {
 		const wrapper = mountHeader();
 		const links = wrapper
 			.findAll(".site-nav__link")
 			.map(link => [link.text(), link.attributes("href")]);
 
-		expect(wrapper.text()).toContain("Classes with Julio");
-		expect(links).toEqual([
-			["Courses", "/"],
-			["Python IDE", "/python-ide"],
-			["Graphing", "/graph-sketcher"],
-			["Student privacy", "/student-privacy"]
-		]);
-		expect(wrapper.text()).not.toContain("Teacher log in");
-		expect(wrapper.find(".site-nav__actions").exists()).toBe(false);
-		expect(wrapper.get('[data-testid="student-access"]').exists()).toBe(
-			true
+		expect(wrapper.text()).toContain("Math with Julio");
+		expect(wrapper.get(".site-brand").attributes("aria-label")).toBe(
+			"Math with Julio home"
 		);
+		expect(links).toEqual([
+			["Graph Sketcher", "/"],
+			["Math courses", "/courses"]
+		]);
+		expect(wrapper.text()).not.toMatch(
+			/Admin|Log out|Student|Python IDE|Student privacy/
+		);
+		expect(wrapper.find(".site-nav__actions").exists()).toBe(false);
 		expect(wrapper.text()).not.toMatch(
 			/Sign up|Book a Class|Tuition|Zoom|Pathways|Teaching/
 		);
-	});
-
-	it("shows Julio's teacher account controls when he is logged in", () => {
-		const pinia = createPinia();
-		setActivePinia(pinia);
-		const app = useAppStore();
-		app.setCurrentAdmin({
-			_id: "julio",
-			name: "Julio",
-			email: "julio@example.com",
-			editAdmins: false,
-			saveEdit: "Save"
-		});
-
-		const wrapper = mountHeader(pinia);
-
-		expect(wrapper.text()).toContain("Admin");
-		expect(wrapper.text()).toContain("Log out");
-		expect(wrapper.text()).not.toContain("Teacher log in");
-		expect(wrapper.text()).not.toContain("Account");
-		expect(wrapper.get('[data-testid="student-access"]').exists()).toBe(
-			true
-		);
-		expect(wrapper.get('[data-testid="student-access"]').isVisible()).toBe(
-			false
-		);
-		expect(
-			wrapper
-				.findAll("a")
-				.find(link => link.text() === "Admin")
-				?.attributes("href")
-		).toBe("/admin");
 	});
 });

@@ -16,6 +16,7 @@ import {
 	ref,
 	watch
 } from "vue";
+import { reportMathClassroomUsage } from "@/modules/classroomUsage";
 import {
 	axisFraction,
 	axisValueAtFraction,
@@ -1702,6 +1703,7 @@ function annotationRectangle(
 onMounted(() => {
 	loadSessionGraph();
 	isClientReady.value = true;
+	void reportMathClassroomUsage("graph-open");
 });
 
 onBeforeUnmount(() => {

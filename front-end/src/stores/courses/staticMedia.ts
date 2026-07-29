@@ -1,9 +1,7 @@
-export const STATIC_MEDIA_BASE = "https://static.cs.avasan.org";
-export const UPSTREAM_STATIC_MEDIA_BASE =
-	"https://static.classes.jacobdanderson.net";
+export const STATIC_MEDIA_BASE = "https://static.classes.jacobdanderson.net";
 export const LEGACY_STATIC_MEDIA_BASE = "https://static.junilearning.com";
 const STATIC_MEDIA_URL_PATTERN =
-	/https:\/\/(?:static\.cs\.avasan\.org|static\.classes\.jacobdanderson\.net|static\.junilearning\.com)\/[^\s<>"')\]]+/g;
+	/https:\/\/(?:static\.classes\.jacobdanderson\.net|static\.junilearning\.com)\/[^\s<>"')\]]+/g;
 export const PENDING_STATIC_MEDIA_NOTICE_PATTERN =
 	/\b(?:pending media|reserved|placeholder|not currently available|class static host)\b/i;
 
@@ -1577,10 +1575,6 @@ export const KNOWN_PENDING_STATIC_MEDIA_FILENAMES = [
 	"python_level_2_project.png",
 	"python_level_3_concept.png",
 	"python_level_3_project.png",
-	"scratch_level_1_concept.png",
-	"scratch_level_1_project.png",
-	"scratch_level_2_concept.png",
-	"scratch_level_2_project.png",
 	"grs1_spirals.mp4",
 	"grs1_turtle_exploration(1).mp4",
 	"grs2_basic_shapes.mp4",
@@ -1769,11 +1763,7 @@ export function isStaticMediaUrl(url: string) {
 
 export function isLegacyStaticMediaUrl(url: string) {
 	try {
-		const origin = new URL(url).origin;
-		return (
-			origin === LEGACY_STATIC_MEDIA_BASE ||
-			origin === UPSTREAM_STATIC_MEDIA_BASE
-		);
+		return new URL(url).origin === LEGACY_STATIC_MEDIA_BASE;
 	} catch {
 		return false;
 	}

@@ -18,8 +18,11 @@ describe("published course depth", () => {
 			expect(course?.modules.length, entry.id).toBeGreaterThan(0);
 
 			const coreModules =
-				course?.modules.filter(module => module.kind !== "appendix") ??
-				[];
+				course?.modules.filter(
+					module =>
+						module.kind !== "appendix" &&
+						module.kind !== "transition"
+				) ?? [];
 			expect(coreModules.length, entry.id).toBeGreaterThan(0);
 			expect(
 				coreModules.some(module => module.curriculum.length > 0),
@@ -37,7 +40,9 @@ describe("published course depth", () => {
 	it("does not load upstream-only subjects through the public store", async () => {
 		const store = useCoursesStore();
 
-		await expect(store.loadCourseById("python-level-3")).resolves.toBeNull();
+		await expect(
+			store.loadCourseById("python-level-3")
+		).resolves.toBeNull();
 		await expect(
 			store.loadCourseById("ap-computer-science-a")
 		).resolves.toBeNull();

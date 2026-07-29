@@ -1,18 +1,16 @@
-export const SITE_TITLE = "Classes with Julio";
-export const SITE_URL = "https://cs.avasan.org";
+export const SITE_TITLE = "Math with Julio";
+export const SITE_URL = "https://math.avasan.org";
 export const SITE_DESCRIPTION =
-	"Scratch, Python, and PyGames courses from grade-school teacher Julio.";
+	"Graph, explore, and learn with a browser-based Graph Sketcher and math courses from elementary through AP Calculus.";
 export const INDEX_ROBOTS =
 	"index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1";
 export const NOINDEX_ROBOTS = "noindex,nofollow";
 
 const ROUTE_TITLES = new Map([
 	["/", SITE_TITLE],
-	["/course-resource", "Course Resource"],
-	["/graph-sketcher", "Graph Sketcher"],
-	["/python-ide", "Python IDE"],
-	["/student-privacy", "Student Privacy"],
-	["/admin", "Teacher Admin"]
+	["/admin", "Teacher Admin"],
+	["/courses", "Math Courses"],
+	["/graph-sketcher", "Graph Sketcher"]
 ]);
 
 export function normalizePagePath(path: string) {
@@ -31,7 +29,7 @@ export function pageTitleForPath(path: string) {
 }
 
 export function pageRobotsForPath(path: string) {
-	return ["/", "/graph-sketcher", "/student-privacy"].includes(
+	return ["/", "/courses", "/graph-sketcher"].includes(
 		normalizePagePath(path)
 	)
 		? INDEX_ROBOTS
@@ -39,5 +37,8 @@ export function pageRobotsForPath(path: string) {
 }
 
 export function canonicalUrlForPath(path: string, siteUrl = SITE_URL) {
-	return new URL(normalizePagePath(path), `${siteUrl}/`).toString();
+	const normalizedPath = normalizePagePath(path);
+	const canonicalPath =
+		normalizedPath === "/graph-sketcher" ? "/" : normalizedPath;
+	return new URL(canonicalPath, `${siteUrl}/`).toString();
 }

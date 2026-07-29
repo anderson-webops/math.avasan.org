@@ -1,14 +1,16 @@
 import type { RawCourse, RawCourseModule, RawCourseModuleItem } from "./types";
-import { applyCourseImplementationArtifacts } from "./course-implementation-artifacts";
+import { applyMathCourseImplementationArtifacts } from "./math-course-implementation-artifacts";
+import { applyMathResearchBackedExpansions } from "./math-research-expansions";
 import { buildProjectGuidance } from "./projectGuidance";
-import { applyResearchBackedExpansions } from "./research-expansions";
 import {
 	canonicalStaticMediaUrl,
 	hasPendingStaticMediaNotice,
 	isKnownPendingStaticMediaUrl,
+	KNOWN_PENDING_STATIC_MEDIA_FILENAMES,
 	normalizeStaticMediaUrlsInText,
 	pendingStaticMediaNotice,
 	staticMediaFilename,
+	staticMediaUrl,
 	staticMediaUrlsFromText
 } from "./staticMedia";
 
@@ -18,6 +20,10 @@ const CLASSROOM_BASE_COURSE_IDS: Record<string, string> = {
 	"python-level-1-classroom": "python-level-1",
 	"python-level-2-classroom": "python-level-2"
 };
+
+function classroomBaseCourseId(courseId: string) {
+	return CLASSROOM_BASE_COURSE_IDS[courseId] ?? courseId;
+}
 
 const itemLinkKeys = [
 	"projectLink",
@@ -126,6 +132,114 @@ function appendPendingStaticMediaNotices(course: RawCourse) {
 			}
 		}
 	}
+}
+
+const dataSciencePendingMediaFilenames = new Set([
+	"api.png",
+	"boxplot.png",
+	"building_permits.csv",
+	"categorical_variables.png",
+	"cholera.csv",
+	"data_science_concept.png",
+	"data_science_project.png",
+	"flight_delays.csv",
+	"height_and_weight.csv",
+	"mpg.csv",
+	"normal.png",
+	"palettes.png",
+	"percents.png",
+	"quantitative_variables.png",
+	"sat.csv",
+	"skew.png",
+	"std.png",
+	"tips.csv",
+	"unemployment.csv",
+	"us_county_incomes.csv",
+	"zoo_animals.csv"
+]);
+
+function pendingStaticMediaInventoryCourseId(filename: string) {
+	if (/^grs/i.test(filename)) return "python-level-1";
+	if (
+		/^(?:ps\d|ps_|python_level_2)/i.test(filename) ||
+		filename === "WhileLoopsExploration(1).mp4"
+	) {
+		return "python-level-2";
+	}
+	if (/^(?:am_|python_level_3)/i.test(filename)) return "python-level-3";
+	if (/^pyg/i.test(filename) || /^check_in_[23]_starter\.py$/i.test(filename))
+		return "pygames";
+	if (/^fai/i.test(filename)) return "ai-level-1";
+	if (dataSciencePendingMediaFilenames.has(filename))
+		return "data-science-in-python";
+	if (/^mfa/i.test(filename) || /^check_in_\d/i.test(filename))
+		return "early-elementary-a-math";
+	if (/^mfb/i.test(filename)) return "early-elementary-b-math";
+	if (/^maa/i.test(filename) || /^checkin2_(?:gm|ma)/i.test(filename))
+		return "late-elementary-a-math";
+	if (/^leb/i.test(filename) || /^checkin1_fractions/i.test(filename))
+		return "late-elementary-b-math";
+	if (/^jor/i.test(filename)) return "early-elementary-a-reading";
+	if (/^wyb/i.test(filename)) return "early-elementary-b-picture-book";
+	if (/^msa/i.test(filename)) return "middle-school-a-literature";
+	if (/^nw/i.test(filename)) return "novel-writing";
+	if (/^pf/i.test(filename)) return "smart-money-personal-finance";
+	if (/^inv/i.test(filename)) return "money-minded-investing";
+	if (/^ent/i.test(filename)) return "entrepreneurship-101";
+	if (/^(?:module_example|module_project_1_0|ted_ed_release)/i.test(filename))
+		return "introduction-to-public-speaking";
+
+	return undefined;
+}
+
+function appendPendingStaticMediaInventory(
+	course: RawCourse,
+	courseId: string
+) {
+	const inventoryCourseId = classroomBaseCourseId(courseId);
+	const representedFilenames = new Set(
+		course.modules.flatMap(module =>
+			[...module.curriculum, ...module.supplementalProjects].flatMap(
+				item =>
+					[
+						...itemLinkKeys.map(key => item[key]),
+						...staticMediaUrlsFromText(item.content)
+					]
+						.filter(
+							(value): value is string =>
+								!!value && isKnownPendingStaticMediaUrl(value)
+						)
+						.map(staticMediaFilename)
+			)
+		)
+	);
+	const missingFilenames = [...new Set(KNOWN_PENDING_STATIC_MEDIA_FILENAMES)]
+		.filter(
+			filename =>
+				pendingStaticMediaInventoryCourseId(filename) ===
+					inventoryCourseId && !representedFilenames.has(filename)
+		)
+		.sort((left, right) => left.localeCompare(right));
+
+	if (missingFilenames.length === 0) return;
+
+	course.modules.push({
+		kind: "appendix",
+		title: "Pending Source Media Inventory",
+		curriculum: [
+			{
+				title: `${course.name} Pending Source Media`,
+				content: [
+					"This inventory preserves stable locations for source-course media that has not yet been restored. These entries are reference records only and are not required learner actions.",
+					...missingFilenames.map(
+						filename =>
+							`- ${staticMediaUrl(filename)}\n\n${pendingStaticMediaNotice(filename)}`
+					)
+				].join("\n\n")
+			}
+		],
+		supplementalProjects: []
+	});
 }
 
 function normalizeStaticMediaUrls(course: RawCourse) {
@@ -894,6 +1008,9 @@ function removeRedundantItemTitleContext(
 				prefix
 			);
 		}
+		if (colonMatch && title.length > 55) {
+			return colonMatch[1].trim();
+		}
 
 		const spacedMatch = title.match(
 			new RegExp(
@@ -1285,7 +1402,7 @@ interface CourseTextContext {
 const structuredSupportPattern =
 	/\*\*(?:Goal|Project goal|Teaching flow|Concept path|Learning sequence|Diagnostic guidance|Readiness check|Misconception check|Common pitfalls|Failure modes|Common failure modes|Exit check|Mastery check|Investigation|Remote investigation|Explanation|Science explanation|Studio focus|Evidence target|Evidence targets|AP connection):?\*\*/i;
 const projectReviewSupportPattern =
-	/\*\*(?:Outcome|Required outcome|Success criteria|Completion checks|Checkpoints|Extension):\*\*/i;
+	/\*\*(?:Outcome|Required outcome|Success criteria|Completion checks|Completion evidence|Checkpoints|Extension):\*\*/i;
 const visibleLessonBackbonePattern =
 	/\*\*(?:Applied studio|Build path|Concept focus|Concept path|Course path|Evidence of proficiency|Evidence target|Evidence targets|Explanation|Focus|Goal|Investigation|Project selection|Project target|Readiness check|Readiness map|Result|Science explanation|Scope path|Selected checks|Studio focus):\*\*|Core topics in this module:|Representative solutions/i;
 
@@ -1664,11 +1781,17 @@ const supportLabelPattern = [
 function formatSupportLabels(text: string) {
 	const supportLabelRegex = `\\*\\*(?:${supportLabelPattern}):\\*\\*`;
 
-	return text
+	const formatted = text
 		.replace(
 			new RegExp(`(\\S)[ \\t]+(${supportLabelRegex})`, "g"),
 			(_match, prefix: string, label: string, offset: number) => {
 				const lineStart = text.lastIndexOf("\n", offset) + 1;
+				const visibleLinePrefix = text
+					.slice(lineStart, offset + prefix.length)
+					.trim();
+				if (/^(?:[-*+]|\d+\.)$/.test(visibleLinePrefix)) {
+					return _match;
+				}
 				const indentation =
 					text.slice(lineStart, offset).match(/^[ \t]*/)?.[0] ?? "";
 
@@ -1679,6 +1802,31 @@ function formatSupportLabels(text: string) {
 			new RegExp(`(?<!\\n)\\n([ \\t]*${supportLabelRegex})`, "g"),
 			"\n\n$1"
 		);
+
+	return formatted
+		.replace(
+			/(\S)[ \t]+(\*\*[^*\n]{2,60}:\*\*)/g,
+			(
+				match,
+				prefix: string,
+				label: string,
+				offset: number,
+				source: string
+			) => {
+				const lineStart = source.lastIndexOf("\n", offset) + 1;
+				const visibleLinePrefix = source
+					.slice(lineStart, offset + prefix.length)
+					.trim();
+				if (/^(?:[-*+]|\d+\.)$/.test(visibleLinePrefix)) {
+					return match;
+				}
+				const indentation =
+					source.slice(lineStart, offset).match(/^[ \t]*/)?.[0] ?? "";
+
+				return `${prefix}\n\n${indentation}${label}`;
+			}
+		)
+		.replace(/(?<!\n)\n([ \t]*\*\*[^*\n]{2,60}:\*\*)/g, "\n\n$1");
 }
 
 function normalizeSupportLabelText(text: string) {
@@ -2120,6 +2268,18 @@ function neutralizeLessonDirectiveText(text: string) {
 			"Key terms, a worked example, and a transfer check form the core sequence for this module."
 		)
 		.replace(
+			/(\*\*[^*\n]+:\*\*\s+)(?:Start|Begin) with\b/g,
+			"$1The sequence opens with"
+		)
+		.replace(
+			/(\*\*[^*\n]+:\*\*\s+)(?:start|begin) with\b/g,
+			"$1the sequence opens with"
+		)
+		.replace(
+			/(\*\*[^*\n]+:\*\*\s+)Introduce\b/g,
+			"$1This section introduces"
+		)
+		.replace(
 			/(^|[.!?]\s+|:\s+|\n\s*(?:[-*]\s+)?)Start with ([^.]+)\./g,
 			(_match, prefix, topic) =>
 				`${prefix}Begin with ${stripTrailingSentencePunctuation(topic)}.`
@@ -2129,6 +2289,16 @@ function neutralizeLessonDirectiveText(text: string) {
 			(_match, prefix, topic) =>
 				`${prefix}begin with ${stripTrailingSentencePunctuation(topic)}.`
 		)
+		.replace(
+			/(^|\n\s*|[.!?]\s+|:\s+)(?:Start|Begin) with\b/g,
+			"$1The sequence opens with"
+		)
+		.replace(
+			/(^|\n\s*|[.!?]\s+|:\s+)(?:start|begin) with\b/g,
+			"$1the sequence opens with"
+		)
+		.replace(/\bThen ask whether\b/g, "Then evaluate whether")
+		.replace(/\bthen ask whether\b/g, "then evaluate whether")
 		.replace(
 			/\bfresh the starting point is ([^.]+)\./g,
 			(_match, topic) =>
@@ -2200,6 +2370,7 @@ function neutralizeLessonDirectiveText(text: string) {
 			/\bwithout copying the ([a-z][^.]+?)\b/gi,
 			"without duplicating the $1"
 		)
+		.replace(/\bwithout copying\b/gi, "independently")
 		.replace(/\bHave learners trace\b/g, "Trace")
 		.replace(/\bhave learners trace\b/g, "trace")
 		.replace(/\bshow them how to\b/gi, "practice how to")
@@ -2504,9 +2675,31 @@ function neutralizeStudentFacingText(text: string) {
 				.replace(/\binstructor-provided\b/gi, "provided")
 				.replace(/\binstructor-approved\b/gi, "approved")
 				.replace(/\binstructor-authored\b/gi, "authored")
+				.replace(/\binstructor-supplied\b/gi, "course-supplied")
+				.replace(/\binstructor-only\b/gi, "private")
+				.replace(/\binstructor submission\b/gi, "private submission")
+				.replace(
+					/\binstructor presentation\b/gi,
+					"private presentation"
+				)
+				.replace(
+					/\binstructor demonstration\b/gi,
+					"optional demonstration"
+				)
+				.replace(
+					/\binstructor reference\b/gi,
+					"course-maintainer reference"
+				)
 				.replace(/\binstructor references\b/gi, "internal references")
+				.replace(
+					/\binstructor\/account holder\b/gi,
+					"course facilitator or account holder"
+				)
+				.replace(/\binstructor\b/gi, "course facilitator")
 				.replace(/\bteacher-provided\b/gi, "provided")
+				.replace(/\bteacher-supplied\b/gi, "course-supplied")
 				.replace(/\bteacher requirement\b/gi, "course requirement")
+				.replace(/\bteacher\b/gi, "course facilitator")
 				.replace(
 					/\bThis module focuses on ([a-z]+)\b/g,
 					moduleFocusVerbReplacement
@@ -2562,6 +2755,25 @@ function neutralizeStudentFacingText(text: string) {
 				.replace(/\bWork should emphasize\b/g, "Work emphasizes")
 				.replace(/\bstudent-facing course\b/gi, "visible course")
 				.replace(/\bstudent-facing\b/gi, "visible")
+				.replace(
+					/\bno learner provides health or demographic data\b/gi,
+					"no health or demographic data is provided"
+				)
+				.replace(/\bdisclosing a learner's\b/gi, "disclosing personal")
+				.replace(
+					/\bclaims about a learner's household\b/gi,
+					"claims about any household"
+				)
+				.replace(/\blearner completion\b/gi, "completion")
+				.replace(/\blearner photos\b/gi, "personal photos")
+				.replace(
+					/\blearner-owned workspace\b/gi,
+					"personally controlled workspace"
+				)
+				.replace(
+					/\blearner-owned toy source\b/gi,
+					"personally controlled toy source"
+				)
 				.replace(/\bStudents\b/g, "Learners")
 				.replace(/\bstudents\b/g, "learners")
 				.replace(/\bA student\b/g, "A learner")
@@ -3139,7 +3351,7 @@ function isAppliedStudioContext(context: CourseTextContext) {
 }
 
 function isBriefContent(content: string) {
-	return wordCount(content) < 65 || compactWhitespace(content).length < 460;
+	return wordCount(content) < 82 || compactWhitespace(content).length < 460;
 }
 
 function hasCompleteScratchSupportPrompt(context: CourseTextContext) {
@@ -3171,8 +3383,10 @@ function needsContentSupport(context: CourseTextContext) {
 	const content = context.item.content;
 	if (!content.trim()) return true;
 	if (hasCompleteScratchSupportPrompt(context)) return false;
-	if (structuredSupportPattern.test(content)) return false;
-	if (isInformationalResourceItem(context.item)) return false;
+	if (isInformationalResourceItem(context.item))
+		return isBriefContent(content);
+	if (structuredSupportPattern.test(content) && !isBriefContent(content))
+		return false;
 
 	return (
 		placeholderContentPattern.test(content) ||
@@ -5487,11 +5701,7 @@ function extensionSubject(context: CourseTextContext) {
 		return itemSubject;
 	}
 
-	if (
-		isCheckInContext(context) ||
-		context.courseId === "java-without-graphics" ||
-		context.courseId === "java-with-graphics"
-	) {
+	if (isCheckInContext(context)) {
 		return withCourseContext(context.course.name, context.module.title);
 	}
 
@@ -5605,6 +5815,20 @@ function extensionPrompt(context: CourseTextContext) {
 				`Create a compact scoring or reasoning note for ${subject} that targets one likely AP point loss.`,
 			subject =>
 				`Add one alternate input for ${subject} and explain which Java statement or method behavior controls the outcome.`
+		]);
+	}
+	if (isPythonTurtleContext(context)) {
+		return variantPrompt(context, [
+			subject =>
+				`Add one visible Turtle variation to ${subject} by changing a coordinate, color, size, movement, loop, or helper argument.`,
+			subject =>
+				`Add one canvas-boundary or reset case to ${subject} and verify it from a clean run.`,
+			subject =>
+				`Extend ${subject} with one new key, click, shape, animation, score, or collision behavior while preserving the existing controls.`,
+			subject =>
+				`Refactor one repeated Turtle action in ${subject} into a helper and call it with two visibly different arguments.`,
+			subject =>
+				`Add one state or feedback change to ${subject} and explain which Turtle command, event callback, loop, or condition controls it.`
 		]);
 	}
 	if (/python level 1|python level 2/.test(source)) {
@@ -5825,7 +6049,7 @@ function projectSupport(context: CourseTextContext) {
 			`**Goal:** Map the prompt requirements to ${reference}, then document the result that confirms the work.`,
 		() =>
 			`**Goal:** Identify the starting state, main transformation, and output or conclusion for ${reference}.`
-	]).replace(/\*\*Goal:\*\* Build Build\b/g, "**Goal:** Build");
+	]).replace(/\*\*Goal:\*\* (Build|Verify) \1\b/g, "**Goal:** $1");
 
 	return [
 		goal,
@@ -7846,11 +8070,25 @@ function studioSupport(context: CourseTextContext) {
 }
 
 function qualitySupportFor(context: CourseTextContext) {
+	if (isInformationalResourceItem(context.item))
+		return informationalResourceSupport(context);
 	if (isCheckInContext(context)) return diagnosticSupport(context);
 	if (isScienceContext(context)) return scienceSupport(context);
 	if (isAppliedStudioContext(context)) return studioSupport(context);
 	if (isProjectLikeItem(context.item)) return projectSupport(context);
 	return lessonSupport(context);
+}
+
+function informationalResourceSupport(context: CourseTextContext) {
+	const topic = supportFocusTopic(context);
+	const moduleTopic =
+		cleanModuleTopicTitle(context.module.title) || context.course.name;
+
+	return [
+		`**Reference scope:** ${topic} supports the ${moduleTopic} work as a lookup or source companion rather than a separate required project.`,
+		`**Reading path:** Locate the section tied to the current question, compare its definitions or examples with the module evidence, and record the exact page, heading, problem, or source detail used.`,
+		"**Source check:** Confirm that the referenced edition, date, version, and access conditions still match the course note before relying on it for assessment or implementation evidence."
+	].join("\n\n");
 }
 
 function shortProjectReviewSupport(context: CourseTextContext) {
@@ -8621,7 +8859,8 @@ function classroomSourceUrl(
 
 function classroomIdeMode(courseId: string) {
 	if (courseId === "python-level-1-classroom") return "turtle";
-	return courseId === "pygames-classroom" ? "pgzero" : "python";
+	if (courseId === "pygames-classroom") return "pgzero";
+	return "python";
 }
 
 function classroomIdeLink(
@@ -8636,20 +8875,23 @@ function classroomIdeLink(
 			.toLowerCase()
 			.replace(/[^a-z0-9]+/g, "-")
 			.replace(/^-+|-+$/g, "");
-	const currentCourseId = CLASSROOM_BASE_COURSE_IDS[courseId] ?? courseId;
 	const params = new URLSearchParams({
 		classroom: "1",
-		course: currentCourseId,
+		course: courseId,
 		mode: classroomIdeMode(courseId),
 		projectKey: `${courseId}:${projectId}:starter`,
 		starterLabel: "Classroom project",
 		starterTitle: item.title,
 		template
 	});
-	if (starterUrl?.startsWith("https://github.com/")) {
-		params.set("starterUrl", starterUrl);
+	const classroomSourcePrefix = "https://github.com/instruction-material/";
+	if (starterUrl?.startsWith(classroomSourcePrefix)) {
+		params.set(
+			"classroomSource",
+			starterUrl.slice(classroomSourcePrefix.length)
+		);
 	}
-	return `/python-ide?${params.toString()}`;
+	return `/ide?${params.toString()}`;
 }
 
 function replaceBeginnerLabel(value: string) {
@@ -9177,8 +9419,8 @@ export function normalizeRawCourse(id: string, rawCourse: RawCourse) {
 	normalizeDisplayTitles(course);
 	rewritePlaceholderCourseText(course, id);
 	normalizeModuleLessonShape(course);
-	applyResearchBackedExpansions(id, course);
-	applyCourseImplementationArtifacts(id, course);
+	applyMathResearchBackedExpansions(id, course);
+	applyMathCourseImplementationArtifacts(id, course);
 	normalizeUsacoProjectGuidance(course, id);
 	normalizeImplementationLabLanguage(course);
 	normalizeContextualItemTitles(course);
@@ -9190,6 +9432,7 @@ export function normalizeRawCourse(id: string, rawCourse: RawCourse) {
 	normalizeLegacyBranding(course);
 	contextualizeGenericDisplayTitles(course);
 	compactGeneratedDisplayTitles(course);
+	appendPendingStaticMediaInventory(course, id);
 	normalizeStaticMediaUrls(course);
 	appendPendingStaticMediaNotices(course);
 	formatVisibleCourseMarkdown(course);
@@ -9197,6 +9440,8 @@ export function normalizeRawCourse(id: string, rawCourse: RawCourse) {
 	removeDuplicateSolutionLinks(course);
 	if (CLASSROOM_BASE_COURSE_IDS[id]) {
 		adaptClassroomCourse(course, id);
+	}
+	if (id === "python-level-1" || CLASSROOM_BASE_COURSE_IDS[id]) {
 		applyCourseLearningPaths(course);
 	}
 	return course;

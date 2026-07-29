@@ -15,7 +15,7 @@ import {
 describe("Graph Sketcher browser safety limits", () => {
 	it("uses a downstream-specific tab storage key", () => {
 		expect(GRAPH_SKETCHER_SESSION_STORAGE_KEY).toBe(
-			"cs-avasan-graph-sketcher-session-v1"
+			"math-avasan-graph-sketcher-session-v1"
 		);
 	});
 

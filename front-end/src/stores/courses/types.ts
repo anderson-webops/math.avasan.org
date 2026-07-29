@@ -15,7 +15,7 @@ export interface RawCourseModuleItem {
 export interface RawCourseModule {
 	id?: string;
 	aliases?: string[];
-	kind?: "module" | "appendix";
+	kind?: "module" | "transition" | "appendix";
 	title: string;
 	estimatedTime?: string;
 	keyBlocks?: string[];
@@ -54,7 +54,7 @@ export interface CourseModuleItem extends RawCourseModuleItem {
 export interface CourseModule {
 	id: string;
 	aliases?: string[];
-	kind?: "module" | "appendix";
+	kind?: "module" | "transition" | "appendix";
 	title: string;
 	estimatedTime?: string;
 	keyBlocks?: string[];

@@ -1,4 +1,5 @@
 import type { RawCourse } from "./types";
+import { configureMathCourseFlow } from "./mathCourseFlow";
 import {
 	geometryAStaticFilenames,
 	pendingStaticMediaNotice,
@@ -685,9 +686,118 @@ export const geometryACourse: RawCourse = {
 			"A final design or portfolio defense includes multiple Geometry A strands, evidence for each claim, and one rejected visual assumption."
 		],
 		recommendedNextWork: [
-			"Add Geometry B to complete the visible geometry sequence.",
+			"Keep the Geometry B entry map aligned with the proof, triangle, coordinate, and trigonometry evidence in this capstone.",
 			"Replace legacy diagrams with owned or source-safe static.classes assets where diagrams materially improve the lesson.",
 			"Add dynamic-geometry optional resources for proofs, triangle centers, and transformations."
 		]
 	}
 };
+
+configureMathCourseFlow(geometryACourse, {
+	courseId: "geometry-a",
+	modules: [
+		{
+			title: "Geometry A Foundations: Definitions, Logic, and Proofs",
+			estimatedTime: "4–5 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"definition / notation",
+				"conditional statement",
+				"counterexample",
+				"deductive reason",
+				"proof chain"
+			],
+			flowNote:
+				"Move from precise object names to conditionals and then to short proofs. A diagram suggests possibilities, while marks, definitions, postulates, and theorems establish claims. Choose the notation map for structured practice or the proof-repair lab for a deeper challenge.",
+			challengeSupplementalTitles: ["Project: Proof Repair Lab"]
+		},
+		{
+			title: "GEOA4-GEOA5 Lines, Angles, and Coordinate Geometry",
+			estimatedTime: "3–4 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"parallel / perpendicular",
+				"transversal angle pair",
+				"slope",
+				"distance / midpoint",
+				"coordinate proof"
+			],
+			flowNote:
+				"Name each line or angle relationship before writing an equation, then use slope, distance, and midpoint as proof evidence rather than isolated calculations. The coordinate design is supported transfer; the parallel-line case file is a proof challenge.",
+			challengeSupplementalTitles: [
+				"Project: Parallel-Line Proof Case File"
+			]
+		},
+		{
+			title: "Check-In #1: Foundations and Lines",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"notation",
+				"logic",
+				"proof reason",
+				"line-angle relationship",
+				"coordinate evidence"
+			],
+			flowNote:
+				"Complete one notation, conditional, proof, line-angle, and coordinate task without notes. Correct the first unsupported inference and select only the mixed review or logic sort that matches the evidence gap.",
+			challengeSupplementalTitles: ["Project: Conditional Statement Sort"]
+		},
+		{
+			title: "GEOA6-GEOA9 Triangles, Congruence, Similarity, and Right Triangles",
+			estimatedTime: "4–5 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"triangle classification",
+				"congruence criterion",
+				"similarity / correspondence",
+				"Pythagorean theorem",
+				"special right triangle"
+			],
+			flowNote:
+				"Classify from marked evidence, keep correspondence order consistent, and choose a theorem only after listing what is known. Use the triangle case file for broad transfer or the scale plan for an indirect-measurement challenge.",
+			challengeSupplementalTitles: ["Project: Similarity Scale Plan"]
+		},
+		{
+			title: "Check-In #2: Triangle Relationships",
+			estimatedTime: "1–2 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"classification evidence",
+				"congruence / similarity",
+				"correspondence",
+				"right-triangle tool",
+				"exact / approximate result"
+			],
+			flowNote:
+				"Choose and defend the theorem before calculating, include one insufficient-evidence case, and correct one correspondence or hypotenuse error. The decision tree is supported review; the error-repair log is the challenge route.",
+			challengeSupplementalTitles: ["Project: Pythagorean Error Repair"]
+		},
+		{
+			title: "GEOA10-GEOA13 Triangle Centers, Inequalities, and Trigonometry",
+			estimatedTime: "4 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"bisector / median / altitude",
+				"triangle center",
+				"triangle inequality",
+				"sine / cosine / tangent",
+				"diagram-based ratio"
+			],
+			flowNote:
+				"Link each triangle center to its construction, test side and angle constraints before solving, and label opposite, adjacent, and hypotenuse from a stated reference angle. The measurement plan is a challenge after the core right-triangle ratio work.",
+			challengeSupplementalTitles: [
+				"Project: Trigonometry Measurement Plan"
+			]
+		},
+		{
+			title: "Check-In #3 and Geometry A Capstone",
+			estimatedTime: "3 sessions · 50–65 minutes each",
+			keyBlocks: [
+				"theorem-selection gate",
+				"five geometry claims",
+				"proof / calculation evidence",
+				"unsupported visual assumption",
+				"Geometry B handoff"
+			],
+			flowNote:
+				"Pass the final theorem-selection check before building the design defense. The capstone is required and supports five claims from different Geometry A strands; the portfolio audit remains choose-one review for organizing evidence and Geometry B targets.",
+			coreSupplementalTitles: ["Capstone: Geometry A Design Defense"]
+		}
+	],
+	appendixTitles: ["Geometry A Reference Archive", "Pending Static Assets"]
+});

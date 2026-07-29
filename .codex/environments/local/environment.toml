@@ -1,5 +1,5 @@
 version = 1
-name = "anderson-webops/cs.avasan.org"
+name = "anderson-webops/math.avasan.org"
 
 [setup]
 script = """
@@ -35,8 +35,3 @@ command = "npm run -w front-end test:unit"
 name = "Frontend Dev"
 icon = "debug"
 command = "npm run dev"
-
-[[actions]]
-name = "Backend Dev"
-icon = "debug"
-command = "npm run server"

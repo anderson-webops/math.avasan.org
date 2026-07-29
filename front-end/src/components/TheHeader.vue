@@ -1,66 +1,37 @@
 <script lang="ts" setup>
-import { storeToRefs } from "pinia";
 import { useRoute } from "vue-router";
-import StudentAccess from "@/components/StudentAccess.vue";
-import { useAppStore } from "@/stores/app";
 
-const app = useAppStore();
 const route = useRoute();
-const { currentAdmin } = storeToRefs(app);
 
 const primaryLinks = [
-	{ label: "Courses", to: "/" },
-	{ label: "Python IDE", to: "/python-ide" },
-	{ label: "Graphing", to: "/graph-sketcher" },
-	{ label: "Student privacy", to: "/student-privacy" }
+	{ label: "Graph Sketcher", to: "/" },
+	{ label: "Math courses", to: "/courses" }
 ];
 
 function isLinkActive(to: string) {
-	return to === "/" ? route.path === "/" : route.path.startsWith(to);
-}
-
-async function logout() {
-	await app.logout();
+	return to === "/"
+		? route.path === "/" || route.path.startsWith("/graph-sketcher")
+		: route.path.startsWith(to);
 }
 </script>
 
 <template>
 	<header class="site-header">
 		<div class="site-shell site-shell--wide">
-			<nav
-				class="navbar navbar-expand-lg site-nav"
-				aria-label="Main navigation"
-			>
+			<nav class="site-nav" aria-label="Main navigation">
 				<div class="site-nav__inner site-surface site-surface--strong">
 					<RouterLink
 						class="site-brand"
 						to="/"
-						aria-label="Classes with Julio courses"
+						aria-label="Math with Julio home"
 					>
 						<span class="site-brand__mark" aria-hidden="true">
-							&lt;/&gt;
+							ƒ(x)
 						</span>
-						<span class="site-brand__title"
-							>Classes with Julio</span
-						>
+						<span class="site-brand__title">Math with Julio</span>
 					</RouterLink>
 
-					<button
-						aria-controls="siteNavbar"
-						aria-expanded="false"
-						aria-label="Toggle navigation"
-						class="navbar-toggler site-toggler"
-						data-bs-target="#siteNavbar"
-						data-bs-toggle="collapse"
-						type="button"
-					>
-						<span class="navbar-toggler-icon" />
-					</button>
-
-					<div
-						id="siteNavbar"
-						class="collapse navbar-collapse site-nav__panel"
-					>
+					<div class="site-nav__panel">
 						<div class="site-nav__content">
 							<ul class="site-nav__links">
 								<li v-for="link in primaryLinks" :key="link.to">
@@ -75,26 +46,6 @@ async function logout() {
 									</RouterLink>
 								</li>
 							</ul>
-
-							<div v-if="currentAdmin" class="site-nav__actions">
-								<RouterLink
-									class="site-button site-button--secondary site-nav__action"
-									:class="{
-										'is-active': isLinkActive('/admin')
-									}"
-									to="/admin"
-								>
-									Admin
-								</RouterLink>
-								<button
-									class="site-button site-button--secondary site-nav__action site-nav__action--danger"
-									type="button"
-									@click="logout"
-								>
-									Log out
-								</button>
-							</div>
-							<StudentAccess v-show="!currentAdmin" />
 						</div>
 					</div>
 				</div>
@@ -144,9 +95,9 @@ async function logout() {
 	box-shadow: 0 12px 24px -18px rgba(15, 118, 110, 0.72);
 	color: white;
 	font-family: var(--font-sans);
-	font-size: 0.86rem;
+	font-size: 0.8rem;
 	font-weight: 900;
-	letter-spacing: -0.08em;
+	letter-spacing: -0.04em;
 }
 
 .site-brand__title {
@@ -155,12 +106,6 @@ async function logout() {
 	font-weight: 700;
 	line-height: 1.1;
 	letter-spacing: -0.025em;
-}
-
-.site-toggler {
-	border: 1px solid var(--color-border);
-	border-radius: var(--radius-sm);
-	background: rgba(255, 255, 255, 0.74);
 }
 
 .site-nav__panel {
@@ -211,32 +156,13 @@ async function logout() {
 	color: var(--color-ink);
 }
 
-.site-nav__actions {
-	display: flex;
-	flex: 0 0 auto;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: flex-end;
-	gap: 0.55rem;
-}
-
-.site-nav__action {
-	min-height: 2.75rem;
-	padding-inline: 0.9rem;
-}
-
-.site-nav__action--danger {
-	color: #9f1239;
-}
-
 @media (max-width: 991px) {
 	.site-nav__panel {
-		flex-basis: 100%;
+		flex: 1 1 100%;
 	}
 
 	.site-nav__content,
-	.site-nav__links,
-	.site-nav__actions {
+	.site-nav__links {
 		width: 100%;
 		flex-direction: column;
 		align-items: stretch;
@@ -246,8 +172,7 @@ async function logout() {
 		padding-top: 0.9rem;
 	}
 
-	.site-nav__link,
-	.site-nav__action {
+	.site-nav__link {
 		width: 100%;
 	}
 }

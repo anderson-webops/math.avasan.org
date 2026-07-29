@@ -129,9 +129,6 @@
 	"references": [
 		{
 			"path": "front-end/tsconfig.json"
-		},
-		{
-			"path": "back-end/tsconfig.json"
 		}
 	]
 }

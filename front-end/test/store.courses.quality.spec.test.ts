@@ -30,7 +30,9 @@ describe("published course quality", () => {
 				const moduleIds = new Set<string>();
 				for (const module of course.modules) {
 					if (!module.id.trim() || !module.title.trim()) {
-						failures.push(`${entry.id}: module is missing an id or title`);
+						failures.push(
+							`${entry.id}: module is missing an id or title`
+						);
 					}
 					if (moduleIds.has(module.id)) {
 						failures.push(
@@ -65,13 +67,23 @@ describe("published course quality", () => {
 		COURSE_SWEEP_TIMEOUT
 	);
 
-	it("keeps the published catalog small and ordered for young learners", () => {
+	it("keeps the complete math catalog in learning order", () => {
 		expect(courseCatalog.map(course => course.id)).toEqual([
-			"scratch-level-1",
-			"scratch-level-2",
-			"python-level-1",
-			"python-level-2",
-			"pygames"
+			"early-elementary-a-math",
+			"early-elementary-b-math",
+			"late-elementary-a-math",
+			"late-elementary-b-math",
+			"pre-algebra-a",
+			"pre-algebra-b",
+			"algebra-1a",
+			"algebra-1b",
+			"geometry-a",
+			"geometry-b",
+			"algebra-2a",
+			"algebra-2b",
+			"pre-calculus-a",
+			"pre-calculus-b",
+			"ap-calculus"
 		]);
 	});
 });
