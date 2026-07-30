@@ -16,9 +16,14 @@ Keep these constraints intact:
   tab storage unless the student downloads a project.
 - `/admin` is an unlisted, noindex handoff to the single protected Admin at
   `https://cs.avasan.org/admin`; do not create a second teacher account system.
-- When school-authorized aggregate collection is enabled, Math may report only
-  one daily `graph-open` count and exact-course `course-open` counts. Respect
-  DNT/GPC and never attach a student, account, graph, page, or device identifier.
+- When school-authorized aggregate collection is enabled, Math may attempt only
+  one daily `graph-open` count and exact-course `course-open` count per browser
+  tab. Never retry an ambiguous attempt without an identifier. Respect DNT/GPC
+  and never attach a student, account, graph, page, or device identifier.
+- Keep the aggregate-usage setting in the reviewed
+  `front-end/src/config/classroom-usage.json` source. The browser, release
+  metadata, and container proxy must derive from that same committed boolean;
+  do not make tracking depend on a mutable workflow or host variable.
 - Do not send graph contents, imported files, coordinates, expressions, or
   annotations to a backend or analytics.
 - Do not add accounts, Admin, tutoring, scheduler, booking, Zoom, tuition,
@@ -42,6 +47,9 @@ decision.
   merge, reset, rebase, or push to either upstream remote.
 - Do not recreate upstream tags. Make a downstream release tag only when the
   user explicitly requests a validated release.
+- Release only an annotated semver tag at the exact `origin/main` revision.
+  Never overwrite an existing semver or source-revision image tag, and do not
+  publish a floating `latest` tag.
 - Preserve unrelated work already present in the working tree.
 
 After a coherent change is validated, commit it with a concise present-tense
@@ -56,6 +64,10 @@ subject and push it to `origin`.
 This is a static-only site. Do not add a backend workspace or accounts. The
 only `/api` route is the cookie-stripping same-origin proxy for the bounded
 anonymous usage endpoint described above.
+
+The reviewed production artifact is the unprivileged static Nginx container.
+Do not add a second deployment configuration that bypasses the proxy boundary
+or can produce different behavior from the same release source.
 
 Math course media remains sourced from
 `https://static.classes.jacobdanderson.net`. Missing upstream media must remain

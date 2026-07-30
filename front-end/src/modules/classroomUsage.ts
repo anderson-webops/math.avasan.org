@@ -1,7 +1,9 @@
+import deploymentConfig from "../config/classroom-usage.json";
+
 export type MathClassroomUsageEvent = "course-open" | "graph-open";
 
 const MATH_SITE_ID = "math";
-const allowedCourseIds = new Set([
+export const MATH_CLASSROOM_USAGE_COURSE_IDS = [
 	"early-elementary-a-math",
 	"early-elementary-b-math",
 	"late-elementary-a-math",
@@ -17,8 +19,10 @@ const allowedCourseIds = new Set([
 	"pre-calculus-a",
 	"pre-calculus-b",
 	"ap-calculus"
-]);
+] as const;
+const allowedCourseIds = new Set<string>(MATH_CLASSROOM_USAGE_COURSE_IDS);
 const storageKeyPrefix = "math-avasan:classroom-usage";
+const attemptedState = "attempted";
 
 interface PrivacyAwareNavigator extends Navigator {
 	globalPrivacyControl?: boolean;
@@ -30,10 +34,7 @@ interface PrivacyAwareWindow extends Window {
 }
 
 function usageCollectionIsEnabled() {
-	return (
-		import.meta.env.VITE_CLASSROOM_USAGE_ENABLED?.trim().toLowerCase() ===
-		"true"
-	);
+	return deploymentConfig.classroomUsageEnabled === true;
 }
 
 function privacySignalIsEnabled() {
@@ -74,11 +75,18 @@ function reportStorageKey(event: MathClassroomUsageEvent, courseId?: string) {
  * UTC date. The payload has no student, account, graph, page, device, or
  * referrer data. Reporting is disabled unless the classroom explicitly opts
  * in, and browser privacy signals always win.
+ *
+ * A tab-local attempted state is written before the request and is never
+ * cleared. That can undercount a failed request, but prevents a lost response
+ * from causing a duplicate count. The anonymous counter intentionally has no
+ * request or browser identifier for server-side deduplication.
  */
 export async function reportMathClassroomUsage(
 	event: MathClassroomUsageEvent,
 	courseId?: string | null
 ) {
+	if (event !== "course-open" && event !== "graph-open") return;
+
 	if (
 		typeof window === "undefined" ||
 		typeof globalThis.fetch !== "function" ||
@@ -93,13 +101,14 @@ export async function reportMathClassroomUsage(
 		return;
 	}
 
-	const safeCourseId = allowedCourseId(courseId);
+	const safeCourseId =
+		event === "course-open" ? allowedCourseId(courseId) : undefined;
 	if (event === "course-open" && !safeCourseId) return;
 
 	const storageKey = reportStorageKey(event, safeCourseId);
 	try {
-		if (window.sessionStorage.getItem(storageKey)) return;
-		window.sessionStorage.setItem(storageKey, "1");
+		if (window.sessionStorage.getItem(storageKey) !== null) return;
+		window.sessionStorage.setItem(storageKey, attemptedState);
 	} catch {
 		return;
 	}

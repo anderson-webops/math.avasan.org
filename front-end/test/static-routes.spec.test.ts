@@ -152,6 +152,7 @@ describe("static route normalization", () => {
 		expect(options.hostname).toBe("https://math.avasan.org");
 		expect(options.hostname).not.toContain("localhost");
 		expect(options.generateRobotsTxt).toBe(false);
+		expect(options.lastmod).toBe("");
 		expect(options.exclude).toEqual(SITEMAP_EXCLUDED_ROUTES);
 		expect(options.exclude).toEqual(["/admin", "/graph-sketcher"]);
 		expect(options.exclude).not.toContain("/courses");

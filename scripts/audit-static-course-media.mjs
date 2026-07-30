@@ -15,7 +15,9 @@ import {
 import {
 	extname,
 	join,
-	relative
+	relative,
+	resolve,
+	sep
 } from "node:path";
 import {
 	courseCatalog,
@@ -30,6 +32,9 @@ import {
 } from "@/stores/courses/staticMedia";
 
 const knownPending = new Set(KNOWN_PENDING_STATIC_MEDIA_FILENAMES);
+const localMirrorRoot = process.env.STATIC_COURSE_MEDIA_MIRROR
+	? resolve(process.env.STATIC_COURSE_MEDIA_MIRROR)
+	: "";
 const urls = new Map();
 const scanRoots = [
 	"front-end/public",
@@ -172,26 +177,131 @@ for (const root of scanRoots) {
 
 const missing = [];
 const available = [];
-
-for (const [url, references] of [...urls].sort(([left], [right]) =>
+const requestTimeoutMs = 15_000;
+const requestConcurrency = 4;
+const originProbeAttempts = 3;
+const transportFailureLimit = 12;
+const totalAuditTimeoutMs = 7 * 60_000;
+const auditDeadline = Date.now() + totalAuditTimeoutMs;
+const unreachableOrigins = new Map();
+const transportFailures = new Map();
+const sortedUrls = [...urls].sort(([left], [right]) =>
 	left.localeCompare(right)
-)) {
+);
+const results = new Array(sortedUrls.length);
+let nextUrlIndex = 0;
+let auditTimedOut = false;
+
+function requestSignal() {
+	const remainingMs = auditDeadline - Date.now();
+	if (remainingMs <= 0) {
+		auditTimedOut = true;
+		return AbortSignal.abort(
+			new Error("Static media audit reached its total time limit.")
+		);
+	}
+	return AbortSignal.timeout(Math.min(requestTimeoutMs, remainingMs));
+}
+
+function recordTransportSuccess(origin) {
+	transportFailures.delete(origin);
+}
+
+function recordTransportFailure(origin, error) {
+	const failureCount = (transportFailures.get(origin) ?? 0) + 1;
+	transportFailures.set(origin, failureCount);
+	if (failureCount >= transportFailureLimit) {
+		unreachableOrigins.set(
+			origin,
+			"Origin circuit breaker opened after " +
+				failureCount +
+				" consecutive transport failures: " +
+				error
+		);
+	}
+}
+
+async function probeOrigins() {
+	if (localMirrorRoot) return;
+
+	const representativeUrls = new Map();
+	for (const [url] of sortedUrls) {
+		const origin = new URL(url).origin;
+		if (!representativeUrls.has(origin)) representativeUrls.set(origin, url);
+	}
+
+	for (const [origin, url] of representativeUrls) {
+		let lastError = "";
+		let reachable = false;
+		for (let attempt = 0; attempt < originProbeAttempts; attempt += 1) {
+			try {
+				await fetch(url, {
+					method: "HEAD",
+					signal: requestSignal()
+				});
+				recordTransportSuccess(origin);
+				reachable = true;
+				break;
+			} catch (err) {
+				lastError = err instanceof Error ? err.message : String(err);
+			}
+		}
+		if (!reachable) {
+			unreachableOrigins.set(
+				origin,
+				"Origin stayed unreachable across " +
+					originProbeAttempts +
+					" sequential network probes: " +
+					lastError
+			);
+		}
+	}
+}
+
+async function inspectUrl(url, references) {
 	let status = 0;
 	let ok = false;
 	let error = "";
+	const origin = new URL(url).origin;
+	const blockedOriginError = unreachableOrigins.get(origin);
 
-	try {
-		let response = await fetch(url, { method: "HEAD" });
-		if (response.status === 405 || response.status === 403) {
-			response = await fetch(url, {
-				headers: { Range: "bytes=0-0" },
-				method: "GET"
-			});
+	if (localMirrorRoot) {
+		const relativeAssetPath = decodeURIComponent(
+			new URL(url).pathname
+		).replace(/^\/+/, "");
+		const localAssetPath = resolve(localMirrorRoot, relativeAssetPath);
+		const isInsideMirror =
+			localAssetPath.startsWith(localMirrorRoot + sep);
+		ok =
+			isInsideMirror &&
+			existsSync(localAssetPath) &&
+			statSync(localAssetPath).isFile();
+		status = ok ? 200 : 404;
+		if (!isInsideMirror) {
+			error = "Static media URL escaped the configured local mirror.";
 		}
-		status = response.status;
-		ok = response.ok || response.status === 206;
-	} catch (err) {
-		error = err instanceof Error ? err.message : String(err);
+	} else if (blockedOriginError) {
+		error = blockedOriginError;
+	} else {
+		try {
+			let response = await fetch(url, {
+				method: "HEAD",
+				signal: requestSignal()
+			});
+			if (response.status === 405 || response.status === 403) {
+				response = await fetch(url, {
+					headers: { Range: "bytes=0-0" },
+					method: "GET",
+					signal: requestSignal()
+				});
+			}
+			recordTransportSuccess(origin);
+			status = response.status;
+			ok = response.ok || response.status === 206;
+		} catch (err) {
+			error = err instanceof Error ? err.message : String(err);
+			recordTransportFailure(origin, error);
+		}
 	}
 
 	const filename = staticMediaFilename(url);
@@ -219,48 +329,112 @@ for (const [url, references] of [...urls].sort(([left], [right]) =>
 		...(error ? { error } : {})
 	};
 
-	if (ok) available.push(row);
-	else missing.push(row);
+	return { ok, row };
 }
 
+async function inspectNextUrl() {
+	while (true) {
+		if (Date.now() >= auditDeadline) {
+			auditTimedOut = true;
+			return;
+		}
+		const index = nextUrlIndex;
+		nextUrlIndex += 1;
+		if (index >= sortedUrls.length) return;
+
+		const [url, references] = sortedUrls[index];
+		results[index] = await inspectUrl(url, references);
+	}
+}
+
+await probeOrigins();
+
+await Promise.all(
+	Array.from(
+		{ length: Math.min(requestConcurrency, sortedUrls.length) },
+		() => inspectNextUrl()
+	)
+);
+
+for (const result of results) {
+	if (!result) continue;
+	if (result.ok) available.push(result.row);
+	else missing.push(result.row);
+}
+
+const uncheckedCount = results.filter(result => !result).length;
 const unknownMissing = missing.filter(row => !row.isKnownPending);
 const unnotedPending = missing.filter(
 	row => row.isKnownPending && row.sourceIssues?.length
 );
+const outputIssueLimit = 100;
 console.log(
 	JSON.stringify(
 		{
 			availableCount: available.length,
 			checkedCount: urls.size,
-			missing,
+			knownPendingMissingCount:
+				missing.filter(row => row.isKnownPending).length,
 			missingCount: missing.length,
-			unnotedPending,
-			unknownMissing
+			mediaSource: localMirrorRoot || "live HTTPS",
+			unnotedPending: unnotedPending.slice(0, outputIssueLimit),
+			unnotedPendingCount: unnotedPending.length,
+			uncheckedCount,
+			unknownMissing: unknownMissing.slice(0, outputIssueLimit),
+			unknownMissingCount: unknownMissing.length,
+			unreachableOrigins: [...unreachableOrigins.entries()].map(
+				([origin, error]) => ({ error, origin })
+			)
 		},
 		null,
 		2
 	)
 );
 
-if (unknownMissing.length > 0 || unnotedPending.length > 0) {
+if (
+	auditTimedOut ||
+	uncheckedCount > 0 ||
+	unknownMissing.length > 0 ||
+	unnotedPending.length > 0
+) {
 	process.exitCode = 1;
 }
 `;
 
 const tempDir = await mkdtemp(join(tmpdir(), "classes-static-media-"));
-const auditFile = join(tempDir, "audit.ts");
+const auditFile = join(tempDir, "audit.mts");
 
 try {
 	await writeFile(auditFile, auditSource);
 
-	const child = spawn("npm", ["exec", "-w", "front-end", "--", "vite-node", auditFile], {
-		stdio: "inherit"
-	});
+	const hardTimeoutMs = 8 * 60_000;
+	const child = spawn(
+		"npm",
+		[
+			"exec",
+			"--",
+			"tsx",
+			"--tsconfig",
+			"front-end/tsconfig.json",
+			auditFile
+		],
+		{ stdio: "inherit" }
+	);
+	let forceKill;
+	const hardTimeout = setTimeout(() => {
+		console.error(
+			"Static media audit exceeded its eight-minute hard time limit."
+		);
+		child.kill("SIGTERM");
+		forceKill = setTimeout(() => child.kill("SIGKILL"), 5_000);
+	}, hardTimeoutMs);
 
 	const exitCode = await new Promise((resolve, reject) => {
 		child.once("error", reject);
 		child.once("exit", code => resolve(code ?? 1));
 	});
+	clearTimeout(hardTimeout);
+	if (forceKill) clearTimeout(forceKill);
 
 	process.exitCode = exitCode;
 } finally {

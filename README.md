@@ -67,13 +67,28 @@ npm run build
 npm run a11y
 ```
 
+`npm run audit:static-media` checks every referenced course asset against the
+live static host. On the deployment host, the same read-only check can avoid
+NAT-hairpin routing by setting `STATIC_COURSE_MEDIA_MIRROR` to the absolute
+path of the canonical `static.classes.jacobdanderson.net` checkout.
+
 The site is static-only: there is no backend workspace, account service, or
 general analytics collector. If school-authorized aggregate collection is
-explicitly enabled, the site reports only deduplicated Math course opens and a
-coarse Graph Sketcher open count through the shared classroom service. It
-honors Do Not Track and Global Privacy Control and never sends graph contents
-or student identifiers. Graph contents remain in the current browser tab
-unless the student downloads a project.
+explicitly enabled, the site attempts at most one Math course-open count per
+course and one coarse Graph Sketcher-open count per browser tab and UTC day
+through the shared classroom service. Failed or ambiguous attempts are not
+retried, which favors avoiding duplicates over exact counts. It honors Do Not
+Track and Global Privacy Control and never sends graph contents or student
+identifiers. The reviewed state is committed in
+`front-end/src/config/classroom-usage.json`, so a release tag cannot be rebuilt
+with a different tracking setting. Graph contents remain in the current browser
+tab unless the student downloads a project.
+
+Production uses the repository's static Nginx container; Netlify is not a
+supported deployment because it cannot provide the same bounded,
+credential-stripping aggregate proxy. Versioned image publishing, host
+requirements, and the required public verification gate are documented in
+[`docs/production-deployment.md`](docs/production-deployment.md).
 
 The independent browser adaptation of GraphSketcher is distributed under its
 original Omni Source License 2007 terms. See

@@ -7,23 +7,24 @@ on:
     pull_request:
         branches: [main]
 
+permissions:
+    contents: read
+
 jobs:
     lint:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-            - uses: actions/setup-node@v7
+            - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
-                  node-version: 22.x
+                  node-version: 24.18.0
                   cache: npm
 
-            # Make runner's npm match packageManager in package.json
-            - name: Pin npm version
+            - name: Verify pinned toolchain
               run: |
-                  npm -v
-                  npm i -g npm@11.12.0
-                  npm -v
+                  test "$(node --version)" = "v24.18.0"
+                  test "$(npm --version)" = "11.16.0"
 
             - name: Install deps
               run: npm ci
@@ -34,17 +35,17 @@ jobs:
     typecheck:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-            - uses: actions/setup-node@v7
+            - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
-                  node-version: 22.x
+                  node-version: 24.18.0
                   cache: npm
 
-            - name: Pin npm version
+            - name: Verify pinned toolchain
               run: |
-                  npm i -g npm@11.12.0
-                  npm -v
+                  test "$(node --version)" = "v24.18.0"
+                  test "$(npm --version)" = "11.16.0"
 
             - name: Install deps
               run: npm ci
@@ -56,26 +57,22 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                node-version: [22.x]
+                node-version: [24.18.0]
                 os: [ubuntu-latest]
             fail-fast: false
 
         steps:
-            - uses: actions/checkout@v7
-            - uses: actions/setup-node@v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
                   node-version: ${{ matrix['node-version'] }}
                   cache: npm
                   registry-url: https://registry.npmjs.org/
 
-            # Only pin npm if compatible
-            - name: Pin npm version (if supported)
+            - name: Verify pinned toolchain
               run: |
-                  # optional guard:
-                  if [ $(node -v | cut -d. -f1 | sed 's/v//') -ge 20 ]; then
-                    npm i -g npm@11.12.0
-                  fi
-                  npm -v
+                  test "$(node --version)" = "v24.18.0"
+                  test "$(npm --version)" = "11.16.0"
 
             - name: Install deps
               run: npm ci
@@ -91,17 +88,17 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 15
         steps:
-            - uses: actions/checkout@v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-            - uses: actions/setup-node@v7
+            - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
-                  node-version: 22.x
+                  node-version: 24.18.0
                   cache: npm
 
-            - name: Pin npm version
+            - name: Verify pinned toolchain
               run: |
-                  npm i -g npm@11.12.0
-                  npm -v
+                  test "$(node --version)" = "v24.18.0"
+                  test "$(npm --version)" = "11.16.0"
 
             - name: Install deps
               run: npm ci
@@ -113,17 +110,17 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 10
         steps:
-            - uses: actions/checkout@v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-            - uses: actions/setup-node@v7
+            - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
-                  node-version: 22.x
+                  node-version: 24.18.0
                   cache: npm
 
-            - name: Pin npm version
+            - name: Verify pinned toolchain
               run: |
-                  npm i -g npm@11.12.0
-                  npm -v
+                  test "$(node --version)" = "v24.18.0"
+                  test "$(npm --version)" = "11.16.0"
 
             - name: Install deps
               run: npm ci
@@ -135,23 +132,23 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 15
         steps:
-            - uses: actions/checkout@v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-            - uses: actions/setup-node@v7
+            - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
-                  node-version: 22.x
+                  node-version: 24.18.0
                   cache: npm
                   registry-url: https://registry.npmjs.org/
 
-            - name: Pin npm version
+            - name: Verify pinned toolchain
               run: |
-                  npm i -g npm@11.12.0
-                  npm -v
+                  test "$(node --version)" = "v24.18.0"
+                  test "$(npm --version)" = "11.16.0"
 
             - name: Install deps
               run: npm ci
 
-            - uses: actions/cache@v6
+            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ~/.cache/Cypress
                   key: cypress-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
@@ -160,7 +157,7 @@ jobs:
               run: npm run -w front-end build
 
             - name: Cypress
-              uses: cypress-io/github-action@v7.4.1
+              uses: cypress-io/github-action@fa4a118725a8f001170d49631ea89e5d66fee626 # v7.4.1
               with:
                   install: false
                   working-directory: front-end
@@ -171,20 +168,110 @@ jobs:
     build:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-            - uses: actions/setup-node@v7
+            - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
-                  node-version: 22.x
+                  node-version: 24.18.0
                   cache: npm
 
-            - name: Pin npm version
+            - name: Verify pinned toolchain
               run: |
-                  npm i -g npm@11.12.0
-                  npm -v
+                  test "$(node --version)" = "v24.18.0"
+                  test "$(npm --version)" = "11.16.0"
 
             - name: Install deps
               run: npm ci
 
+            - name: Dependency audit
+              run: npm audit --workspaces
+
             - name: Build
               run: npm run build
+
+    container:
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Build pinned production image
+              run: |
+                  docker build \
+                    --build-arg MATH_RELEASE_VERSION=1.0.0 \
+                    --build-arg SOURCE_REVISION=0000000000000000000000000000000000000000 \
+                    --build-arg SOURCE_DATE_EPOCH=0 \
+                    --tag math-avasan:test \
+                    .
+
+            - name: Exercise read-only production image
+              run: |
+                  test "$(docker run --rm --entrypoint id math-avasan:test -u)" != "0"
+
+                  docker run --rm -d \
+                    --name math-avasan-test \
+                    --publish 127.0.0.1:8080:8080 \
+                    --read-only \
+                    --tmpfs /tmp:rw,noexec,nosuid,size=32m \
+                    --cap-drop ALL \
+                    --security-opt no-new-privileges \
+                    math-avasan:test
+                  trap 'docker stop math-avasan-test' EXIT
+
+                  for attempt in $(seq 1 20); do
+                    if curl --fail --silent --show-error http://127.0.0.1:8080/ >/dev/null; then
+                      break
+                    fi
+                    if [ "$attempt" -eq 20 ]; then
+                      exit 1
+                    fi
+                    sleep 1
+                  done
+
+                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8080/)" = "200"
+                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8080/api)" = "404"
+                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8080/api/not-public)" = "404"
+                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8080/api/classroom-usage)" = "404"
+                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' --request POST --data '{}' http://127.0.0.1:8080/api/classroom-usage)" = "404"
+                  curl --fail --silent --show-error http://127.0.0.1:8080/release.json |
+                    grep -Fq '"revision": "0000000000000000000000000000000000000000"'
+                  curl --fail --silent --show-error http://127.0.0.1:8080/release.json |
+                    grep -Fq '"classroomUsageEnabled": false'
+
+            - name: Validate the dormant enabled proxy configuration
+              run: |
+                  docker run --rm \
+                    --volume "${GITHUB_WORKSPACE}/nginx/classroom-usage-enabled.inc:/etc/nginx/conf.d/classroom-usage.inc:ro" \
+                    --entrypoint nginx \
+                    math-avasan:test \
+                    -t
+                  docker run --rm -d \
+                    --name math-avasan-proxy-enabled-test \
+                    --publish 127.0.0.1:8081:8080 \
+                    --volume "${GITHUB_WORKSPACE}/nginx/classroom-usage-enabled.inc:/etc/nginx/conf.d/classroom-usage.inc:ro" \
+                    --read-only \
+                    --tmpfs /tmp:rw,noexec,nosuid,size=32m \
+                    --cap-drop ALL \
+                    --security-opt no-new-privileges \
+                    math-avasan:test
+                  trap 'docker stop math-avasan-proxy-enabled-test' EXIT
+
+                  for attempt in $(seq 1 20); do
+                    if curl --fail --silent --show-error http://127.0.0.1:8081/ >/dev/null; then
+                      break
+                    fi
+                    if [ "$attempt" -eq 20 ]; then
+                      exit 1
+                    fi
+                    sleep 1
+                  done
+
+                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8081/api/classroom-usage)" = "405"
+                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' --request POST --header 'Content-Type: application/json' --header 'Origin: https://math.avasan.org' --data '{}' http://127.0.0.1:8081/api/classroom-usage)" = "403"
+                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' --request POST --header 'Content-Type: application/json' --header 'Origin: https://math.avasan.org' --header 'X-Classroom-Request: 1' --data '{}' http://127.0.0.1:8081/api/classroom-usage)" = "403"
+                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' --request POST --header 'Content-Type: application/json' --header 'Origin: https://math.avasan.org' --header 'Sec-Fetch-Site: same-site' --header 'X-Classroom-Request: 1' --data '{}' http://127.0.0.1:8081/api/classroom-usage)" = "403"
+                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' --request POST --header 'Content-Type: application/json' --header 'Origin: https://example.invalid' --header 'Sec-Fetch-Site: cross-site' --header 'X-Classroom-Request: 1' --data '{}' http://127.0.0.1:8081/api/classroom-usage)" = "403"
+                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' --request POST --header 'Origin: https://math.avasan.org' --header 'Sec-Fetch-Site: same-origin' --header 'X-Classroom-Request: 1' --data '{}' http://127.0.0.1:8081/api/classroom-usage)" = "415"
+                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' --request POST --header 'Content-Type: application/json' --header 'Origin: https://math.avasan.org' --header 'Sec-Fetch-Site: same-origin' --header 'X-Classroom-Request: 1' --data '{}' 'http://127.0.0.1:8081/api/classroom-usage?student=1')" = "400"
+                  curl --fail --silent --show-error http://127.0.0.1:8081/release.json |
+                    grep -Fq '"classroomUsageEnabled": false'

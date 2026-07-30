@@ -6,6 +6,7 @@ type SitemapOptions = {
 	exclude: string[];
 	generateRobotsTxt: boolean;
 	hostname: string;
+	lastmod: string;
 };
 
 type GenerateSitemap = (options: SitemapOptions) => void;
@@ -14,7 +15,8 @@ export function sitemapOptions(): SitemapOptions {
 	return {
 		exclude: SITEMAP_EXCLUDED_ROUTES,
 		generateRobotsTxt: false,
-		hostname: SITE_URL
+		hostname: SITE_URL,
+		lastmod: ""
 	};
 }
 

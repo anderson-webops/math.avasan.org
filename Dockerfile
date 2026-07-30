@@ -1,18 +1,51 @@
-FROM node:20-alpine AS build-stage
+ARG SOURCE_DATE_EPOCH=0
+
+FROM node:24.18.0-alpine@sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e6f1a95432d679c54fbfd AS build-stage
+
+ARG SOURCE_DATE_EPOCH
 
 WORKDIR /app
+
+ENV CYPRESS_INSTALL_BINARY=0 \
+    PUPPETEER_SKIP_DOWNLOAD=true
+
+RUN test "$(node --version)" = "v24.18.0" \
+    && test "$(npm --version)" = "11.16.0"
 
 COPY package.json package-lock.json ./
 COPY front-end/package.json ./front-end/package.json
 RUN npm ci
 
-COPY . .
-RUN npm run -w front-end build
+ARG MATH_RELEASE_VERSION
+ARG SOURCE_REVISION=unknown
+ENV MATH_RELEASE_VERSION=$MATH_RELEASE_VERSION
+ENV SOURCE_REVISION=$SOURCE_REVISION
 
-FROM nginx:stable-alpine AS production-stage
+COPY . .
+RUN classroom_usage_enabled="$(node -p \
+      "require('./front-end/src/config/classroom-usage.json').classroomUsageEnabled")" \
+    && case "$classroom_usage_enabled" in \
+      true) usage_proxy_mode=enabled ;; \
+      false) usage_proxy_mode=disabled ;; \
+      *) \
+        echo "classroomUsageEnabled must be true or false." >&2; \
+        exit 1 \
+        ;; \
+    esac \
+    && cp \
+      "nginx/classroom-usage-${usage_proxy_mode}.inc" \
+      /tmp/classroom-usage.inc \
+    && npm run -w front-end build
+
+FROM nginxinc/nginx-unprivileged:stable-alpine@sha256:44e36330f74d4f3a1d4e222acca9e23b401fb87811a7597024502bb759c4dd49 AS production-stage
+
+RUN test -s /etc/ssl/certs/ca-certificates.crt
 
 COPY --from=build-stage /app/front-end/dist /usr/share/nginx/html
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
+COPY --from=build-stage /tmp/classroom-usage.inc /etc/nginx/conf.d/classroom-usage.inc
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 CMD wget --quiet --spider http://127.0.0.1:8080/ || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
