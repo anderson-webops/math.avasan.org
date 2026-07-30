@@ -4,7 +4,7 @@ on:
     workflow_dispatch:
         inputs:
             expected_release:
-                description: Released semantic version, such as v1.0.1
+                description: Released semantic version, such as v1.0.2
                 required: true
                 type: string
             expected_revision:

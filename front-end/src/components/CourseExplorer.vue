@@ -14,6 +14,7 @@ import {
 	watch
 } from "vue";
 import { reportMathClassroomUsage } from "@/modules/classroomUsage";
+import { isYouTubeVideoUrl } from "@/modules/resourceUrls";
 import { useCoursesStore } from "@/stores/courses";
 import {
 	hasPendingStaticMediaNotice,
@@ -565,12 +566,7 @@ function canonicalResourceTarget(url: string) {
 }
 
 function mediaLabel(url: string) {
-	const normalizedUrl = url.toLowerCase();
-
-	if (
-		normalizedUrl.includes("youtube.com") ||
-		normalizedUrl.includes("youtu.be")
-	) {
+	if (isYouTubeVideoUrl(url)) {
 		return "Demo video";
 	}
 

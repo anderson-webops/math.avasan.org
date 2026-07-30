@@ -17,12 +17,18 @@ COPY front-end/package.json ./front-end/package.json
 RUN npm ci
 
 ARG MATH_RELEASE_VERSION
-ARG SOURCE_REVISION=unknown
+ARG SOURCE_REVISION
 ENV MATH_RELEASE_VERSION=$MATH_RELEASE_VERSION
 ENV SOURCE_REVISION=$SOURCE_REVISION
 
 COPY . .
-RUN classroom_usage_enabled="$(node -p \
+RUN node -e ' \
+      const [declaredVersion, revision] = process.argv.slice(1); \
+      const packageVersion = require("./package.json").version; \
+      if (declaredVersion.replace(/^v/, "") !== packageVersion \
+        || !/^[0-9a-f]{40}$/.test(revision)) process.exit(1); \
+    ' "$MATH_RELEASE_VERSION" "$SOURCE_REVISION" \
+    && classroom_usage_enabled="$(node -p \
       "require('./front-end/src/config/classroom-usage.json').classroomUsageEnabled")" \
     && case "$classroom_usage_enabled" in \
       true) usage_proxy_mode=enabled ;; \

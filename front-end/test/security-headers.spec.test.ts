@@ -65,6 +65,15 @@ describe("production browser security policy", () => {
 		expect(dockerfile.match(/^FROM .+@sha256:[0-9a-f]{64}/gm)).toHaveLength(
 			2
 		);
+		expect(dockerfile).toContain("ARG SOURCE_REVISION\n");
+		expect(dockerfile).not.toContain("SOURCE_REVISION=unknown");
+		expect(dockerfile).toContain(
+			`require("./package.json").version`
+		);
+		expect(dockerfile).toContain(
+			`declaredVersion.replace(/^v/, "") !== packageVersion`
+		);
+		expect(dockerfile).toContain("/^[0-9a-f]{40}$/");
 	});
 
 	it("keeps direct host-static serving equivalent and collection-disabled", () => {
@@ -265,6 +274,41 @@ describe("production browser security policy", () => {
 			"math-production-release-${{ github.ref }}"
 		);
 		expect(releaseWorkflow).toContain("flavor: latest=false");
+	});
+
+	it("derives CI release identity from the package and rejects unknown revisions", () => {
+		const repositoryRoot = resolve(process.cwd(), "..");
+		const continuousIntegration = readFileSync(
+			resolve(repositoryRoot, ".github/workflows/ci.yml"),
+			"utf8"
+		);
+		const releaseWriter = readFileSync(
+			resolve(
+				repositoryRoot,
+				"front-end/scripts/write-release-metadata.mjs"
+			),
+			"utf8"
+		);
+		const postDeploySmoke = readFileSync(
+			resolve(repositoryRoot, "scripts/post-deploy-smoke.mjs"),
+			"utf8"
+		);
+
+		expect(continuousIntegration).toContain(
+			`node -p "require('./package.json').version"`
+		);
+		expect(continuousIntegration).not.toContain(
+			"MATH_RELEASE_VERSION=1.0.0"
+		);
+		expect(releaseWriter).toContain(
+			"MATH_RELEASE_VERSION must match the root package version."
+		);
+		expect(releaseWriter).not.toContain(
+			"sourceRevisionPattern = /^(?:[0-9a-f]{40}|unknown)$/"
+		);
+		expect(postDeploySmoke).not.toContain(
+			"[0-9a-f]{40}|unknown"
+		);
 	});
 
 	it("marks the Admin handoff noindex in the redirect response", () => {

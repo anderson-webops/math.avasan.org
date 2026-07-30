@@ -21,6 +21,11 @@ state. A deployment must build the intended revision, preserve that exact
 output, and refuse to record success unless `/release.json` matches the
 revision and package version being deployed.
 
+A build from a Git checkout derives the exact current revision. Container
+builds exclude `.git`, so they must supply both `MATH_RELEASE_VERSION` matching
+the root package version and a full `SOURCE_REVISION`; missing, `unknown`, or
+mismatched release identities fail the build.
+
 The standard source keeps aggregate classroom usage disabled in
 `front-end/src/config/classroom-usage.json`. That reviewed, committed value is
 the single source of truth for the browser, release metadata, and optional

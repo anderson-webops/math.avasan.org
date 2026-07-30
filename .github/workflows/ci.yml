@@ -197,8 +197,11 @@ jobs:
 
             - name: Build pinned production image
               run: |
+                  MATH_RELEASE_VERSION="$(
+                    node -p "require('./package.json').version"
+                  )"
                   docker build \
-                    --build-arg MATH_RELEASE_VERSION=1.0.0 \
+                    --build-arg MATH_RELEASE_VERSION="${MATH_RELEASE_VERSION}" \
                     --build-arg SOURCE_REVISION=0000000000000000000000000000000000000000 \
                     --build-arg SOURCE_DATE_EPOCH=0 \
                     --tag math-avasan:test \

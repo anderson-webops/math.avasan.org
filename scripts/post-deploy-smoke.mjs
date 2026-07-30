@@ -89,7 +89,7 @@ async function verifyReleaseIdentity() {
 			typeof metadata === "object" &&
 			typeof metadata.classroomUsageEnabled === "boolean" &&
 			/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(metadata.version) &&
-			/^(?:[0-9a-f]{40}|unknown)$/.test(metadata.revision),
+			/^[0-9a-f]{40}$/.test(metadata.revision),
 		"/release.json did not contain valid release metadata."
 	);
 	if (expectedRelease) {

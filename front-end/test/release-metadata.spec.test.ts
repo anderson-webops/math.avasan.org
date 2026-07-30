@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { releaseMetadata } from "../scripts/write-release-metadata.mjs";
+import {
+	gitSourceRevision,
+	releaseMetadata
+} from "../scripts/write-release-metadata.mjs";
 
 describe("release metadata", () => {
 	it("normalizes a release tag and records the exact source revision", () => {
@@ -19,12 +22,14 @@ describe("release metadata", () => {
 		expect(
 			releaseMetadata(
 				{ VITE_CLASSROOM_USAGE_ENABLED: "true" },
-				"1.0.0"
+				"1.0.2",
+				false,
+				"b".repeat(40)
 			)
 		).toEqual({
 			classroomUsageEnabled: false,
-			revision: "unknown",
-			version: "1.0.0"
+			revision: "b".repeat(40),
+			version: "1.0.2"
 		});
 	});
 
@@ -36,8 +41,22 @@ describe("release metadata", () => {
 		[
 			{ MATH_RELEASE_VERSION: "1.2.3", SOURCE_REVISION: "short" },
 			"SOURCE_REVISION"
+		],
+		[
+			{ MATH_RELEASE_VERSION: "1.0.1", SOURCE_REVISION: "a".repeat(40) },
+			"root package version",
+			"1.0.2"
+		],
+		[
+			{ MATH_RELEASE_VERSION: "1.0.2", SOURCE_REVISION: "unknown" },
+			"SOURCE_REVISION",
+			"1.0.2"
 		]
-	])("rejects ambiguous release metadata", (environment, message) => {
-		expect(() => releaseMetadata(environment)).toThrow(message);
+	])("rejects ambiguous release metadata", (environment, message, defaultVersion = "") => {
+		expect(() => releaseMetadata(environment, defaultVersion)).toThrow(message);
+	});
+
+	it("derives a full revision from the current Git checkout", () => {
+		expect(gitSourceRevision()).toMatch(/^[0-9a-f]{40}$/);
 	});
 });
