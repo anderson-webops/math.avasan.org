@@ -8,7 +8,7 @@ on:
                 required: true
                 type: string
             expected_revision:
-                description: Full Git commit SHA embedded in the image
+                description: Full Git commit SHA embedded in the deployed artifact
                 required: true
                 type: string
             verify_usage_proxy:

@@ -84,10 +84,14 @@ identifiers. The reviewed state is committed in
 with a different tracking setting. Graph contents remain in the current browser
 tab unless the student downloads a project.
 
-Production uses the repository's static Nginx container; Netlify is not a
-supported deployment because it cannot provide the same bounded,
-credential-stripping aggregate proxy. Versioned image publishing, host
-requirements, and the required public verification gate are documented in
+Production serves the repository's exact built static output through Nginx.
+The current collection-disabled release may be served directly by the host
+virtual server or through the repository's static Nginx container, provided
+both enforce the same security, release-identity, API, and strict-404
+boundaries. If aggregate collection is enabled, the reviewed container supplies
+the bounded, credential-stripping proxy. Netlify is not supported. Build
+identity, host requirements, versioned image publishing, and the required
+public verification gate are documented in
 [`docs/production-deployment.md`](docs/production-deployment.md).
 
 The independent browser adaptation of GraphSketcher is distributed under its

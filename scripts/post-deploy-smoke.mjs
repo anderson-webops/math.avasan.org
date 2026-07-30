@@ -124,17 +124,25 @@ async function verifyAdminHandoff() {
 }
 
 async function verifyUnknownRouteBoundary() {
-	const response = await request("/definitely-not-a-math-route", {
-		redirect: "manual"
-	});
-	assertion(
-		response.status === 404,
-		`An unknown Math route returned HTTP ${response.status} instead of 404.`
-	);
-	assertion(
-		response.headers.get("set-cookie") === null,
-		"An unknown Math route returned a cookie."
-	);
+	const unknownPaths = [
+		"/__math-deployment-probe-missing",
+		"/__math-deployment-probe-missing/",
+		"/courses/__math-deployment-probe-missing"
+	];
+
+	for (const path of unknownPaths) {
+		const response = await request(path, {
+			redirect: "manual"
+		});
+		assertion(
+			response.status === 404,
+			`${path} returned HTTP ${response.status} instead of 404.`
+		);
+		assertion(
+			response.headers.get("set-cookie") === null,
+			`${path} returned a cookie.`
+		);
+	}
 }
 
 async function verifyApiBoundary() {

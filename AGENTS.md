@@ -22,7 +22,7 @@ Keep these constraints intact:
   and never attach a student, account, graph, page, or device identifier.
 - Keep the aggregate-usage setting in the reviewed
   `front-end/src/config/classroom-usage.json` source. The browser, release
-  metadata, and container proxy must derive from that same committed boolean;
+  metadata, and production proxy must derive from that same committed boolean;
   do not make tracking depend on a mutable workflow or host variable.
 - Do not send graph contents, imported files, coordinates, expressions, or
   annotations to a backend or analytics.
@@ -62,12 +62,21 @@ subject and push it to `origin`.
   accessibility-adjacent behavior.
 
 This is a static-only site. Do not add a backend workspace or accounts. The
-only `/api` route is the cookie-stripping same-origin proxy for the bounded
-anonymous usage endpoint described above.
+only possible `/api` route is the cookie-stripping same-origin proxy for the
+bounded anonymous usage endpoint described above.
 
-The reviewed production artifact is the unprivileged static Nginx container.
-Do not add a second deployment configuration that bypasses the proxy boundary
-or can produce different behavior from the same release source.
+The reviewed production source is the exact `front-end/dist` output built with
+its release identity. It may be served by the unprivileged static Nginx
+container or directly by the host's TLS Nginx virtual host. Direct host-static
+serving is supported only while the committed aggregate-usage setting is
+disabled; it must return `404` for every `/api` request and match the
+container's security headers, Admin handoff, no-store release metadata, strict
+unknown-route behavior, and logging policy. If aggregate usage is enabled, use
+the reviewed container proxy unless an equivalent host proxy receives a
+separate security review.
+
+Do not add Netlify or another build/deployment configuration that can produce
+different files or behavior from the same release source.
 
 Math course media remains sourced from
 `https://static.classes.jacobdanderson.net`. Missing upstream media must remain

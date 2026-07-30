@@ -47,7 +47,7 @@ describe("production browser security policy", () => {
 		expect(nginx).not.toContain("script-src 'unsafe-inline'");
 	});
 
-	it("keeps one production artifact and excludes local secrets from it", () => {
+	it("keeps one production build and excludes unsupported deploy configurations", () => {
 		const repositoryRoot = resolve(process.cwd(), "..");
 		const dockerIgnore = readFileSync(
 			resolve(repositoryRoot, ".dockerignore"),
@@ -64,6 +64,43 @@ describe("production browser security policy", () => {
 		expect(dockerIgnore).toContain("**/node_modules");
 		expect(dockerfile.match(/^FROM .+@sha256:[0-9a-f]{64}/gm)).toHaveLength(
 			2
+		);
+	});
+
+	it("keeps direct host-static serving equivalent and collection-disabled", () => {
+		const repositoryRoot = resolve(process.cwd(), "..");
+		const deploymentGuide = readFileSync(
+			resolve(repositoryRoot, "docs/production-deployment.md"),
+			"utf8"
+		);
+		const postDeploySmoke = readFileSync(
+			resolve(repositoryRoot, "scripts/post-deploy-smoke.mjs"),
+			"utf8"
+		);
+
+		expect(deploymentGuide).toContain(
+			"one reviewed static build output: `front-end/dist`"
+		);
+		expect(deploymentGuide).toContain(
+			"Direct host-static serving is supported only while the committed"
+		);
+		expect(deploymentGuide).toContain(
+			"`classroomUsageEnabled` value is `false`"
+		);
+		expect(deploymentGuide).toContain(
+			"use `try_files $uri $uri/ =404;`"
+		);
+		expect(deploymentGuide).toContain(
+			"return `404` for `/api`, every `/api/` path"
+		);
+		expect(deploymentGuide).not.toContain(
+			"The container is the only supported production artifact"
+		);
+		expect(postDeploySmoke).toContain(
+			"/__math-deployment-probe-missing/"
+		);
+		expect(postDeploySmoke).toContain(
+			"/courses/__math-deployment-probe-missing"
 		);
 	});
 

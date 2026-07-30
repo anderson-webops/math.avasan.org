@@ -1,11 +1,36 @@
 # Production deployment
 
-Math is deployed as one static Nginx container. The container is the only
-supported production artifact. Netlify is intentionally unsupported because
-its redirect configuration cannot enforce the credential stripping and
-upstream TLS controls required by the optional classroom-count proxy.
+Math has one reviewed static build output: `front-end/dist`. Production may
+serve those exact files through either the repository's unprivileged static
+Nginx container or the host's TLS Nginx virtual server. These are serving
+envelopes for the same release, not separate application builds.
+
+Direct host-static serving is supported only while the committed
+`classroomUsageEnabled` value is `false`. In that state every `/api` request
+must return `404`, so the host does not recreate or bypass the dormant proxy.
+If aggregate collection is enabled, deploy the reviewed container unless an
+equivalent host proxy receives a separate security review. Netlify remains
+unsupported because it cannot enforce the reviewed credential stripping and
+upstream TLS controls required by that optional proxy.
 
 ## Release
+
+Every production build writes `/release.json` into `front-end/dist` with its
+semantic version, exact 40-character source revision, and aggregate-usage
+state. A deployment must build the intended revision, preserve that exact
+output, and refuse to record success unless `/release.json` matches the
+revision and package version being deployed.
+
+The standard source keeps aggregate classroom usage disabled in
+`front-end/src/config/classroom-usage.json`. That reviewed, committed value is
+the single source of truth for the browser, release metadata, and optional
+container proxy; a workflow or host variable cannot silently change a build
+from the same revision.
+Set it to `true` only after the privacy-notice contact, school or district
+authorization, and the shared classroom service are ready. Changing it requires
+a source commit, version increment, annotated tag, and new release.
+
+### Versioned container release
 
 1. Update the root package version.
 2. Complete the required repository validation.
@@ -17,17 +42,32 @@ upstream TLS controls required by the optional classroom-count proxy.
 5. Record the immutable image digest from the workflow summary. Production
    should pin that digest rather than either mutable registry tag.
 
-The release image embeds `/release.json` with its semantic version, exact source
-revision, and aggregate-usage state. The standard source keeps aggregate
-classroom usage disabled in
-`front-end/src/config/classroom-usage.json`. That reviewed, committed value is
-the single source of truth for both the browser and the container proxy; a
-workflow variable cannot silently change an image built from a release tag.
-Set it to `true` only after the privacy-notice contact, school or district
-authorization, and the shared classroom service are ready. Changing it requires
-a source commit, version increment, annotated tag, and new release.
+The release image contains the same reviewed `front-end/dist` output and
+release metadata as a direct host-static deployment.
 
-## Host
+## Host-static serving
+
+The current production host builds the intended source revision and atomically
+serves the resulting `front-end/dist` directory. Its TLS virtual host must:
+
+- use `try_files $uri $uri/ =404;` for ordinary static requests, without an
+  `index.html` fallback that turns unknown paths into soft `200` responses;
+- apply the Content Security Policy, HSTS, Referrer Policy, Permissions Policy,
+  X-Content-Type-Options, and framing protections from `nginx/default.conf`;
+- serve `/release.json` with `Cache-Control: no-store`;
+- redirect `/admin` and `/admin/` to `https://cs.avasan.org/admin` with the
+  noindex response policy;
+- return `404` for `/api`, every `/api/` path, and both methods on
+  `/api/classroom-usage` while aggregate usage is disabled; and
+- keep access logs off unless the school or district has approved a specific,
+  short-lived security-log purpose and retention period.
+
+Before recording a host-static deployment as successful, verify that
+`/release.json` matches the deployed source revision and version, `/` returns
+`200`, and multiple synthetic unknown paths return `404`. Then run the full
+post-deployment gate below.
+
+## Container serving
 
 Run the pinned, unprivileged image behind the host's TLS-terminating virtual
 host and bind container port `8080` to host loopback. Preserve the public hostname
@@ -71,5 +111,6 @@ The probe checks:
 - when selected, a harmless invalid event through the CS proxy that cannot
   increment a classroom count.
 
-An image being published is not a deployment. Do not describe the Math site as
-updated until this post-deployment gate passes against the public hostname.
+Publishing an image or copying static files is not by itself a deployment. Do
+not describe the Math site as updated until this post-deployment gate passes
+against the public hostname.
