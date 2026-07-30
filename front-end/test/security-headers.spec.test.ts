@@ -172,6 +172,8 @@ describe("production browser security policy", () => {
 		expect(nginx).toContain("access_log off;");
 		expect(nginx).toContain("location ^~ /api/");
 		expect(nginx).toContain("return 404;");
+		expect(nginx).toContain("try_files $uri $uri/ =404;");
+		expect(nginx).not.toContain("try_files $uri $uri/ /index.html;");
 		expect(enabledProxy.match(/\bproxy_pass\b/g)).toHaveLength(1);
 		expect(nginx).toContain("location = /api");
 	});

@@ -123,6 +123,20 @@ async function verifyAdminHandoff() {
 	);
 }
 
+async function verifyUnknownRouteBoundary() {
+	const response = await request("/definitely-not-a-math-route", {
+		redirect: "manual"
+	});
+	assertion(
+		response.status === 404,
+		`An unknown Math route returned HTTP ${response.status} instead of 404.`
+	);
+	assertion(
+		response.headers.get("set-cookie") === null,
+		"An unknown Math route returned a cookie."
+	);
+}
+
 async function verifyApiBoundary() {
 	const disallowed = await request("/api/not-a-public-route", {
 		redirect: "manual"
@@ -248,6 +262,7 @@ export async function runPostDeploySmoke() {
 	await runProductionGraphSketcherSmoke();
 	await verifyReleaseIdentity();
 	await verifyAdminHandoff();
+	await verifyUnknownRouteBoundary();
 	await verifyApiBoundary();
 	console.log(`OK: ${productionOrigin} passed Math production relationship checks.`);
 }
