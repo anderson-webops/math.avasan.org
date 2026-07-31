@@ -21,11 +21,15 @@ jobs:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   fetch-depth: 0
+                  persist-credentials: false
 
             - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
-                  node-version: 24.18.0
+                  node-version: 24.18.1
                   cache: npm
+
+            - name: Use the repository npm version
+              run: npm install --global "npm@12.0.2"
 
             - name: Verify annotated release tag
               id: release
@@ -66,18 +70,26 @@ jobs:
 
             - name: Verify pinned toolchain
               run: |
-                  test "$(node --version)" = "v24.18.0"
-                  test "$(npm --version)" = "11.16.0"
+                  test "$(node --version)" = "v24.18.1"
+                  test "$(npm --version)" = "12.0.2"
 
             - name: Install dependencies
-              run: npm ci
+              run: npm ci --include=optional --strict-allow-scripts
+              env:
+                  CYPRESS_INSTALL_BINARY: "0"
+                  PUPPETEER_SKIP_DOWNLOAD: "true"
 
             - name: Validate release source
               env:
                   MATH_RELEASE_VERSION: ${{ github.ref_name }}
                   SOURCE_REVISION: ${{ steps.release.outputs.revision }}
               run: |
-                  npm audit --workspaces
+                  npm run audit
+                  npm run audit:production
+                  npm run audit:signatures
+                  npm run verify:dependency-graph
+                  npm run verify:native-lock
+                  npm run verify:platform-install
                   npm run lint
                   npm run typecheck
                   npm run -w front-end test:unit

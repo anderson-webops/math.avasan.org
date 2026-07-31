@@ -43,6 +43,9 @@ describe("production browser security policy", () => {
 
 		expect(nginx).toContain(requiredPolicy);
 		expect(nginx).toContain("Strict-Transport-Security");
+		expect(nginx).toContain('Cross-Origin-Opener-Policy "same-origin"');
+		expect(nginx).toContain('Cross-Origin-Resource-Policy "same-origin"');
+		expect(nginx).toContain("includeSubDomains");
 		expect(nginx).not.toContain("frame-src 'self'");
 		expect(nginx).not.toContain("script-src 'unsafe-inline'");
 	});
@@ -67,13 +70,12 @@ describe("production browser security policy", () => {
 		);
 		expect(dockerfile).toContain("ARG SOURCE_REVISION\n");
 		expect(dockerfile).not.toContain("SOURCE_REVISION=unknown");
-		expect(dockerfile).toContain(
-			`require("./package.json").version`
-		);
+		expect(dockerfile).toContain(`require("./package.json").version`);
 		expect(dockerfile).toContain(
 			`declaredVersion.replace(/^v/, "") !== packageVersion`
 		);
 		expect(dockerfile).toContain("/^[0-9a-f]{40}$/");
+		expect(dockerfile).toContain("\nUSER 101\n");
 	});
 
 	it("keeps direct host-static serving equivalent and collection-disabled", () => {
@@ -96,18 +98,14 @@ describe("production browser security policy", () => {
 		expect(deploymentGuide).toContain(
 			"`classroomUsageEnabled` value is `false`"
 		);
-		expect(deploymentGuide).toContain(
-			"use `try_files $uri $uri/ =404;`"
-		);
+		expect(deploymentGuide).toContain("use `try_files $uri $uri/ =404;`");
 		expect(deploymentGuide).toContain(
 			"return `404` for `/api`, every `/api/` path"
 		);
 		expect(deploymentGuide).not.toContain(
 			"The container is the only supported production artifact"
 		);
-		expect(postDeploySmoke).toContain(
-			"/__math-deployment-probe-missing/"
-		);
+		expect(postDeploySmoke).toContain("/__math-deployment-probe-missing/");
 		expect(postDeploySmoke).toContain(
 			"/courses/__math-deployment-probe-missing"
 		);
@@ -115,19 +113,13 @@ describe("production browser security policy", () => {
 
 	it("pins every action used to validate and publish this artifact", () => {
 		const repositoryRoot = resolve(process.cwd(), "..");
-		const workflowDirectory = resolve(
-			repositoryRoot,
-			".github/workflows"
-		);
+		const workflowDirectory = resolve(repositoryRoot, ".github/workflows");
 		const workflowPaths = readdirSync(workflowDirectory)
 			.filter(path => /\.ya?ml$/.test(path))
 			.map(path => resolve(workflowDirectory, path));
 
 		for (const workflowPath of workflowPaths) {
-			const workflow = readFileSync(
-				workflowPath,
-				"utf8"
-			);
+			const workflow = readFileSync(workflowPath, "utf8");
 			const actionReferences = [
 				...workflow.matchAll(/\buses:\s+\S+@([^\s#]+)/g)
 			].map(match => match[1]);
@@ -147,10 +139,7 @@ describe("production browser security policy", () => {
 			"utf8"
 		);
 		const enabledProxy = readFileSync(
-			resolve(
-				process.cwd(),
-				"../nginx/classroom-usage-enabled.inc"
-			),
+			resolve(process.cwd(), "../nginx/classroom-usage-enabled.inc"),
 			"utf8"
 		);
 
@@ -175,10 +164,7 @@ describe("production browser security policy", () => {
 			"utf8"
 		);
 		const enabledProxy = readFileSync(
-			resolve(
-				process.cwd(),
-				"../nginx/classroom-usage-enabled.inc"
-			),
+			resolve(process.cwd(), "../nginx/classroom-usage-enabled.inc"),
 			"utf8"
 		);
 
@@ -188,9 +174,7 @@ describe("production browser security policy", () => {
 			"proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;"
 		);
 		expect(enabledProxy).toContain("proxy_pass_request_headers off;");
-		expect(enabledProxy).toContain(
-			'if ($http_x_classroom_request != "1")'
-		);
+		expect(enabledProxy).toContain('if ($http_x_classroom_request != "1")');
 		expect(enabledProxy).toContain(
 			'if ($http_origin != "https://math.avasan.org")'
 		);
@@ -231,10 +215,7 @@ describe("production browser security policy", () => {
 			"utf8"
 		);
 		const releaseWorkflow = readFileSync(
-			resolve(
-				repositoryRoot,
-				".github/workflows/release-container.yml"
-			),
+			resolve(repositoryRoot, ".github/workflows/release-container.yml"),
 			"utf8"
 		);
 		const deploymentConfig = JSON.parse(
@@ -258,14 +239,10 @@ describe("production browser security policy", () => {
 		expect(dockerfile).toContain(
 			"nginx/classroom-usage-${usage_proxy_mode}.inc"
 		);
-		expect(dockerfile).toContain(
-			"/etc/nginx/conf.d/classroom-usage.inc"
-		);
+		expect(dockerfile).toContain("/etc/nginx/conf.d/classroom-usage.inc");
 		expect(disabledProxy.trim()).toBe("return 404;");
 		expect(disabledProxy).not.toContain("proxy_pass");
-		expect(dockerfile).not.toContain(
-			"ARG VITE_CLASSROOM_USAGE_ENABLED"
-		);
+		expect(dockerfile).not.toContain("ARG VITE_CLASSROOM_USAGE_ENABLED");
 		expect(releaseWorkflow).not.toContain(
 			"vars.MATH_CLASSROOM_USAGE_ENABLED"
 		);
@@ -306,9 +283,7 @@ describe("production browser security policy", () => {
 		expect(releaseWriter).not.toContain(
 			"sourceRevisionPattern = /^(?:[0-9a-f]{40}|unknown)$/"
 		);
-		expect(postDeploySmoke).not.toContain(
-			"[0-9a-f]{40}|unknown"
-		);
+		expect(postDeploySmoke).not.toContain("[0-9a-f]{40}|unknown");
 	});
 
 	it("marks the Admin handoff noindex in the redirect response", () => {

@@ -1,5 +1,6 @@
 .gitattributes text eol=lf
 .dockerignore text eol=lf
+.gitleaksignore text eol=lf
 .node-version text eol=lf
 .nvmrc text eol=lf
 Dockerfile text eol=lf
@@ -21,3 +22,10 @@ Dockerfile text eol=lf
 *.vue text eol=lf
 *.yaml text eol=lf
 *.yml text eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.woff2 binary

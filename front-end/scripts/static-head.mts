@@ -2,7 +2,7 @@ import {
 	canonicalUrlForPath,
 	pageRobotsForPath,
 	pageTitleForPath
-} from "../src/modules/pageHead";
+} from "../src/modules/pageHead.ts";
 
 const TITLE_RE = /<title(?:\s[^>]*)?>[\s\S]*?<\/title>/gi;
 const ROBOTS_META_RE = /<meta\b(?=[^>]*\bname\s*=\s*["']robots["'])[^>]*\/?>/gi;

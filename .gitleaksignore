@@ -1,0 +1,4 @@
+# Historical false positives: PEM boundary validation and a public random-code alphabet.
+a5bb4a6b8c1f1440fc5630f6a8a89baf65fd288b:back-end/src/utils/oauthProviderConfig.ts:private-key:37
+1c50ed1faf28ffae30471e6b67b52a146d1b86fc:back-end/src/security/studentCredentials.ts:generic-api-key:12
+99923324bb21d0451b8fd349e56b9b6c83e7df08:back-end/src/utils/oauthProviderConfig.ts:private-key:32

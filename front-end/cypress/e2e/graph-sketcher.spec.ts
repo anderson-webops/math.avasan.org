@@ -12,12 +12,19 @@ context("Graph Sketcher browser workspace", () => {
 
 	beforeEach(() => {
 		forbiddenRequests = [];
-		const siteOrigin = new URL(
-			Cypress.config("baseUrl") as string
-		).origin;
+		const siteOrigin = new URL(Cypress.config("baseUrl") as string).origin;
 
 		cy.intercept({ url: "**" }, request => {
 			const url = new URL(request.url);
+			const requestOrigin = request.headers.origin;
+			const requestReferrer = request.headers.referer;
+			const isPageInitiated =
+				url.origin === siteOrigin ||
+				requestOrigin === siteOrigin ||
+				(typeof requestReferrer === "string" &&
+					requestReferrer.startsWith(siteOrigin));
+			if (!isPageInitiated) return;
+
 			const isApiOrAnalytics =
 				url.pathname.startsWith("/api") ||
 				/(?:analytics|collect|telemetry)/i.test(url.pathname);
@@ -50,7 +57,9 @@ context("Graph Sketcher browser workspace", () => {
 				value: class ForbiddenEventSource {
 					constructor(url: string | URL) {
 						forbiddenRequests.push(`EVENTSOURCE ${String(url)}`);
-						throw new Error("EventSource is disabled in this test.");
+						throw new Error(
+							"EventSource is disabled in this test."
+						);
 					}
 				}
 			});

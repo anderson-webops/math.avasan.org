@@ -1,6 +1,6 @@
 ARG SOURCE_DATE_EPOCH=0
 
-FROM node:24.18.0-alpine@sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e6f1a95432d679c54fbfd AS build-stage
+FROM node:24.18.1-alpine@sha256:f70403e87646dc51b45295f4b8b70cdad0b63d2297c4c9899119b03f7af7a6b3 AS build-stage
 
 ARG SOURCE_DATE_EPOCH
 
@@ -9,12 +9,13 @@ WORKDIR /app
 ENV CYPRESS_INSTALL_BINARY=0 \
     PUPPETEER_SKIP_DOWNLOAD=true
 
-RUN test "$(node --version)" = "v24.18.0" \
-    && test "$(npm --version)" = "11.16.0"
+RUN npm install --global npm@12.0.2 \
+    && test "$(node --version)" = "v24.18.1" \
+    && test "$(npm --version)" = "12.0.2"
 
-COPY package.json package-lock.json ./
+COPY .npmrc package.json package-lock.json ./
 COPY front-end/package.json ./front-end/package.json
-RUN npm ci
+RUN npm ci --include=optional --strict-allow-scripts
 
 ARG MATH_RELEASE_VERSION
 ARG SOURCE_REVISION
@@ -50,6 +51,9 @@ RUN test -s /etc/ssl/certs/ca-certificates.crt
 COPY --from=build-stage /app/front-end/dist /usr/share/nginx/html
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=build-stage /tmp/classroom-usage.inc /etc/nginx/conf.d/classroom-usage.inc
+
+USER 101
+
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 CMD wget --quiet --spider http://127.0.0.1:8080/ || exit 1

@@ -10,24 +10,36 @@ on:
 permissions:
     contents: read
 
+env:
+    NODE_VERSION: 24.18.1
+    NPM_VERSION: 12.0.2
+    PUPPETEER_SKIP_DOWNLOAD: "true"
+
 jobs:
     lint:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
 
             - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
-                  node-version: 24.18.0
+                  node-version: ${{ env.NODE_VERSION }}
                   cache: npm
+
+            - name: Use the repository npm version
+              run: npm install --global "npm@${NPM_VERSION}"
 
             - name: Verify pinned toolchain
               run: |
-                  test "$(node --version)" = "v24.18.0"
-                  test "$(npm --version)" = "11.16.0"
+                  test "$(node --version)" = "v${NODE_VERSION}"
+                  test "$(npm --version)" = "${NPM_VERSION}"
 
             - name: Install deps
-              run: npm ci
+              run: npm ci --include=optional --strict-allow-scripts
+              env:
+                  CYPRESS_INSTALL_BINARY: "0"
 
             - name: Lint
               run: npm run lint
@@ -36,19 +48,26 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
 
             - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
-                  node-version: 24.18.0
+                  node-version: ${{ env.NODE_VERSION }}
                   cache: npm
+
+            - name: Use the repository npm version
+              run: npm install --global "npm@${NPM_VERSION}"
 
             - name: Verify pinned toolchain
               run: |
-                  test "$(node --version)" = "v24.18.0"
-                  test "$(npm --version)" = "11.16.0"
+                  test "$(node --version)" = "v${NODE_VERSION}"
+                  test "$(npm --version)" = "${NPM_VERSION}"
 
             - name: Install deps
-              run: npm ci
+              run: npm ci --include=optional --strict-allow-scripts
+              env:
+                  CYPRESS_INSTALL_BINARY: "0"
 
             - name: Typecheck
               run: npm run typecheck
@@ -57,25 +76,32 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                node-version: [24.18.0]
+                node-version: [24.18.1]
                 os: [ubuntu-latest]
             fail-fast: false
 
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
             - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
                   node-version: ${{ matrix['node-version'] }}
                   cache: npm
                   registry-url: https://registry.npmjs.org/
 
+            - name: Use the repository npm version
+              run: npm install --global "npm@${NPM_VERSION}"
+
             - name: Verify pinned toolchain
               run: |
-                  test "$(node --version)" = "v24.18.0"
-                  test "$(npm --version)" = "11.16.0"
+                  test "$(node --version)" = "v${NODE_VERSION}"
+                  test "$(npm --version)" = "${NPM_VERSION}"
 
             - name: Install deps
-              run: npm ci
+              run: npm ci --include=optional --strict-allow-scripts
+              env:
+                  CYPRESS_INSTALL_BINARY: "0"
 
             - name: Unit tests
               env:
@@ -89,19 +115,26 @@ jobs:
         timeout-minutes: 15
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
 
             - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
-                  node-version: 24.18.0
+                  node-version: ${{ env.NODE_VERSION }}
                   cache: npm
+
+            - name: Use the repository npm version
+              run: npm install --global "npm@${NPM_VERSION}"
 
             - name: Verify pinned toolchain
               run: |
-                  test "$(node --version)" = "v24.18.0"
-                  test "$(npm --version)" = "11.16.0"
+                  test "$(node --version)" = "v${NODE_VERSION}"
+                  test "$(npm --version)" = "${NPM_VERSION}"
 
             - name: Install deps
-              run: npm ci
+              run: npm ci --include=optional --strict-allow-scripts
+              env:
+                  CYPRESS_INSTALL_BINARY: "0"
 
             - name: Axe accessibility smoke checks
               run: npm run a11y
@@ -111,19 +144,26 @@ jobs:
         timeout-minutes: 10
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
 
             - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
-                  node-version: 24.18.0
+                  node-version: ${{ env.NODE_VERSION }}
                   cache: npm
+
+            - name: Use the repository npm version
+              run: npm install --global "npm@${NPM_VERSION}"
 
             - name: Verify pinned toolchain
               run: |
-                  test "$(node --version)" = "v24.18.0"
-                  test "$(npm --version)" = "11.16.0"
+                  test "$(node --version)" = "v${NODE_VERSION}"
+                  test "$(npm --version)" = "${NPM_VERSION}"
 
             - name: Install deps
-              run: npm ci
+              run: npm ci --include=optional --strict-allow-scripts
+              env:
+                  CYPRESS_INSTALL_BINARY: "0"
 
             - name: Audit static course media
               run: npm run audit:static-media
@@ -133,20 +173,25 @@ jobs:
         timeout-minutes: 15
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
 
             - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
-                  node-version: 24.18.0
+                  node-version: ${{ env.NODE_VERSION }}
                   cache: npm
                   registry-url: https://registry.npmjs.org/
 
+            - name: Use the repository npm version
+              run: npm install --global "npm@${NPM_VERSION}"
+
             - name: Verify pinned toolchain
               run: |
-                  test "$(node --version)" = "v24.18.0"
-                  test "$(npm --version)" = "11.16.0"
+                  test "$(node --version)" = "v${NODE_VERSION}"
+                  test "$(npm --version)" = "${NPM_VERSION}"
 
             - name: Install deps
-              run: npm ci
+              run: npm ci --include=optional --strict-allow-scripts
 
             - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
@@ -169,24 +214,73 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
 
             - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
-                  node-version: 24.18.0
+                  node-version: ${{ env.NODE_VERSION }}
                   cache: npm
+
+            - name: Use the repository npm version
+              run: npm install --global "npm@${NPM_VERSION}"
 
             - name: Verify pinned toolchain
               run: |
-                  test "$(node --version)" = "v24.18.0"
-                  test "$(npm --version)" = "11.16.0"
+                  test "$(node --version)" = "v${NODE_VERSION}"
+                  test "$(npm --version)" = "${NPM_VERSION}"
 
             - name: Install deps
-              run: npm ci
+              run: npm ci --include=optional --strict-allow-scripts
+              env:
+                  CYPRESS_INSTALL_BINARY: "0"
 
-            - name: Dependency audit
-              run: npm audit --workspaces
+            - name: Full dependency audit
+              run: npm run audit
+
+            - name: Production dependency audit
+              run: npm run audit:production
+
+            - name: Verify registry signatures
+              run: npm run audit:signatures
+
+            - name: Verify dependency tree
+              run: npm run verify:dependency-graph
+
+            - name: Verify native lockfile coverage
+              run: npm run verify:native-lock
+
+            - name: Simulate Linux ARM64 installs
+              run: npm run verify:platform-install
 
             - name: Build
+              run: npm run build
+
+    native-arm64:
+        runs-on: ubuntu-24.04-arm
+        timeout-minutes: 20
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
+
+            - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: npm
+
+            - name: Use the repository npm version
+              run: npm install --global "npm@${NPM_VERSION}"
+
+            - name: Install ARM64 dependencies
+              run: npm ci --include=optional --strict-allow-scripts
+              env:
+                  CYPRESS_INSTALL_BINARY: "0"
+
+            - name: Verify native lockfile coverage
+              run: npm run verify:native-lock
+
+            - name: Build on ARM64
               run: npm run build
 
     container:
@@ -194,6 +288,12 @@ jobs:
         timeout-minutes: 20
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
+
+            - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
 
             - name: Build pinned production image
               run: |

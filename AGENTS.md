@@ -86,6 +86,7 @@ clearly identified as pending; do not fabricate placeholder assets.
 
 - Use the pinned npm toolchain and root `package-lock.json`; do not mix package
   managers.
+- Use Node `24.18.1` and npm `12.0.2` for local, CI, and container builds.
 - Keep manifests and the lockfile synchronized. Never hand-edit dependency
   resolutions.
 - When dependencies change, require a clean `npm ci` and `npm audit` before

@@ -6,6 +6,7 @@ import {
 	SITE_DESCRIPTION,
 	SITE_URL
 } from "@/modules/pageHead";
+import { serializeJsonLd } from "@/modules/serializeJsonLd";
 
 const siteUrl = import.meta.env.VITE_SITE_URL || SITE_URL;
 const route = useRoute();
@@ -118,7 +119,7 @@ useHead(
 			],
 			script: [
 				{
-					innerHTML: JSON.stringify(structuredData.value),
+					innerHTML: serializeJsonLd(structuredData.value),
 					key: "site-json-ld",
 					type: "application/ld+json"
 				}

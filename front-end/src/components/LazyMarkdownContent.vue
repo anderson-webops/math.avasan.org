@@ -24,6 +24,12 @@ interface MarkdownRendererInstance {
 	};
 }
 
+interface MarkdownRendererOptions {
+	breaks?: boolean;
+	html?: boolean;
+	linkify?: boolean;
+}
+
 let markdownRendererPromise: Promise<MarkdownRendererInstance> | null = null;
 
 function normalizeInlineCourseMarkdown(content: string) {
@@ -90,8 +96,9 @@ function getMarkdownRenderer() {
 			({ default: MarkdownIt }) => {
 				const markdown = new MarkdownIt({
 					breaks: true,
+					html: false,
 					linkify: true
-				}) as unknown as MarkdownRendererInstance;
+				} as MarkdownRendererOptions) as unknown as MarkdownRendererInstance;
 				const defaultTableOpen =
 					markdown.renderer.rules.table_open ??
 					((tokens, index, options, _env, self) =>

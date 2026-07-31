@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { defineAsyncComponent } from "vue";
+import { serializeJsonLd } from "@/modules/serializeJsonLd";
 
 defineOptions({ name: "MathCoursesPage" });
 
@@ -29,7 +30,7 @@ useHead({
 	link: [{ href: `${siteUrl}/courses`, rel: "canonical" }],
 	script: [
 		{
-			innerHTML: JSON.stringify({
+			innerHTML: serializeJsonLd({
 				"@context": "https://schema.org",
 				"@type": "ItemList",
 				itemListElement: courseNames.map((name, index) => ({

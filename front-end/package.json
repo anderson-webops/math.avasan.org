@@ -20,51 +20,72 @@
 		"test:unit": "vitest run",
 		"typecheck": "vue-tsc --noEmit",
 		"up": "npm exec --yes -- taze major -I",
-		"postinstall": "npx simple-git-hooks",
+		"postinstall": "simple-git-hooks",
 		"lint": "eslint \"src/**/*.{js,ts,vue}\"",
 		"lint-fix": "eslint \"src/**/*.{js,ts,vue}\" --fix"
 	},
 	"dependencies": {
-		"@unhead/vue": "^3.0.2",
-		"@vueuse/core": "^14.2.1",
+		"@unhead/vue": "^3.2.3",
+		"@vueuse/core": "^14.4.0",
 		"fflate": "^0.8.3",
-		"markdown-it": "^14.3.0",
+		"markdown-it": "^15.0.0",
 		"nprogress": "^0.2.0",
-		"pinia": "^3.0.4",
+		"pinia": "^4.0.2",
 		"vite-plugin-vue-layouts-next": "^2.1.0",
-		"vue": "^3.5.31",
-		"vue-router": "^5.0.4"
+		"vue": "^3.5.40",
+		"vue-router": "^5.2.0"
 	},
 	"devDependencies": {
-		"@types/node": "^25.6.0",
+		"@types/node": "^24.13.3",
 		"@types/nprogress": "^0.2.3",
-		"@vitejs/plugin-vue": "^6.0.6",
+		"@vitejs/plugin-vue": "^6.0.8",
 		"@vue/test-utils": "^2.4.11",
 		"beasties": "^0.4.3",
 		"cypress": "^15.19.0",
 		"eslint-plugin-format": "^2.0.1",
-		"lint-staged": "^16.4.0",
+		"lint-staged": "^17.2.0",
 		"simple-git-hooks": "^2.13.1",
 		"typescript-eslint": "^8.65.0",
 		"unplugin-auto-import": "^21.0.0",
-		"unplugin-vue-components": "^32.0.0",
-		"vite": "^8.0.8",
+		"unplugin-vue-components": "^32.1.0",
+		"vite": "^8.2.0",
 		"vite-ssg": "^28.3.0",
 		"vite-ssg-sitemap": "^0.10.0",
-		"vitest": "^4.1.5",
-		"vue-eslint-parser": "^10.4.0",
-		"vue-tsc": "^3.2.6"
+		"vitest": "^4.1.10",
+		"vue-eslint-parser": "^10.4.1",
+		"vue-tsc": "^3.3.8"
 	},
 	"optionalDependencies": {
-		"@oxc-resolver/binding-linux-arm64-gnu": "^11.17.0"
+		"@esbuild/linux-arm64": "0.28.1",
+		"@esbuild/linux-x64": "0.28.1",
+		"@oxc-parser/binding-linux-arm64-gnu": "0.140.0",
+		"@oxc-parser/binding-linux-arm64-musl": "0.140.0",
+		"@oxc-parser/binding-linux-x64-gnu": "0.140.0",
+		"@oxc-parser/binding-linux-x64-musl": "0.140.0",
+		"@oxc-resolver/binding-linux-arm64-gnu": "11.24.2",
+		"@oxc-resolver/binding-linux-arm64-musl": "11.24.2",
+		"@oxc-resolver/binding-linux-x64-gnu": "11.24.2",
+		"@oxc-resolver/binding-linux-x64-musl": "11.24.2",
+		"@oxfmt/binding-linux-arm64-gnu": "0.35.0",
+		"@oxfmt/binding-linux-arm64-musl": "0.35.0",
+		"@oxfmt/binding-linux-x64-gnu": "0.35.0",
+		"@oxfmt/binding-linux-x64-musl": "0.35.0",
+		"@rolldown/binding-linux-arm64-gnu": "1.2.1",
+		"@rolldown/binding-linux-arm64-musl": "1.2.1",
+		"@rolldown/binding-linux-x64-gnu": "1.2.1",
+		"@rolldown/binding-linux-x64-musl": "1.2.1",
+		"lightningcss-linux-arm64-gnu": "1.33.0",
+		"lightningcss-linux-arm64-musl": "1.33.0",
+		"lightningcss-linux-x64-gnu": "1.33.0",
+		"lightningcss-linux-x64-musl": "1.33.0"
 	},
 	"resolutions": {
-		"unplugin": "^3.0.0",
-		"vite": "^8.0.8",
-		"vue-router": "^5.0.4"
+		"unplugin": "^3.3.0",
+		"vite": "^8.2.0",
+		"vue-router": "^5.2.0"
 	},
 	"simple-git-hooks": {
-		"pre-commit": "npx lint-staged"
+		"pre-commit": "test -x ./node_modules/.bin/lint-staged || { echo 'lint-staged is not installed. Run npm install.'; exit 1; }; ./node_modules/.bin/lint-staged"
 	},
 	"lint-staged": {
 		"*.{ts,js,vue}": [

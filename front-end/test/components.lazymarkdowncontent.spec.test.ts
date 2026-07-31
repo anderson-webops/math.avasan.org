@@ -52,6 +52,27 @@ describe("LazyMarkdownContent.vue", () => {
 		);
 	});
 
+	it("escapes raw HTML and rejects executable link protocols", async () => {
+		const wrapper = mount(LazyMarkdownContent, {
+			props: {
+				content: [
+					"<img src=x onerror=alert(1)>",
+					"[unsafe](javascript:alert(1))"
+				].join("\n")
+			}
+		});
+
+		await flushPromises();
+		await vi.waitFor(() => {
+			expect(wrapper.text()).toContain("<img src=x onerror=alert(1)>");
+		});
+
+		expect(wrapper.find("img").exists()).toBe(false);
+		expect(wrapper.find("a").exists()).toBe(false);
+		expect(wrapper.html()).not.toContain("<img");
+		expect(wrapper.html()).not.toContain('href="javascript:');
+	});
+
 	it("formats compact inline course steps as readable markdown lists", async () => {
 		const wrapper = mount(LazyMarkdownContent, {
 			props: {
@@ -77,7 +98,9 @@ describe("LazyMarkdownContent.vue", () => {
 			"The normal path works.",
 			"One boundary case is tested."
 		]);
-		expect(wrapper.text()).toContain("Checkpoint: The game restarts cleanly.");
+		expect(wrapper.text()).toContain(
+			"Checkpoint: The game restarts cleanly."
+		);
 	});
 
 	it("does not split hyphenated project titles into fake bullet items", async () => {
