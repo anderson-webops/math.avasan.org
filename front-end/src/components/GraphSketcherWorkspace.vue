@@ -59,6 +59,7 @@ import {
 import {
 	evenlySampleSeriesIndexes,
 	GRAPH_SKETCHER_SESSION_STORAGE_KEY,
+	graphHistorySnapshotFits,
 	graphPngDimensions,
 	MAX_INTERACTIVE_GRAPH_POINTS,
 	pushBoundedGraphHistorySnapshot
@@ -129,6 +130,7 @@ let wheelBeforeSnapshot: string | undefined;
 let suppressSessionSave = false;
 let fileImportGeneration = 0;
 let fileImportController: AbortController | undefined;
+let graphRevision = 0;
 
 function handleInspectorTabKeydown(
 	event: KeyboardEvent,
@@ -231,59 +233,129 @@ const arePointHandlesSampled = computed(
 	() => visiblePointCount.value > MAX_INTERACTIVE_GRAPH_POINTS
 );
 
+function graphSeriesPointVisualPaths(series: GraphSeries) {
+	const markerSegments: string[] = [];
+	const errorBarSegments: string[] = [];
+	for (const point of series.points) {
+		const canvasPoint = graphPointToCanvas(graphDocument.value, point);
+		if (!canvasPoint.isValid) continue;
+
+		const { x, y } = canvasPoint;
+		const markerRadius =
+			series.markerShape === "circle" ||
+			series.markerShape === "triangle" ||
+			series.markerShape === "diamond"
+				? Math.max(1, series.markerSize / 2)
+				: series.markerSize / 2;
+		if (series.markerShape === "circle") {
+			markerSegments.push(
+				`M ${x - markerRadius} ${y} a ${markerRadius} ${markerRadius} 0 1 0 ${
+					markerRadius * 2
+				} 0 a ${markerRadius} ${markerRadius} 0 1 0 ${-markerRadius * 2} 0`
+			);
+		} else if (series.markerShape === "square") {
+			markerSegments.push(
+				`M ${x - markerRadius} ${y - markerRadius} H ${
+					x + markerRadius
+				} V ${y + markerRadius} H ${x - markerRadius} Z`
+			);
+		} else if (series.markerShape === "triangle") {
+			markerSegments.push(
+				`M ${x} ${y - markerRadius} L ${x + markerRadius} ${
+					y + markerRadius
+				} L ${x - markerRadius} ${y + markerRadius} Z`
+			);
+		} else if (series.markerShape === "diamond") {
+			markerSegments.push(
+				`M ${x} ${y - markerRadius} L ${x + markerRadius} ${y} L ${x} ${
+					y + markerRadius
+				} L ${x - markerRadius} ${y} Z`
+			);
+		} else if (series.markerShape === "cross") {
+			markerSegments.push(
+				`M ${x - markerRadius} ${y - markerRadius} L ${
+					x + markerRadius
+				} ${y + markerRadius} M ${x + markerRadius} ${
+					y - markerRadius
+				} L ${x - markerRadius} ${y + markerRadius}`
+			);
+		} else if (series.markerShape === "plus") {
+			markerSegments.push(
+				`M ${x - markerRadius} ${y} H ${x + markerRadius} M ${x} ${
+					y - markerRadius
+				} V ${y + markerRadius}`
+			);
+		}
+
+		if (point.xError) {
+			const start = graphPointToCanvas(graphDocument.value, {
+				x: point.x - point.xError,
+				y: point.y
+			});
+			const end = graphPointToCanvas(graphDocument.value, {
+				x: point.x + point.xError,
+				y: point.y
+			});
+			if (start.isValid && end.isValid) {
+				errorBarSegments.push(
+					`M ${start.x} ${y} H ${end.x} M ${start.x} ${y - 5} V ${
+						y + 5
+					} M ${end.x} ${y - 5} V ${y + 5}`
+				);
+			}
+		}
+		if (point.yError) {
+			const start = graphPointToCanvas(graphDocument.value, {
+				x: point.x,
+				y: point.y + point.yError
+			});
+			const end = graphPointToCanvas(graphDocument.value, {
+				x: point.x,
+				y: point.y - point.yError
+			});
+			if (start.isValid && end.isValid) {
+				errorBarSegments.push(
+					`M ${x} ${start.y} V ${end.y} M ${x - 5} ${start.y} H ${
+						x + 5
+					} M ${x - 5} ${end.y} H ${x + 5}`
+				);
+			}
+		}
+	}
+	return {
+		errorBarPath: errorBarSegments.join(" "),
+		markerPath: markerSegments.join(" ")
+	};
+}
+
 const renderedSeries = computed(() => {
 	const series = visibleSeries.value;
 	const sampledIndexes = evenlySampleSeriesIndexes(
 		series.map(item => item.points.length)
 	);
-	return series.map((item, seriesIndex) => ({
-		areaPath: graphSeriesAreaPath(graphDocument.value, item),
-		dashArray: graphLineDashArray(item.lineStyle),
-		path: graphSeriesPath(graphDocument.value, item),
-		points: sampledIndexes[seriesIndex]
-			.map(index => {
-				const point = item.points[index];
-				const canvasPoint = graphPointToCanvas(
-					graphDocument.value,
-					point
-				);
-				const xErrorStart = point.xError
-					? graphPointToCanvas(graphDocument.value, {
-							x: point.x - point.xError,
-							y: point.y
-						})
-					: undefined;
-				const xErrorEnd = point.xError
-					? graphPointToCanvas(graphDocument.value, {
-							x: point.x + point.xError,
-							y: point.y
-						})
-					: undefined;
-				const yErrorStart = point.yError
-					? graphPointToCanvas(graphDocument.value, {
-							x: point.x,
-							y: point.y + point.yError
-						})
-					: undefined;
-				const yErrorEnd = point.yError
-					? graphPointToCanvas(graphDocument.value, {
-							x: point.x,
-							y: point.y - point.yError
-						})
-					: undefined;
-				return {
-					canvasPoint,
-					index,
-					point,
-					xErrorStart,
-					xErrorEnd,
-					yErrorStart,
-					yErrorEnd
-				};
-			})
-			.filter(renderedPoint => renderedPoint.canvasPoint.isValid),
-		series: item
-	}));
+	return series.map((item, seriesIndex) => {
+		const visualPaths = graphSeriesPointVisualPaths(item);
+		return {
+			areaPath: graphSeriesAreaPath(graphDocument.value, item),
+			dashArray: graphLineDashArray(item.lineStyle),
+			path: graphSeriesPath(graphDocument.value, item),
+			points: sampledIndexes[seriesIndex]
+				.map(index => {
+					const point = item.points[index];
+					return {
+						canvasPoint: graphPointToCanvas(
+							graphDocument.value,
+							point
+						),
+						index,
+						point
+					};
+				})
+				.filter(renderedPoint => renderedPoint.canvasPoint.isValid),
+			series: item,
+			...visualPaths
+		};
+	});
 });
 
 const renderedAnnotations = computed(() =>
@@ -412,7 +484,9 @@ function hasGraphCapacity(
 }
 
 function pushUndoSnapshot(snapshot: string) {
+	if (undoStack.value.at(-1) === snapshot) return true;
 	pushBoundedGraphHistorySnapshot(undoStack.value, redoStack.value, snapshot);
+	return undoStack.value.at(-1) === snapshot;
 }
 
 function commitMutation(
@@ -439,8 +513,10 @@ function replaceDocument(next: GraphDocument, label: string) {
 	activeSeriesId.value = graphDocument.value.series[0].id;
 	selectedPoint.value = null;
 	selectedAnnotationId.value = null;
-	redoStack.value = [];
-	pushUndoSnapshot(before);
+	if (before !== graphSnapshot()) {
+		redoStack.value = [];
+		pushUndoSnapshot(before);
+	}
 	importWarnings.value = [];
 	statusMessage.value = label;
 }
@@ -461,11 +537,26 @@ function restoreSnapshot(snapshot: string) {
 function undo() {
 	const snapshot = undoStack.value.pop();
 	if (!snapshot) return;
-	pushBoundedGraphHistorySnapshot(
-		redoStack.value,
-		undoStack.value,
-		graphSnapshot()
-	);
+	const current = graphSnapshot();
+	if (!graphHistorySnapshotFits(current)) {
+		undoStack.value.push(snapshot);
+		statusMessage.value =
+			"This graph is too large to undo safely. Download it before making a smaller copy.";
+		return;
+	}
+	if (
+		redoStack.value.at(-1) !== current &&
+		!pushBoundedGraphHistorySnapshot(
+			redoStack.value,
+			undoStack.value,
+			current
+		)
+	) {
+		undoStack.value.push(snapshot);
+		statusMessage.value =
+			"The graph could not reserve enough browser memory for Undo.";
+		return;
+	}
 	restoreSnapshot(snapshot);
 	statusMessage.value = "Undid the last graph change.";
 }
@@ -473,7 +564,19 @@ function undo() {
 function redo() {
 	const snapshot = redoStack.value.pop();
 	if (!snapshot) return;
-	pushUndoSnapshot(graphSnapshot());
+	const current = graphSnapshot();
+	if (!graphHistorySnapshotFits(current)) {
+		redoStack.value.push(snapshot);
+		statusMessage.value =
+			"This graph is too large to redo safely. Download it before making a smaller copy.";
+		return;
+	}
+	if (!pushUndoSnapshot(current)) {
+		redoStack.value.push(snapshot);
+		statusMessage.value =
+			"The graph could not reserve enough browser memory for Redo.";
+		return;
+	}
 	restoreSnapshot(snapshot);
 	statusMessage.value = "Redid the graph change.";
 }
@@ -504,6 +607,10 @@ function scheduleSessionSave() {
 	saveTimer = setTimeout(saveSessionGraph, 250);
 }
 
+watch(graphDocument, () => (graphRevision += 1), {
+	deep: true,
+	flush: "sync"
+});
 watch(graphDocument, scheduleSessionSave, { deep: true });
 
 function loadSessionGraph() {
@@ -554,6 +661,7 @@ function cancelPendingFileImport() {
 }
 
 function newGraph() {
+	cancelPendingFileImport();
 	if (!isNewGraphConfirmationPending.value) {
 		isNewGraphConfirmationPending.value = true;
 		statusMessage.value =
@@ -568,7 +676,6 @@ function newGraph() {
 	}
 	if (newGraphConfirmationTimer) clearTimeout(newGraphConfirmationTimer);
 	isNewGraphConfirmationPending.value = false;
-	cancelPendingFileImport();
 	replaceDocument(createBlankGraphDocument(), "Started a blank graph.");
 }
 
@@ -749,6 +856,11 @@ function addEditablePoint(point: { x: number; y: number }) {
 	return true;
 }
 
+function lockCanvasInteraction(event: Event) {
+	if (event.cancelable) event.preventDefault();
+	event.stopPropagation();
+}
+
 function onCanvasPointerDown(event: PointerEvent) {
 	const canvasPoint = pointerCanvasPosition(event);
 	if (!canvasPoint || !isInsidePlot(canvasPoint)) return;
@@ -756,6 +868,7 @@ function onCanvasPointerDown(event: PointerEvent) {
 	selectedAnnotationId.value = null;
 
 	if (activeTool.value === "point") {
+		lockCanvasInteraction(event);
 		const graphPoint = canvasPointToGraph(
 			graphDocument.value,
 			canvasPoint.x,
@@ -766,6 +879,7 @@ function onCanvasPointerDown(event: PointerEvent) {
 	}
 
 	if (activeTool.value === "text") {
+		lockCanvasInteraction(event);
 		if (!hasGraphCapacity({ annotations: 1 })) return;
 		const graphPoint = canvasPointToGraph(
 			graphDocument.value,
@@ -794,6 +908,7 @@ function onCanvasPointerDown(event: PointerEvent) {
 	}
 
 	if (activeTool.value === "draw") {
+		lockCanvasInteraction(event);
 		if (!hasGraphCapacity({ points: 1, series: 1 })) return;
 		const before = graphSnapshot();
 		const graphPoint = canvasPointToGraph(
@@ -826,6 +941,7 @@ function onCanvasPointerDown(event: PointerEvent) {
 	}
 
 	if (activeTool.value === "pan") {
+		lockCanvasInteraction(event);
 		pointerGesture.value = {
 			kind: "pan",
 			pointerId: event.pointerId,
@@ -863,6 +979,7 @@ function onPointPointerDown(
 	selectedPoint.value = { seriesId, index };
 	selectedAnnotationId.value = null;
 	if (activeTool.value !== "select") return;
+	lockCanvasInteraction(event);
 	const point = pointerCanvasPosition(event);
 	if (!point) return;
 	pointerGesture.value = {
@@ -884,6 +1001,7 @@ function onAnnotationPointerDown(event: PointerEvent, annotationId: string) {
 	selectedPoint.value = null;
 	inspectorTab.value = "graph";
 	if (activeTool.value !== "select") return;
+	lockCanvasInteraction(event);
 	const point = pointerCanvasPosition(event);
 	if (!point) return;
 	pointerGesture.value = {
@@ -910,6 +1028,7 @@ function onCanvasPointerMove(event: PointerEvent) {
 	)}`;
 	const gesture = pointerGesture.value;
 	if (!gesture || gesture.pointerId !== event.pointerId) return;
+	lockCanvasInteraction(event);
 
 	if (gesture.kind === "point" && gesture.seriesId !== undefined) {
 		const series = graphDocument.value.series.find(
@@ -989,6 +1108,7 @@ function onCanvasPointerMove(event: PointerEvent) {
 function finishPointerGesture(event: PointerEvent) {
 	const gesture = pointerGesture.value;
 	if (!gesture || gesture.pointerId !== event.pointerId) return;
+	lockCanvasInteraction(event);
 	const after = graphSnapshot();
 	if (gesture.before !== after) {
 		redoStack.value = [];
@@ -1007,6 +1127,7 @@ function finishPointerGesture(event: PointerEvent) {
 }
 
 function onCanvasWheel(event: WheelEvent) {
+	lockCanvasInteraction(event);
 	const canvasPoint = pointerCanvasPosition(event);
 	if (!canvasPoint || !isInsidePlot(canvasPoint)) return;
 	svgElement.value?.focus();
@@ -1533,9 +1654,17 @@ async function handleFileSelection(event: Event) {
 	const importController = new AbortController();
 	fileImportController = importController;
 	const currentImportGeneration = ++fileImportGeneration;
-	const isCurrentImport = () =>
-		currentImportGeneration === fileImportGeneration &&
-		!importController.signal.aborted;
+	const graphRevisionAtImportStart = graphRevision;
+	const ownsCurrentImport = () =>
+		currentImportGeneration === fileImportGeneration;
+	const shouldDiscardImport = () => {
+		if (!ownsCurrentImport() || importController.signal.aborted)
+			return true;
+		if (graphRevision === graphRevisionAtImportStart) return false;
+		statusMessage.value =
+			"The graph changed while the file was opening, so the import was not applied.";
+		return true;
+	};
 	importWarnings.value = [];
 	try {
 		if (file.size > MAX_GRAPH_DOCUMENT_BYTES) {
@@ -1545,7 +1674,7 @@ async function handleFileSelection(event: Event) {
 		}
 		if (/\.(?:csv|tsv)$/i.test(file.name)) {
 			const text = await file.text();
-			if (!isCurrentImport()) return;
+			if (shouldDiscardImport()) return;
 			pastedData.value = text;
 			inspectorTab.value = "data";
 			importPastedData();
@@ -1553,13 +1682,13 @@ async function handleFileSelection(event: Event) {
 		}
 		if (/\.ograph$/i.test(file.name)) {
 			const fileBytes = new Uint8Array(await file.arrayBuffer());
-			if (!isCurrentImport()) return;
+			if (shouldDiscardImport()) return;
 			const imported = await importLegacyGraphSketcherDocument(
 				fileBytes,
 				titleFromFileName(file.name),
 				importController.signal
 			);
-			if (!isCurrentImport()) return;
+			if (shouldDiscardImport()) return;
 			replaceDocument(
 				imported.document,
 				`Imported ${file.name} without modifying the original file.`
@@ -1568,17 +1697,18 @@ async function handleFileSelection(event: Event) {
 			return;
 		}
 		const text = await file.text();
-		if (!isCurrentImport()) return;
+		if (shouldDiscardImport()) return;
 		const next = graphDocumentFromJson(text);
+		if (shouldDiscardImport()) return;
 		replaceDocument(next, `Opened ${file.name}.`);
 	} catch (error) {
-		if (!isCurrentImport()) return;
+		if (shouldDiscardImport()) return;
 		statusMessage.value =
 			error instanceof Error
 				? error.message
 				: `Could not open ${file.name}.`;
 	} finally {
-		if (isCurrentImport()) fileImportController = undefined;
+		if (ownsCurrentImport()) fileImportController = undefined;
 	}
 }
 
@@ -1670,23 +1800,6 @@ function exportCsv() {
 		)
 	);
 	statusMessage.value = "Exported graph data as CSV.";
-}
-
-function markerPolygon(
-	shape: GraphMarkerShape,
-	x: number,
-	y: number,
-	size: number
-) {
-	const radius = Math.max(1, size / 2);
-	if (shape === "triangle") {
-		return `${x},${y - radius} ${x + radius},${y + radius} ${
-			x - radius
-		},${y + radius}`;
-	}
-	return `${x},${y - radius} ${x + radius},${y} ${x},${y + radius} ${
-		x - radius
-	},${y}`;
 }
 
 function annotationRectangle(
@@ -1890,7 +2003,8 @@ onBeforeUnmount(() => {
 
 				<p class="graph-tools__hint">
 					Canvas focus captures arrows, space, Page Up, and Page Down
-					so the page does not scroll while editing.
+					so the page does not scroll while editing. Wheel zoom and
+					pointer drags also stay inside the canvas.
 				</p>
 			</aside>
 
@@ -1903,13 +2017,18 @@ onBeforeUnmount(() => {
 					<p>{{ coordinatesText }}</p>
 				</div>
 
-				<div class="graph-canvas-shell">
+				<div
+					class="graph-canvas-shell"
+					@dragstart.stop.prevent
+					@wheel.stop.prevent="onCanvasWheel"
+				>
 					<svg
 						ref="svgElement"
 						class="graph-canvas"
 						:class="`tool-${activeTool}`"
 						:viewBox="`0 0 ${graphDocument.canvas.width} ${graphDocument.canvas.height}`"
 						:aria-label="graphAriaLabel"
+						draggable="false"
 						role="img"
 						tabindex="0"
 						@keydown="onCanvasKeyDown"
@@ -1917,7 +2036,6 @@ onBeforeUnmount(() => {
 						@pointerdown="onCanvasPointerDown"
 						@pointermove="onCanvasPointerMove"
 						@pointerup="finishPointerGesture"
-						@wheel.prevent="onCanvasWheel"
 					>
 						<title>{{ graphDocument.title }}</title>
 						<desc>
@@ -2048,6 +2166,34 @@ onBeforeUnmount(() => {
 									:stroke-dasharray="rendered.dashArray"
 									:stroke-width="rendered.series.strokeWidth"
 								/>
+								<path
+									v-if="rendered.errorBarPath"
+									class="graph-series__error-bars"
+									:d="rendered.errorBarPath"
+									fill="none"
+									:stroke="rendered.series.color"
+									aria-hidden="true"
+								/>
+								<path
+									v-if="rendered.markerPath"
+									class="graph-series__markers"
+									:d="rendered.markerPath"
+									:fill="
+										['cross', 'plus'].includes(
+											rendered.series.markerShape
+										)
+											? 'none'
+											: rendered.series.color
+									"
+									:stroke="
+										['cross', 'plus'].includes(
+											rendered.series.markerShape
+										)
+											? rendered.series.color
+											: 'none'
+									"
+									aria-hidden="true"
+								/>
 
 								<g
 									v-for="point in rendered.points"
@@ -2067,63 +2213,6 @@ onBeforeUnmount(() => {
 										)
 									"
 								>
-									<g
-										class="graph-error-bars"
-										fill="none"
-										:stroke="rendered.series.color"
-									>
-										<template
-											v-if="
-												point.xErrorStart?.isValid &&
-												point.xErrorEnd?.isValid
-											"
-										>
-											<line
-												:x1="point.xErrorStart.x"
-												:x2="point.xErrorEnd.x"
-												:y1="point.canvasPoint.y"
-												:y2="point.canvasPoint.y"
-											/>
-											<line
-												:x1="point.xErrorStart.x"
-												:x2="point.xErrorStart.x"
-												:y1="point.canvasPoint.y - 5"
-												:y2="point.canvasPoint.y + 5"
-											/>
-											<line
-												:x1="point.xErrorEnd.x"
-												:x2="point.xErrorEnd.x"
-												:y1="point.canvasPoint.y - 5"
-												:y2="point.canvasPoint.y + 5"
-											/>
-										</template>
-										<template
-											v-if="
-												point.yErrorStart?.isValid &&
-												point.yErrorEnd?.isValid
-											"
-										>
-											<line
-												:x1="point.canvasPoint.x"
-												:x2="point.canvasPoint.x"
-												:y1="point.yErrorStart.y"
-												:y2="point.yErrorEnd.y"
-											/>
-											<line
-												:x1="point.canvasPoint.x - 5"
-												:x2="point.canvasPoint.x + 5"
-												:y1="point.yErrorStart.y"
-												:y2="point.yErrorStart.y"
-											/>
-											<line
-												:x1="point.canvasPoint.x - 5"
-												:x2="point.canvasPoint.x + 5"
-												:y1="point.yErrorEnd.y"
-												:y2="point.yErrorEnd.y"
-											/>
-										</template>
-									</g>
-
 									<circle
 										class="graph-point__hit"
 										:cx="point.canvasPoint.x"
@@ -2134,132 +2223,6 @@ onBeforeUnmount(() => {
 												rendered.series.markerSize
 											)
 										"
-									/>
-									<circle
-										v-if="
-											rendered.series.markerShape ===
-											'circle'
-										"
-										:cx="point.canvasPoint.x"
-										:cy="point.canvasPoint.y"
-										:r="
-											Math.max(
-												1,
-												rendered.series.markerSize / 2
-											)
-										"
-										:fill="rendered.series.color"
-									/>
-									<rect
-										v-else-if="
-											rendered.series.markerShape ===
-											'square'
-										"
-										:x="
-											point.canvasPoint.x -
-											rendered.series.markerSize / 2
-										"
-										:y="
-											point.canvasPoint.y -
-											rendered.series.markerSize / 2
-										"
-										:width="rendered.series.markerSize"
-										:height="rendered.series.markerSize"
-										:fill="rendered.series.color"
-									/>
-									<polygon
-										v-else-if="
-											['triangle', 'diamond'].includes(
-												rendered.series.markerShape
-											)
-										"
-										:points="
-											markerPolygon(
-												rendered.series.markerShape,
-												point.canvasPoint.x,
-												point.canvasPoint.y,
-												rendered.series.markerSize
-											)
-										"
-										:fill="rendered.series.color"
-									/>
-									<path
-										v-else-if="
-											['cross', 'plus'].includes(
-												rendered.series.markerShape
-											)
-										"
-										:d="
-											rendered.series.markerShape ===
-											'cross'
-												? `M ${
-														point.canvasPoint.x -
-														rendered.series
-															.markerSize /
-															2
-													} ${
-														point.canvasPoint.y -
-														rendered.series
-															.markerSize /
-															2
-													} L ${
-														point.canvasPoint.x +
-														rendered.series
-															.markerSize /
-															2
-													} ${
-														point.canvasPoint.y +
-														rendered.series
-															.markerSize /
-															2
-													} M ${
-														point.canvasPoint.x +
-														rendered.series
-															.markerSize /
-															2
-													} ${
-														point.canvasPoint.y -
-														rendered.series
-															.markerSize /
-															2
-													} L ${
-														point.canvasPoint.x -
-														rendered.series
-															.markerSize /
-															2
-													} ${
-														point.canvasPoint.y +
-														rendered.series
-															.markerSize /
-															2
-													}`
-												: `M ${
-														point.canvasPoint.x -
-														rendered.series
-															.markerSize /
-															2
-													} ${point.canvasPoint.y} L ${
-														point.canvasPoint.x +
-														rendered.series
-															.markerSize /
-															2
-													} ${point.canvasPoint.y} M ${
-														point.canvasPoint.x
-													} ${
-														point.canvasPoint.y -
-														rendered.series
-															.markerSize /
-															2
-													} L ${point.canvasPoint.x} ${
-														point.canvasPoint.y +
-														rendered.series
-															.markerSize /
-															2
-													}`
-										"
-										fill="none"
-										:stroke="rendered.series.color"
-										stroke-width="2"
 									/>
 									<text
 										v-if="point.point.label"
@@ -2424,10 +2387,10 @@ onBeforeUnmount(() => {
 				</div>
 
 				<p v-if="arePointHandlesSampled" class="graph-sampling-notice">
-					Point handles are evenly sampled to keep editing responsive.
-					All
-					{{ visiblePointCount.toLocaleString() }} points remain in
-					the graph paths, saved data, and exports.
+					Editing handles and point labels are evenly sampled to keep
+					the canvas responsive. Lines, markers, and error bars still
+					use all {{ visiblePointCount.toLocaleString() }} points;
+					saved data and exports remain complete.
 				</p>
 
 				<div class="graph-status" role="status" aria-live="polite">
@@ -3622,9 +3585,14 @@ onBeforeUnmount(() => {
 	font-size: 12px !important;
 }
 
-.graph-error-bars {
+.graph-series__error-bars,
+.graph-series__markers {
 	stroke-width: 1.25;
 	pointer-events: none;
+}
+
+.graph-series__markers {
+	stroke-width: 2;
 }
 
 .graph-annotation {

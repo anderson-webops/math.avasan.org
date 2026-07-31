@@ -131,7 +131,7 @@ describe("privacy-first Math classroom usage", () => {
 	});
 
 	it("fails closed when tab-local deduplication is unavailable", async () => {
-		vi.spyOn(Storage.prototype, "getItem").mockImplementationOnce(() => {
+		vi.spyOn(window, "sessionStorage", "get").mockImplementation(() => {
 			throw new Error("storage unavailable");
 		});
 
