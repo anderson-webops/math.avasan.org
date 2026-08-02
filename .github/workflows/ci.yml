@@ -165,6 +165,9 @@ jobs:
               env:
                   CYPRESS_INSTALL_BINARY: "0"
 
+            - name: Test static media request retries
+              run: npm run test:static-media-request
+
             - name: Audit static course media
               run: npm run audit:static-media
 
