@@ -84,14 +84,13 @@ identifiers. The reviewed state is committed in
 with a different tracking setting. Graph contents remain in the current browser
 tab unless the student downloads a project.
 
-Production serves the repository's exact built static output through Nginx.
-The current collection-disabled release may be served directly by the host
-virtual server or through the repository's static Nginx container, provided
-both enforce the same security, release-identity, API, and strict-404
-boundaries. If aggregate collection is enabled, the reviewed container supplies
-the bounded, credential-stripping proxy. Netlify is not supported. Build
-identity, host requirements, versioned image publishing, and the required
-public verification gate are documented in
+Production serves the repository's exact built static output through the
+native Nginx host and atomic release symlink. Docker, container registries,
+Netlify, and alternate build paths are not supported. The checked-in native
+policy supplies the strict API boundary and the dormant, credential-stripping
+usage proxy selected only from committed source. Build identity, host
+requirements, atomic promotion, and the required public verification gate are
+documented in
 [`docs/production-deployment.md`](docs/production-deployment.md).
 
 The independent browser adaptation of GraphSketcher is distributed under its

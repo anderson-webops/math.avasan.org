@@ -57,8 +57,8 @@ describe("Graph Sketcher runtime boundary", () => {
 			resolve(process.cwd(), "vite.config.mts"),
 			"utf8"
 		);
-		const dockerfile = readFileSync(
-			resolve(process.cwd(), "../Dockerfile"),
+		const nativePolicy = readFileSync(
+			resolve(process.cwd(), "../deploy/nginx/server-policy.conf"),
 			"utf8"
 		);
 
@@ -66,6 +66,7 @@ describe("Graph Sketcher runtime boundary", () => {
 		expect(rootPackage.scripts).not.toHaveProperty("server");
 		expect(viteConfig).not.toContain('"/api"');
 		expect(viteConfig).not.toContain("VITE_API_PROXY_TARGET");
-		expect(dockerfile).not.toContain("back-end");
+		expect(nativePolicy).not.toContain("back-end");
+		expect(nativePolicy).not.toContain("proxy_pass http://");
 	});
 });

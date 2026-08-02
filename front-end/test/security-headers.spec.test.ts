@@ -35,9 +35,21 @@ describe("production browser security policy", () => {
 		);
 	});
 
-	it("uses the restrictive frame and script policy on the container host", () => {
+	it("ships a small branded page for true 404 responses", () => {
+		const notFound = readFileSync(
+			resolve(process.cwd(), "public/404.html"),
+			"utf8"
+		);
+
+		expect(notFound).toContain("Page not found");
+		expect(notFound).toContain("Math with Julio");
+		expect(notFound).toContain('href="/"');
+		expect(notFound).not.toMatch(/<script\b/i);
+	});
+
+	it("uses the restrictive frame and script policy on the native host", () => {
 		const nginx = readFileSync(
-			resolve(process.cwd(), "../nginx/default.conf"),
+			resolve(process.cwd(), "../deploy/nginx/server-policy.conf"),
 			"utf8"
 		);
 
@@ -52,30 +64,21 @@ describe("production browser security policy", () => {
 
 	it("keeps one production build and excludes unsupported deploy configurations", () => {
 		const repositoryRoot = resolve(process.cwd(), "..");
-		const dockerIgnore = readFileSync(
-			resolve(repositoryRoot, ".dockerignore"),
-			"utf8"
-		);
-		const dockerfile = readFileSync(
-			resolve(repositoryRoot, "Dockerfile"),
-			"utf8"
-		);
 
 		expect(existsSync(resolve(repositoryRoot, "netlify.toml"))).toBe(false);
-		expect(dockerIgnore).toContain("**/.env");
-		expect(dockerIgnore).toContain(".git");
-		expect(dockerIgnore).toContain("**/node_modules");
-		expect(dockerfile.match(/^FROM .+@sha256:[0-9a-f]{64}/gm)).toHaveLength(
-			2
-		);
-		expect(dockerfile).toContain("ARG SOURCE_REVISION\n");
-		expect(dockerfile).not.toContain("SOURCE_REVISION=unknown");
-		expect(dockerfile).toContain(`require("./package.json").version`);
-		expect(dockerfile).toContain(
-			`declaredVersion.replace(/^v/, "") !== packageVersion`
-		);
-		expect(dockerfile).toContain("/^[0-9a-f]{40}$/");
-		expect(dockerfile).toContain("\nUSER 101\n");
+		expect(existsSync(resolve(repositoryRoot, "Dockerfile"))).toBe(false);
+		expect(existsSync(resolve(repositoryRoot, ".dockerignore"))).toBe(false);
+		expect(
+			existsSync(
+				resolve(repositoryRoot, ".github/workflows/release-container.yml")
+			)
+		).toBe(false);
+		expect(
+			existsSync(resolve(repositoryRoot, "deploy/direct/prepare-static-release.sh"))
+		).toBe(true);
+		expect(
+			existsSync(resolve(repositoryRoot, "deploy/direct/promote-static-release.sh"))
+		).toBe(true);
 	});
 
 	it("keeps direct host-static serving equivalent and collection-disabled", () => {
@@ -92,12 +95,10 @@ describe("production browser security policy", () => {
 		expect(deploymentGuide).toContain(
 			"one reviewed static build output: `front-end/dist`"
 		);
-		expect(deploymentGuide).toContain(
-			"Direct host-static serving is supported only while the committed"
+		expect(deploymentGuide).toMatch(
+			/The native host is\s+the only supported production serving path/
 		);
-		expect(deploymentGuide).toContain(
-			"`classroomUsageEnabled` value is `false`"
-		);
+		expect(deploymentGuide).toContain("`classroomUsageEnabled`");
 		expect(deploymentGuide).toContain("use `try_files $uri $uri/ =404;`");
 		expect(deploymentGuide).toContain(
 			"return `404` for `/api`, every `/api/` path"
@@ -133,26 +134,22 @@ describe("production browser security policy", () => {
 		}
 	});
 
-	it("keeps the optional usage proxy isolated from static-site startup", () => {
+	it("keeps the optional usage route isolated and source-controlled", () => {
 		const nginx = readFileSync(
-			resolve(process.cwd(), "../nginx/default.conf"),
+			resolve(process.cwd(), "../deploy/nginx/server-policy.conf"),
 			"utf8"
 		);
 		const enabledProxy = readFileSync(
-			resolve(process.cwd(), "../nginx/classroom-usage-enabled.inc"),
+			resolve(process.cwd(), "../deploy/nginx/classroom-usage-enabled.inc"),
 			"utf8"
 		);
 
 		expect(nginx).toContain("location = /api/classroom-usage");
 		expect(nginx).toContain(
-			"include /etc/nginx/conf.d/classroom-usage.inc;"
+			"include /srv/math.avasan.org/current/.math-classroom-usage.inc;"
 		);
-		expect(enabledProxy).toContain("resolver 127.0.0.11");
-		expect(enabledProxy).toContain("resolver_timeout 2s;");
+		expect(enabledProxy).not.toContain("resolver 127.0.0.11");
 		expect(enabledProxy).toContain(
-			"proxy_pass $classroom_usage_origin/api/classroom-usage;"
-		);
-		expect(enabledProxy).not.toContain(
 			"proxy_pass https://cs.avasan.org/api/classroom-usage;"
 		);
 		expect(enabledProxy).toContain("proxy_next_upstream off;");
@@ -160,11 +157,11 @@ describe("production browser security policy", () => {
 
 	it("verifies the upstream certificate and strips credentials", () => {
 		const nginx = readFileSync(
-			resolve(process.cwd(), "../nginx/default.conf"),
+			resolve(process.cwd(), "../deploy/nginx/server-policy.conf"),
 			"utf8"
 		);
 		const enabledProxy = readFileSync(
-			resolve(process.cwd(), "../nginx/classroom-usage-enabled.inc"),
+			resolve(process.cwd(), "../deploy/nginx/classroom-usage-enabled.inc"),
 			"utf8"
 		);
 
@@ -208,14 +205,10 @@ describe("production browser security policy", () => {
 		expect(nginx).toContain("location = /api");
 	});
 
-	it("bakes the usage proxy state into the same immutable image metadata", () => {
+	it("bakes the usage proxy state into the same immutable native release", () => {
 		const repositoryRoot = resolve(process.cwd(), "..");
-		const dockerfile = readFileSync(
-			resolve(repositoryRoot, "Dockerfile"),
-			"utf8"
-		);
-		const releaseWorkflow = readFileSync(
-			resolve(repositoryRoot, ".github/workflows/release-container.yml"),
+		const prepareRelease = readFileSync(
+			resolve(repositoryRoot, "deploy/direct/prepare-static-release.sh"),
 			"utf8"
 		);
 		const deploymentConfig = JSON.parse(
@@ -228,29 +221,22 @@ describe("production browser security policy", () => {
 			)
 		) as { classroomUsageEnabled: unknown };
 		const disabledProxy = readFileSync(
-			resolve(repositoryRoot, "nginx/classroom-usage-disabled.inc"),
+			resolve(repositoryRoot, "deploy/nginx/classroom-usage-disabled.inc"),
 			"utf8"
 		);
 
 		expect(deploymentConfig.classroomUsageEnabled).toBe(false);
-		expect(dockerfile).toContain(
+		expect(prepareRelease).toContain(
 			"front-end/src/config/classroom-usage.json"
 		);
-		expect(dockerfile).toContain(
-			"nginx/classroom-usage-${usage_proxy_mode}.inc"
+		expect(prepareRelease).toContain(
+			"deploy/nginx/classroom-usage-${usage_mode}.inc"
 		);
-		expect(dockerfile).toContain("/etc/nginx/conf.d/classroom-usage.inc");
+		expect(prepareRelease).toContain(".math-classroom-usage.inc");
+		expect(prepareRelease).toContain(".math-static-release.json");
 		expect(disabledProxy.trim()).toBe("return 404;");
 		expect(disabledProxy).not.toContain("proxy_pass");
-		expect(dockerfile).not.toContain("ARG VITE_CLASSROOM_USAGE_ENABLED");
-		expect(releaseWorkflow).not.toContain(
-			"vars.MATH_CLASSROOM_USAGE_ENABLED"
-		);
-		expect(releaseWorkflow).toContain("group: math-production-release");
-		expect(releaseWorkflow).not.toContain(
-			"math-production-release-${{ github.ref }}"
-		);
-		expect(releaseWorkflow).toContain("flavor: latest=false");
+		expect(prepareRelease).not.toContain("VITE_CLASSROOM_USAGE_ENABLED");
 	});
 
 	it("derives CI release identity from the package and rejects unknown revisions", () => {
@@ -271,9 +257,7 @@ describe("production browser security policy", () => {
 			"utf8"
 		);
 
-		expect(continuousIntegration).toContain(
-			`node -p "require('./package.json').version"`
-		);
+		expect(continuousIntegration).toContain("SOURCE_REVISION: ${{ github.sha }}");
 		expect(continuousIntegration).not.toContain(
 			"MATH_RELEASE_VERSION=1.0.0"
 		);
@@ -287,24 +271,36 @@ describe("production browser security policy", () => {
 	});
 
 	it("marks the Admin handoff noindex in the redirect response", () => {
-		const nginx = readFileSync(
-			resolve(process.cwd(), "../nginx/default.conf"),
+		const serverPolicy = readFileSync(
+			resolve(process.cwd(), "../deploy/nginx/server-policy.conf"),
+			"utf8"
+		);
+		const maps = readFileSync(
+			resolve(process.cwd(), "../deploy/nginx/http-maps.conf"),
 			"utf8"
 		);
 
-		expect(nginx).toContain('/admin "noindex, nofollow, noarchive";');
-		expect(nginx).toContain("add_header X-Robots-Tag");
-		expect(nginx).toContain("return 302 https://cs.avasan.org/admin;");
+		expect(maps).toContain('/admin "noindex, nofollow, noarchive";');
+		expect(maps).toContain('/admin "no-store";');
+		expect(serverPolicy).toContain("add_header X-Robots-Tag");
+		expect(serverPolicy).toContain("add_header Cache-Control");
+		expect(serverPolicy).toContain("return 302 https://cs.avasan.org/admin;");
 	});
 
 	it("serves release identity without caching it", () => {
-		const nginx = readFileSync(
-			resolve(process.cwd(), "../nginx/default.conf"),
+		const serverPolicy = readFileSync(
+			resolve(process.cwd(), "../deploy/nginx/server-policy.conf"),
+			"utf8"
+		);
+		const maps = readFileSync(
+			resolve(process.cwd(), "../deploy/nginx/http-maps.conf"),
 			"utf8"
 		);
 
-		expect(nginx).toContain('/release.json "no-store";');
-		expect(nginx).toContain("add_header Cache-Control");
-		expect(nginx).toContain("location = /release.json");
+		expect(maps).toContain('/release.json "no-store";');
+		expect(serverPolicy).toContain("add_header Cache-Control");
+		expect(serverPolicy).toContain("location = /release.json");
+		expect(serverPolicy).toContain("error_page 404 /404.html;");
+		expect(serverPolicy).toContain("internal;");
 	});
 });

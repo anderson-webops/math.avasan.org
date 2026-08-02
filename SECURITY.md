@@ -34,6 +34,6 @@ attempting to access the classroom Admin without authorization.
 Security releases require a clean locked install, full and production-only
 dependency audits, registry-signature verification, dependency-tree and Linux
 ARM64 native-package checks, lint, typecheck, unit/browser/accessibility tests,
-static build verification, container policy checks, and secret scanning. A
+static build and native-host policy checks, and secret scanning. A
 source release and a live deployment are separate states; the live release is
 confirmed only when the public post-deployment probe passes.

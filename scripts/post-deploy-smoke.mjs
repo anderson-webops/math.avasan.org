@@ -76,6 +76,14 @@ function verifySecurityHeaders(response) {
 		response.headers.get("strict-transport-security")?.includes("max-age=31536000"),
 		"The homepage is missing HSTS."
 	);
+	assertion(
+		response.headers.get("cross-origin-opener-policy") === "same-origin",
+		"The homepage is missing Cross-Origin-Opener-Policy."
+	);
+	assertion(
+		response.headers.get("cross-origin-resource-policy") === "same-origin",
+		"The homepage is missing Cross-Origin-Resource-Policy."
+	);
 }
 
 async function verifyReleaseIdentity() {
@@ -121,6 +129,10 @@ async function verifyAdminHandoff() {
 		response.headers.get("x-robots-tag")?.toLowerCase().includes("noindex"),
 		"/admin is missing its noindex response header."
 	);
+	assertion(
+		response.headers.get("cache-control")?.toLowerCase().includes("no-store"),
+		"/admin must not be cached."
+	);
 }
 
 async function verifyUnknownRouteBoundary() {
@@ -141,6 +153,10 @@ async function verifyUnknownRouteBoundary() {
 		assertion(
 			response.headers.get("set-cookie") === null,
 			`${path} returned a cookie.`
+		);
+		assertion(
+			(await response.text()).includes("Page not found"),
+			`${path} did not return the branded Math 404 page.`
 		);
 	}
 }

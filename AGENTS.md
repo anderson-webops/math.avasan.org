@@ -48,8 +48,7 @@ decision.
 - Do not recreate upstream tags. Make a downstream release tag only when the
   user explicitly requests a validated release.
 - Release only an annotated semver tag at the exact `origin/main` revision.
-  Never overwrite an existing semver or source-revision image tag, and do not
-  publish a floating `latest` tag.
+  Never overwrite an existing semver tag.
 - Preserve unrelated work already present in the working tree.
 
 After a coherent change is validated, commit it with a concise present-tense
@@ -66,17 +65,15 @@ only possible `/api` route is the cookie-stripping same-origin proxy for the
 bounded anonymous usage endpoint described above.
 
 The reviewed production source is the exact `front-end/dist` output built with
-its release identity. It may be served by the unprivileged static Nginx
-container or directly by the host's TLS Nginx virtual host. Direct host-static
-serving is supported only while the committed aggregate-usage setting is
-disabled; it must return `404` for every `/api` request and match the
-container's security headers, Admin handoff, no-store release metadata, strict
-unknown-route behavior, and logging policy. If aggregate usage is enabled, use
-the reviewed container proxy unless an equivalent host proxy receives a
-separate security review.
+its release identity and served by the native TLS Nginx virtual host through an
+atomic release symlink. It must return `404` for every undeclared `/api`
+request and match the checked-in security headers, Admin handoff, no-store
+release metadata, branded true-404 behavior, and logging policy. The optional
+usage proxy is a native include selected solely from committed source.
 
-Do not add Netlify or another build/deployment configuration that can produce
-different files or behavior from the same release source.
+Do not add Docker, a container registry, Netlify, or another deployment
+configuration that can produce different files or behavior from the same
+release source.
 
 Math course media remains sourced from
 `https://static.classes.jacobdanderson.net`. Missing upstream media must remain
@@ -86,7 +83,7 @@ clearly identified as pending; do not fabricate placeholder assets.
 
 - Use the pinned npm toolchain and root `package-lock.json`; do not mix package
   managers.
-- Use Node `24.18.1` and npm `12.0.2` for local, CI, and container builds.
+- Use Node `24.18.1` and npm `12.0.2` for local, CI, and production builds.
 - Keep manifests and the lockfile synchronized. Never hand-edit dependency
   resolutions.
 - When dependencies change, require a clean `npm ci` and `npm audit` before

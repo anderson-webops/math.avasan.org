@@ -283,7 +283,7 @@ jobs:
             - name: Build on ARM64
               run: npm run build
 
-    container:
+    native-static-runtime:
         runs-on: ubuntu-latest
         timeout-minutes: 20
         steps:
@@ -294,87 +294,30 @@ jobs:
             - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
                   node-version: ${{ env.NODE_VERSION }}
+                  cache: npm
 
-            - name: Build pinned production image
+            - name: Use the repository npm version
+              run: npm install --global "npm@${NPM_VERSION}"
+
+            - name: Install dependencies
+              run: npm ci --include=optional --strict-allow-scripts
+              env:
+                  CYPRESS_INSTALL_BINARY: "0"
+
+            - name: Build the native static release
+              env:
+                  SOURCE_REVISION: ${{ github.sha }}
+              run: npm run build
+
+            - name: Verify native deployment contracts
               run: |
-                  MATH_RELEASE_VERSION="$(
-                    node -p "require('./package.json').version"
-                  )"
-                  docker build \
-                    --build-arg MATH_RELEASE_VERSION="${MATH_RELEASE_VERSION}" \
-                    --build-arg SOURCE_REVISION=0000000000000000000000000000000000000000 \
-                    --build-arg SOURCE_DATE_EPOCH=0 \
-                    --tag math-avasan:test \
-                    .
-
-            - name: Exercise read-only production image
-              run: |
-                  test "$(docker run --rm --entrypoint id math-avasan:test -u)" != "0"
-
-                  docker run --rm -d \
-                    --name math-avasan-test \
-                    --publish 127.0.0.1:8080:8080 \
-                    --read-only \
-                    --tmpfs /tmp:rw,noexec,nosuid,size=32m \
-                    --cap-drop ALL \
-                    --security-opt no-new-privileges \
-                    math-avasan:test
-                  trap 'docker stop math-avasan-test' EXIT
-
-                  for attempt in $(seq 1 20); do
-                    if curl --fail --silent --show-error http://127.0.0.1:8080/ >/dev/null; then
-                      break
-                    fi
-                    if [ "$attempt" -eq 20 ]; then
-                      exit 1
-                    fi
-                    sleep 1
-                  done
-
-                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8080/)" = "200"
-                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8080/api)" = "404"
-                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8080/api/not-public)" = "404"
-                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8080/api/classroom-usage)" = "404"
-                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' --request POST --data '{}' http://127.0.0.1:8080/api/classroom-usage)" = "404"
-                  curl --fail --silent --show-error http://127.0.0.1:8080/release.json |
-                    grep -Fq '"revision": "0000000000000000000000000000000000000000"'
-                  curl --fail --silent --show-error http://127.0.0.1:8080/release.json |
-                    grep -Fq '"classroomUsageEnabled": false'
-
-            - name: Validate the dormant enabled proxy configuration
-              run: |
-                  docker run --rm \
-                    --volume "${GITHUB_WORKSPACE}/nginx/classroom-usage-enabled.inc:/etc/nginx/conf.d/classroom-usage.inc:ro" \
-                    --entrypoint nginx \
-                    math-avasan:test \
-                    -t
-                  docker run --rm -d \
-                    --name math-avasan-proxy-enabled-test \
-                    --publish 127.0.0.1:8081:8080 \
-                    --volume "${GITHUB_WORKSPACE}/nginx/classroom-usage-enabled.inc:/etc/nginx/conf.d/classroom-usage.inc:ro" \
-                    --read-only \
-                    --tmpfs /tmp:rw,noexec,nosuid,size=32m \
-                    --cap-drop ALL \
-                    --security-opt no-new-privileges \
-                    math-avasan:test
-                  trap 'docker stop math-avasan-proxy-enabled-test' EXIT
-
-                  for attempt in $(seq 1 20); do
-                    if curl --fail --silent --show-error http://127.0.0.1:8081/ >/dev/null; then
-                      break
-                    fi
-                    if [ "$attempt" -eq 20 ]; then
-                      exit 1
-                    fi
-                    sleep 1
-                  done
-
-                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8081/api/classroom-usage)" = "405"
-                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' --request POST --header 'Content-Type: application/json' --header 'Origin: https://math.avasan.org' --data '{}' http://127.0.0.1:8081/api/classroom-usage)" = "403"
-                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' --request POST --header 'Content-Type: application/json' --header 'Origin: https://math.avasan.org' --header 'X-Classroom-Request: 1' --data '{}' http://127.0.0.1:8081/api/classroom-usage)" = "403"
-                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' --request POST --header 'Content-Type: application/json' --header 'Origin: https://math.avasan.org' --header 'Sec-Fetch-Site: same-site' --header 'X-Classroom-Request: 1' --data '{}' http://127.0.0.1:8081/api/classroom-usage)" = "403"
-                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' --request POST --header 'Content-Type: application/json' --header 'Origin: https://example.invalid' --header 'Sec-Fetch-Site: cross-site' --header 'X-Classroom-Request: 1' --data '{}' http://127.0.0.1:8081/api/classroom-usage)" = "403"
-                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' --request POST --header 'Origin: https://math.avasan.org' --header 'Sec-Fetch-Site: same-origin' --header 'X-Classroom-Request: 1' --data '{}' http://127.0.0.1:8081/api/classroom-usage)" = "415"
-                  test "$(curl --silent --output /dev/null --write-out '%{http_code}' --request POST --header 'Content-Type: application/json' --header 'Origin: https://math.avasan.org' --header 'Sec-Fetch-Site: same-origin' --header 'X-Classroom-Request: 1' --data '{}' 'http://127.0.0.1:8081/api/classroom-usage?student=1')" = "400"
-                  curl --fail --silent --show-error http://127.0.0.1:8081/release.json |
-                    grep -Fq '"classroomUsageEnabled": false'
+                  test ! -e Dockerfile
+                  test ! -e .dockerignore
+                  test ! -e .github/workflows/release-container.yml
+                  test -f front-end/dist/index.html
+                  test -f front-end/dist/404.html
+                  test -f front-end/dist/release.json
+                  grep -Fq '"revision": "${{ github.sha }}"' front-end/dist/release.json
+                  grep -Fq '"classroomUsageEnabled": false' front-end/dist/release.json
+                  bash -n deploy/direct/prepare-static-release.sh
+                  bash -n deploy/direct/promote-static-release.sh

@@ -25,13 +25,7 @@ if ($args != "") {
 access_log off;
 client_max_body_size 2k;
 
-# Resolve only when a usage request arrives. A temporary DNS or CS outage must
-# not prevent this static Math site from starting.
-resolver 127.0.0.11 valid=30s ipv6=off;
-resolver_timeout 2s;
-set $classroom_usage_origin https://cs.avasan.org;
-proxy_pass $classroom_usage_origin/api/classroom-usage;
-
+proxy_pass https://cs.avasan.org/api/classroom-usage;
 proxy_http_version 1.1;
 proxy_connect_timeout 2s;
 proxy_send_timeout 3s;

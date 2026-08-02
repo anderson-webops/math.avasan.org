@@ -8,6 +8,11 @@ untrusted graph and course content, backend and proxy boundaries, dependency
 integrity, CI, container execution, deployment identity, and public route
 behavior.
 
+> Historical note (2026-08-02): the container delivery path described below
+> has since been retired. Production now uses the checked-in native Nginx
+> policy and atomic static-release scripts. The findings remain as an audit
+> record, not current deployment instructions.
+
 ## Effective access model
 
 | Actor                     | Allowed application action                                                        | Privileged state                 |
