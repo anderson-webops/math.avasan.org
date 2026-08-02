@@ -5,9 +5,10 @@ export PATH
 
 release_root="${RELEASE_ROOT:-/srv/math.avasan.org/releases}"
 current_link="${CURRENT_LINK:-/srv/math.avasan.org/current}"
-health_url="${HEALTH_URL:-http://127.0.0.1/release.json}"
 host_header="${HOST_HEADER:-math.avasan.org}"
-site_origin="${SITE_ORIGIN:-${health_url%/release.json}}"
+site_origin="${SITE_ORIGIN:-https://$host_header}"
+health_url="${HEALTH_URL:-$site_origin/release.json}"
+resolve_address="${RESOLVE_ADDRESS:-127.0.0.1}"
 snippet_root="${NGINX_SNIPPET_ROOT:-/etc/nginx/snippets}"
 maps_target="$snippet_root/math.avasan.org-http-maps.conf"
 policy_target="$snippet_root/math.avasan.org-server-policy.conf"
@@ -107,18 +108,21 @@ restore_snippets() {
 }
 
 request_status() {
-  curl --silent --show-error --max-time 5 --header "Host: $host_header" \
+  curl --silent --show-error --max-time 5 --resolve "$host_header:443:$resolve_address" \
+    --header "Host: $host_header" \
     --output "$response_file" --dump-header "$headers_file" --write-out '%{http_code}' "$@"
 }
 
 wait_for_health() {
   local attempt admin_status missing_status
   for attempt in {1..20}; do
-    if curl --fail --silent --show-error --max-time 5 --header "Host: $host_header" \
+    if curl --fail --silent --show-error --max-time 5 --resolve "$host_header:443:$resolve_address" \
+      --header "Host: $host_header" \
       --dump-header "$headers_file" "$health_url" --output "$response_file" \
       && cmp -s "$candidate/front-end/dist/release.json" "$response_file" \
       && grep -Eiq '^Cache-Control:.*no-store' "$headers_file" \
-      && curl --fail --silent --show-error --max-time 5 --header "Host: $host_header" \
+      && curl --fail --silent --show-error --max-time 5 --resolve "$host_header:443:$resolve_address" \
+        --header "Host: $host_header" \
         --dump-header "$headers_file" "$site_origin/" --output "$response_file" \
       && grep -Eiq '^Cross-Origin-Opener-Policy:[[:space:]]*same-origin' "$headers_file" \
       && grep -Eiq '^Cross-Origin-Resource-Policy:[[:space:]]*same-origin' "$headers_file"; then
