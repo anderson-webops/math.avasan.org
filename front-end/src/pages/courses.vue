@@ -27,7 +27,7 @@ const courseNames = [
 ];
 
 useHead({
-	link: [{ href: `${siteUrl}/courses`, rel: "canonical" }],
+	link: [{ href: `${siteUrl}/courses/`, rel: "canonical" }],
 	script: [
 		{
 			innerHTML: serializeJsonLd({

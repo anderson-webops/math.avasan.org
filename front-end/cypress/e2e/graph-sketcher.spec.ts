@@ -85,7 +85,7 @@ context("Graph Sketcher browser workspace", () => {
 			"Project/contents.xml": new TextEncoder().encode(legacyGraph)
 		});
 
-		cy.visit("/graph-sketcher");
+		cy.visit("/graph-sketcher/");
 		cy.get("input[aria-label='Open or import a graph project']")
 			.should("be.enabled")
 			.selectFile(

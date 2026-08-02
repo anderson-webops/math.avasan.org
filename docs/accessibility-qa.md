@@ -2,7 +2,7 @@
 
 This checklist complements the automated `npm run a11y` axe smoke suite.
 
-- Test `/`, `/graph-sketcher`, `/courses`, and the unlisted `/admin` handoff
+- Test `/`, `/graph-sketcher/`, `/courses/`, and the unlisted `/admin` handoff
   with keyboard-only navigation and a screen reader.
 - Confirm the skip link, two-item header navigation, graph toolbar, inspector
   tabs, editable data table, course selector, outline buttons, and resource

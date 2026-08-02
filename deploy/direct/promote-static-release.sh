@@ -30,7 +30,7 @@ case "$candidate/" in
   *) echo "Candidate must resolve beneath $release_root_real: $candidate" >&2; exit 1 ;;
 esac
 
-for required_file in front-end/dist/index.html front-end/dist/404.html front-end/dist/release.json .math-static-release.json .math-classroom-usage.inc deploy/nginx/http-maps.conf deploy/nginx/server-policy.conf; do
+for required_file in front-end/dist/index.html front-end/dist/404.html front-end/dist/release.json .math-static-release.json .math-classroom-usage.inc deploy/direct/verify-nginx-snippet-dump.sh deploy/nginx/http-maps.conf deploy/nginx/server-policy.conf; do
   if [[ ! -f "$candidate/$required_file" ]]; then
     echo "Prepared release is missing $required_file." >&2
     exit 1
@@ -59,11 +59,12 @@ previous_target="$(readlink -f -- "$current_link" 2>/dev/null || true)"
 next_link="${current_link}.next.$$"
 response_file="$(mktemp)"
 headers_file="$(mktemp)"
+nginx_dump_file="$(mktemp)"
 backup_directory="$(mktemp -d)"
 cleanup() {
   if [[ -L "$next_link" ]]; then unlink -- "$next_link"; fi
   rm -f -- "${maps_target}.next.$$" "${policy_target}.next.$$" "${usage_target}.next.$$"
-  rm -f -- "$response_file" "$headers_file"
+  rm -f -- "$response_file" "$headers_file" "$nginx_dump_file"
   rm -f -- \
     "$backup_directory/http-maps.conf" "$backup_directory/http-maps.conf.absent" \
     "$backup_directory/server-policy.conf" "$backup_directory/server-policy.conf.absent" \
@@ -107,6 +108,21 @@ restore_snippets() {
   restore_snippet "$usage_target" classroom-usage.inc
 }
 
+verify_installed_snippets() {
+  if ! cmp -s "$candidate/deploy/nginx/http-maps.conf" "$maps_target" \
+    || ! cmp -s "$candidate/deploy/nginx/server-policy.conf" "$policy_target" \
+    || ! cmp -s "$candidate/.math-classroom-usage.inc" "$usage_target"; then
+    echo "Installed Math Nginx snippets do not match the prepared release." >&2
+    return 1
+  fi
+  if ! nginx -T >"$nginx_dump_file" 2>&1; then
+    echo "Nginx could not parse and dump the installed Math policy." >&2
+    return 1
+  fi
+  "$candidate/deploy/direct/verify-nginx-snippet-dump.sh" \
+    "$nginx_dump_file" "$maps_target" "$policy_target" "$usage_target"
+}
+
 request_status() {
   curl --silent --show-error --max-time 5 --resolve "$host_header:443:$resolve_address" \
     --header "Host: $host_header" \
@@ -114,7 +130,7 @@ request_status() {
 }
 
 wait_for_health() {
-  local attempt admin_status missing_status
+  local attempt admin_status courses_status graph_status legacy_path legacy_status missing_status
   for attempt in {1..20}; do
     if curl --fail --silent --show-error --max-time 5 --resolve "$host_header:443:$resolve_address" \
       --header "Host: $host_header" \
@@ -134,8 +150,35 @@ wait_for_health() {
         sleep 1
         continue
       fi
+      courses_status="$(request_status --request GET "$site_origin/courses")"
+      if [[ "$courses_status" != "301" ]] \
+        || ! grep -Fiq "Location: $site_origin/courses/" "$headers_file"; then
+        sleep 1
+        continue
+      fi
+      graph_status="$(request_status --request GET "$site_origin/graph-sketcher")"
+      if [[ "$graph_status" != "301" ]] \
+        || ! grep -Fiq "Location: $site_origin/graph-sketcher/" "$headers_file"; then
+        sleep 1
+        continue
+      fi
       missing_status="$(request_status "$site_origin/__math-deployment-probe-missing")"
-      if [[ "$missing_status" == "404" ]] && grep -Fq 'Page not found' "$response_file"; then
+      if [[ "$missing_status" != "404" ]] || ! grep -Fq 'Page not found' "$response_file"; then
+        sleep 1
+        continue
+      fi
+      for legacy_path in \
+        /404 /404/ /404.html /404/index.html /index.html \
+        /admin.html /admin/index.html \
+        /courses.html /courses/index.html \
+        /graph-sketcher.html /graph-sketcher/index.html \
+        /.vite/ssr-manifest.json; do
+        legacy_status="$(request_status "$site_origin$legacy_path")"
+        if [[ "$legacy_status" != "404" ]] || ! grep -Fq 'Page not found' "$response_file"; then
+          break
+        fi
+      done
+      if [[ "$legacy_status" == "404" ]] && grep -Fq 'Page not found' "$response_file"; then
         return 0
       fi
     fi
@@ -146,10 +189,20 @@ wait_for_health() {
 
 if ! install_snippet "$candidate/deploy/nginx/http-maps.conf" "$maps_target" http-maps.conf \
   || ! install_snippet "$candidate/deploy/nginx/server-policy.conf" "$policy_target" server-policy.conf \
-  || ! install_snippet "$candidate/.math-classroom-usage.inc" "$usage_target" classroom-usage.inc \
-  || ! activate_target "$candidate"; then
+  || ! install_snippet "$candidate/.math-classroom-usage.inc" "$usage_target" classroom-usage.inc; then
   restore_snippets
-  echo "Could not install the candidate release and Nginx snippets." >&2
+  echo "Could not install the candidate Nginx snippets." >&2
+  exit 1
+fi
+if ! verify_installed_snippets; then
+  restore_snippets
+  nginx -t
+  echo "Candidate Nginx snippets are not loaded exactly once; release remains unchanged." >&2
+  exit 1
+fi
+if ! activate_target "$candidate"; then
+  restore_snippets
+  echo "Could not activate the candidate release." >&2
   exit 1
 fi
 if ! nginx -t; then

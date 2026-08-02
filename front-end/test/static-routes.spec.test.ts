@@ -1,10 +1,18 @@
-import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import {
+	mkdir,
+	mkdtemp,
+	readFile,
+	rm,
+	stat,
+	writeFile
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
 	SITEMAP_EXCLUDED_ROUTES,
 	SITE_URL,
+	canonicalizeProductionSitemapXml,
 	generateProductionSitemap,
 	sitemapOptions
 } from "../scripts/sitemap.mts";
@@ -42,6 +50,17 @@ describe("static route normalization", () => {
 			join(tempDir, "admin.html"),
 			"<main>Julio’s Admin</main>"
 		);
+		await writeFile(
+			join(tempDir, "404.html"),
+			"<main>Page not found</main>"
+		);
+		await mkdir(join(tempDir, "404"), { recursive: true });
+		await writeFile(
+			join(tempDir, "404", "index.html"),
+			"<main>Stale soft 404</main>"
+		);
+		await mkdir(join(tempDir, ".vite"), { recursive: true });
+		await writeFile(join(tempDir, ".vite", "ssr-manifest.json"), "{}");
 
 		await normalizeStaticRoutes(tempDir);
 
@@ -57,6 +76,20 @@ describe("static route normalization", () => {
 		await expect(
 			stat(join(tempDir, "index", "index.html"))
 		).rejects.toThrow();
+		await expect(readFile(join(tempDir, "404.html"), "utf8")).resolves.toBe(
+			"<main>Page not found</main>"
+		);
+		for (const removedArtifact of [
+			"admin.html",
+			"courses.html",
+			"graph-sketcher.html",
+			"404/index.html",
+			".vite/ssr-manifest.json"
+		]) {
+			await expect(
+				stat(join(tempDir, removedArtifact))
+			).rejects.toThrow();
+		}
 		for (const removedRoute of [
 			"course-resource",
 			"python-ide",
@@ -79,7 +112,7 @@ describe("static route normalization", () => {
 			"/courses",
 			"Math Courses | Math with Julio",
 			"index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1",
-			"https://math.avasan.org/courses"
+			"https://math.avasan.org/courses/"
 		],
 		[
 			"/python-ide",
@@ -154,8 +187,30 @@ describe("static route normalization", () => {
 		expect(options.generateRobotsTxt).toBe(false);
 		expect(options.lastmod).toBe("");
 		expect(options.exclude).toEqual(SITEMAP_EXCLUDED_ROUTES);
-		expect(options.exclude).toEqual(["/admin", "/graph-sketcher"]);
+		expect(options.exclude).toEqual(["/404", "/admin", "/graph-sketcher"]);
+		expect(options.exclude).toContain("/404");
 		expect(options.exclude).not.toContain("/courses");
 		expect(calls).toEqual([options]);
+	});
+
+	it("keeps only canonical public routes in the generated sitemap", () => {
+		const canonical = canonicalizeProductionSitemapXml(
+			[
+				'<?xml version="1.0"?>',
+				"<urlset>",
+				`<url><loc>${SITE_URL}/courses</loc></url>`,
+				`<url><loc>${SITE_URL}/</loc></url>`,
+				"</urlset>"
+			].join("")
+		);
+
+		expect(canonical).toContain(`<loc>${SITE_URL}/courses/</loc>`);
+		expect(canonical).not.toContain(`<loc>${SITE_URL}/courses</loc>`);
+		expect(canonical).not.toContain("/404");
+		expect(() =>
+			canonicalizeProductionSitemapXml(
+				`<urlset><url><loc>${SITE_URL}/404</loc></url><url><loc>${SITE_URL}/courses</loc></url><url><loc>${SITE_URL}/</loc></url></urlset>`
+			)
+		).toThrow("unexpected routes");
 	});
 });

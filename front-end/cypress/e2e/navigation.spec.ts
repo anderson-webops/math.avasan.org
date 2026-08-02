@@ -40,7 +40,7 @@ context("Public math navigation", () => {
 	it("keeps only the essential public navigation", () => {
 		cy.get(".site-nav__link").should("have.length", 2);
 		cy.get(".site-nav").contains("a:visible", "Math courses").click();
-		cy.url().should("eq", `${Cypress.config().baseUrl}/courses`);
+		cy.url().should("eq", `${Cypress.config().baseUrl}/courses/`);
 		cy.contains("h1", "Math courses").should("be.visible");
 
 		cy.get(".site-nav").contains("a:visible", "Graph Sketcher").click();
@@ -52,8 +52,8 @@ context("Public math navigation", () => {
 	});
 
 	it("keeps the Graph Sketcher alias available", () => {
-		cy.visit("/graph-sketcher");
-		cy.url().should("eq", `${Cypress.config().baseUrl}/graph-sketcher`);
+		cy.visit("/graph-sketcher/");
+		cy.url().should("eq", `${Cypress.config().baseUrl}/graph-sketcher/`);
 		cy.contains("h1", "Graph Sketcher").should("be.visible");
 	});
 
@@ -67,7 +67,7 @@ context("Public math navigation", () => {
 	});
 
 	it("publishes exactly fifteen math courses in four groups", () => {
-		cy.visit("/courses");
+		cy.visit("/courses/");
 		cy.get("#course-select option").should("have.length", 15);
 		cy.get("#course-select option").then(options => {
 			expect(

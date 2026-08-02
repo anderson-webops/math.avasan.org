@@ -129,36 +129,48 @@ async function verifyAdminHandoff() {
 		response.headers.get("x-robots-tag")?.toLowerCase().includes("noindex"),
 		"/admin is missing its noindex response header."
 	);
-	assertion(
-		response.headers.get("cache-control")?.toLowerCase().includes("no-store"),
-		"/admin must not be cached."
-	);
+	assertion(response.headers.get("cache-control")?.toLowerCase().includes("no-store"), "/admin must not be cached.");
 }
 
 async function verifyUnknownRouteBoundary() {
 	const unknownPaths = [
 		"/__math-deployment-probe-missing",
 		"/__math-deployment-probe-missing/",
-		"/courses/__math-deployment-probe-missing"
+		"/courses/__math-deployment-probe-missing",
+		"/404",
+		"/404/",
+		"/404.html",
+		"/404/index.html",
+		"/index.html",
+		"/admin.html",
+		"/admin/index.html",
+		"/courses.html",
+		"/courses/index.html",
+		"/graph-sketcher.html",
+		"/graph-sketcher/index.html",
+		"/.vite/ssr-manifest.json"
 	];
 
 	for (const path of unknownPaths) {
 		const response = await request(path, {
 			redirect: "manual"
 		});
-		assertion(
-			response.status === 404,
-			`${path} returned HTTP ${response.status} instead of 404.`
-		);
-		assertion(
-			response.headers.get("set-cookie") === null,
-			`${path} returned a cookie.`
-		);
+		assertion(response.status === 404, `${path} returned HTTP ${response.status} instead of 404.`);
+		assertion(response.headers.get("set-cookie") === null, `${path} returned a cookie.`);
 		assertion(
 			(await response.text()).includes("Page not found"),
 			`${path} did not return the branded Math 404 page.`
 		);
 	}
+}
+
+async function verifyCanonicalRouteRedirect(path, expectedLocation) {
+	const response = await request(path, { redirect: "manual" });
+	assertion(response.status === 301, `${path} returned HTTP ${response.status} instead of 301.`);
+	assertion(
+		response.headers.get("location") === expectedLocation,
+		`${path} did not redirect to ${expectedLocation}.`
+	);
 }
 
 async function verifyApiBoundary() {
@@ -188,17 +200,14 @@ async function verifyApiBoundary() {
 			body: invalidPayload,
 			headers: {
 				"Content-Type": "application/json",
-				"Origin": "https://math.avasan.org",
+				Origin: "https://math.avasan.org",
 				"Sec-Fetch-Site": "same-origin",
 				"X-Classroom-Request": "1"
 			},
 			method: "POST",
 			redirect: "manual"
 		});
-		assertion(
-			disabledProxy.status === 404,
-			`The disabled usage proxy returned HTTP ${disabledProxy.status}.`
-		);
+		assertion(disabledProxy.status === 404, `The disabled usage proxy returned HTTP ${disabledProxy.status}.`);
 		return;
 	}
 
@@ -206,7 +215,7 @@ async function verifyApiBoundary() {
 		body: invalidPayload,
 		headers: {
 			"Content-Type": "application/json",
-			"Origin": "https://math.avasan.org",
+			Origin: "https://math.avasan.org",
 			"Sec-Fetch-Site": "same-origin"
 		},
 		method: "POST",
@@ -221,7 +230,7 @@ async function verifyApiBoundary() {
 		body: invalidPayload,
 		headers: {
 			"Content-Type": "application/json",
-			"Origin": "https://math.avasan.org",
+			Origin: "https://math.avasan.org",
 			"X-Classroom-Request": "1"
 		},
 		method: "POST",
@@ -236,7 +245,7 @@ async function verifyApiBoundary() {
 		body: invalidPayload,
 		headers: {
 			"Content-Type": "application/json",
-			"Origin": "https://example.invalid",
+			Origin: "https://example.invalid",
 			"Sec-Fetch-Site": "cross-site",
 			"X-Classroom-Request": "1"
 		},
@@ -252,7 +261,7 @@ async function verifyApiBoundary() {
 		body: invalidPayload,
 		headers: {
 			"Content-Type": "application/json",
-			"Origin": "https://math.avasan.org",
+			Origin: "https://math.avasan.org",
 			"Sec-Fetch-Site": "same-origin",
 			"X-Classroom-Request": "1"
 		},
@@ -275,13 +284,23 @@ export async function runPostDeploySmoke() {
 		"The homepage did not contain or load the Graph Sketcher application."
 	);
 
-	const alias = await requiredText("/graph-sketcher");
+	await verifyCanonicalRouteRedirect("/graph-sketcher", `${productionOrigin}/graph-sketcher/`);
+	const alias = await requiredText("/graph-sketcher/");
 	assertion(alias.text.includes("Graph Sketcher"), "/graph-sketcher is not the compatible Grapher alias.");
+	assertion(
+		alias.text.includes(`<link href="${productionOrigin}/" rel="canonical">`),
+		"/graph-sketcher/ is missing the Graph Sketcher homepage canonical URL."
+	);
 
-	const courses = await requiredText("/courses");
+	await verifyCanonicalRouteRedirect("/courses", `${productionOrigin}/courses/`);
+	const courses = await requiredText("/courses/");
 	for (const title of courseTitles) {
 		assertion(courses.text.includes(title), `/courses is missing ${title}.`);
 	}
+	assertion(
+		courses.text.includes(`<link href="${productionOrigin}/courses/" rel="canonical">`),
+		"/courses/ is missing its trailing-slash canonical URL."
+	);
 
 	await runProductionGraphSketcherSmoke();
 	await verifyReleaseIdentity();

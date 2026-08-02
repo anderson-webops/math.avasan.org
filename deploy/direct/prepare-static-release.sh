@@ -36,6 +36,8 @@ fi
 
 export SOURCE_REVISION="$(git -C "$candidate" rev-parse HEAD)"
 export MATH_RELEASE_VERSION="$(node -p "require('$candidate/package.json').version")"
+"$candidate/deploy/direct/verify-release-source.sh" \
+  "$candidate" "$MATH_RELEASE_VERSION"
 
 cd -- "$candidate"
 npm ci --include=optional --strict-allow-scripts
