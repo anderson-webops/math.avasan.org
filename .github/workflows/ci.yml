@@ -321,3 +321,14 @@ jobs:
                   grep -Fq '"classroomUsageEnabled": false' front-end/dist/release.json
                   bash -n deploy/direct/prepare-static-release.sh
                   bash -n deploy/direct/promote-static-release.sh
+                  bash -n deploy/direct/verify-release-source.sh
+                  bash -n deploy/direct/verify-nginx-snippet-dump.sh
+                  test -x deploy/direct/verify-release-source.sh
+                  test -x deploy/direct/verify-nginx-snippet-dump.sh
+                  test ! -e front-end/dist/.vite
+                  test ! -e front-end/dist/404/index.html
+                  test ! -e front-end/dist/admin.html
+                  test ! -e front-end/dist/courses.html
+                  test ! -e front-end/dist/graph-sketcher.html
+                  grep -Fq '<loc>https://math.avasan.org/courses/</loc>' front-end/dist/sitemap.xml
+                  ! grep -Fq '<loc>https://math.avasan.org/404</loc>' front-end/dist/sitemap.xml

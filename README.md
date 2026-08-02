@@ -6,8 +6,8 @@ homepage, and the complete math course sequence is available at `/courses`.
 ## Public Site
 
 - `/`: browser-based Graph Sketcher
-- `/graph-sketcher`: compatible Graph Sketcher alias
-- `/courses`: all 15 math courses
+- `/graph-sketcher` → `/graph-sketcher/`: compatible Graph Sketcher alias
+- `/courses` → `/courses/`: all 15 math courses
 - `/admin`: handoff to Julio’s single protected classroom Admin
 
 Graph Sketcher supports plotted functions, editable data series, annotations,

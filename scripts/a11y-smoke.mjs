@@ -9,9 +9,7 @@ const frontendPort = Number(process.env.A11Y_FRONTEND_PORT || 3334);
 const baseUrl = `http://127.0.0.1:${frontendPort}`;
 const isCi = process.env.CI === "true";
 const runFullMatrix = process.env.A11Y_FULL === "true" || !isCi;
-const routes = runFullMatrix
-	? ["/", "/graph-sketcher", "/courses", "/admin"]
-	: ["/", "/courses"];
+const routes = runFullMatrix ? ["/", "/graph-sketcher/", "/courses/", "/admin"] : ["/", "/courses/"];
 const viewports = runFullMatrix
 	? [
 			{ height: 900, name: "mobile", width: 390 },

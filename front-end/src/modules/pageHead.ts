@@ -39,6 +39,10 @@ export function pageRobotsForPath(path: string) {
 export function canonicalUrlForPath(path: string, siteUrl = SITE_URL) {
 	const normalizedPath = normalizePagePath(path);
 	const canonicalPath =
-		normalizedPath === "/graph-sketcher" ? "/" : normalizedPath;
+		normalizedPath === "/graph-sketcher"
+			? "/"
+			: normalizedPath === "/courses"
+				? "/courses/"
+				: normalizedPath;
 	return new URL(canonicalPath, `${siteUrl}/`).toString();
 }

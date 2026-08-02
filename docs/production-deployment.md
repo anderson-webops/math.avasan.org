@@ -24,7 +24,10 @@ graph identity.
 ## Prepare and promote
 
 Create a clean checkout beneath `/srv/math.avasan.org/releases/<revision>` as
-the unprivileged deployment user. Run:
+the unprivileged deployment user. The checkout must use the canonical
+`anderson-webops/math.avasan.org` origin, and its `HEAD`, fetched
+`origin/main`, and annotated `v<package-version>` tag must resolve to the same
+commit. Run:
 
 ```bash
 deploy/direct/prepare-static-release.sh \
@@ -42,9 +45,13 @@ deploy/direct/promote-static-release.sh \
   /srv/math.avasan.org/releases/<revision>
 ```
 
-Promotion validates the candidate, atomically moves `current`, tests and
-reloads Nginx, checks release identity and headers, verifies the Admin handoff,
-and requires a branded true `404`. A failed gate restores the prior symlink.
+Promotion validates the candidate, installs byte-identical policy snippets,
+and proves from `nginx -T` that the maps, server policy, and selected usage
+snippet are each loaded exactly once before activation. It then atomically
+moves `current`, tests and reloads Nginx, checks release identity and headers,
+verifies the Admin handoff, and requires branded true `404` responses for
+unknown and generated legacy artifact paths. A failed gate restores the prior
+symlink and snippets.
 Do not record deployment success before promotion and public smoke checks pass.
 
 ## Nginx contract
@@ -70,6 +77,9 @@ The effective HTTPS host must:
   `X-Robots-Tag: noindex` and `Cache-Control: no-store`;
 - return `404` for `/api`, every `/api/` path, and the usage route while the
   committed usage setting is disabled; and
+- return the branded `404` for `/404`, generated `.html` aliases, direct nested
+  `index.html` artifacts, and build-only `.vite` metadata while preserving the
+  canonical `/`, `/courses/`, and `/graph-sketcher/` pages; and
 - keep access logs off unless a school-approved, documented, short-retention
   security purpose exists.
 

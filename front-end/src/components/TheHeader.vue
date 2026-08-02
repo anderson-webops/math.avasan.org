@@ -5,13 +5,19 @@ const route = useRoute();
 
 const primaryLinks = [
 	{ label: "Graph Sketcher", to: "/" },
-	{ label: "Math courses", to: "/courses" }
+	{ label: "Math courses", to: "/courses/" }
 ];
 
 function isLinkActive(to: string) {
-	return to === "/"
-		? route.path === "/" || route.path.startsWith("/graph-sketcher")
-		: route.path.startsWith(to);
+	if (to === "/") {
+		return route.path === "/" || route.path.startsWith("/graph-sketcher");
+	}
+
+	const normalizedTarget = to.replace(/\/+$/, "");
+	return (
+		route.path === normalizedTarget ||
+		route.path.startsWith(`${normalizedTarget}/`)
+	);
 }
 </script>
 

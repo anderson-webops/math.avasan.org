@@ -48,10 +48,10 @@ describe("page head helpers", () => {
 		}
 	});
 
-	it("builds stable canonical URLs without query strings or trailing slashes", () => {
+	it("builds stable canonical URLs that match production routing", () => {
 		expect(canonicalUrlForPath("/")).toBe("https://math.avasan.org/");
 		expect(canonicalUrlForPath("/courses/")).toBe(
-			"https://math.avasan.org/courses"
+			"https://math.avasan.org/courses/"
 		);
 		expect(canonicalUrlForPath("/graph-sketcher")).toBe(
 			"https://math.avasan.org/"

@@ -67,17 +67,32 @@ describe("production browser security policy", () => {
 
 		expect(existsSync(resolve(repositoryRoot, "netlify.toml"))).toBe(false);
 		expect(existsSync(resolve(repositoryRoot, "Dockerfile"))).toBe(false);
-		expect(existsSync(resolve(repositoryRoot, ".dockerignore"))).toBe(false);
+		expect(existsSync(resolve(repositoryRoot, ".dockerignore"))).toBe(
+			false
+		);
 		expect(
 			existsSync(
-				resolve(repositoryRoot, ".github/workflows/release-container.yml")
+				resolve(
+					repositoryRoot,
+					".github/workflows/release-container.yml"
+				)
 			)
 		).toBe(false);
 		expect(
-			existsSync(resolve(repositoryRoot, "deploy/direct/prepare-static-release.sh"))
+			existsSync(
+				resolve(
+					repositoryRoot,
+					"deploy/direct/prepare-static-release.sh"
+				)
+			)
 		).toBe(true);
 		expect(
-			existsSync(resolve(repositoryRoot, "deploy/direct/promote-static-release.sh"))
+			existsSync(
+				resolve(
+					repositoryRoot,
+					"deploy/direct/promote-static-release.sh"
+				)
+			)
 		).toBe(true);
 	});
 
@@ -110,6 +125,15 @@ describe("production browser security policy", () => {
 		expect(postDeploySmoke).toContain(
 			"/courses/__math-deployment-probe-missing"
 		);
+		for (const undeclaredArtifact of [
+			"/404/",
+			"/admin.html",
+			"/courses.html",
+			"/graph-sketcher.html",
+			"/.vite/ssr-manifest.json"
+		]) {
+			expect(postDeploySmoke).toContain(undeclaredArtifact);
+		}
 	});
 
 	it("pins every action used to validate and publish this artifact", () => {
@@ -140,7 +164,10 @@ describe("production browser security policy", () => {
 			"utf8"
 		);
 		const enabledProxy = readFileSync(
-			resolve(process.cwd(), "../deploy/nginx/classroom-usage-enabled.inc"),
+			resolve(
+				process.cwd(),
+				"../deploy/nginx/classroom-usage-enabled.inc"
+			),
 			"utf8"
 		);
 
@@ -161,7 +188,10 @@ describe("production browser security policy", () => {
 			"utf8"
 		);
 		const enabledProxy = readFileSync(
-			resolve(process.cwd(), "../deploy/nginx/classroom-usage-enabled.inc"),
+			resolve(
+				process.cwd(),
+				"../deploy/nginx/classroom-usage-enabled.inc"
+			),
 			"utf8"
 		);
 
@@ -221,7 +251,10 @@ describe("production browser security policy", () => {
 			)
 		) as { classroomUsageEnabled: unknown };
 		const disabledProxy = readFileSync(
-			resolve(repositoryRoot, "deploy/nginx/classroom-usage-disabled.inc"),
+			resolve(
+				repositoryRoot,
+				"deploy/nginx/classroom-usage-disabled.inc"
+			),
 			"utf8"
 		);
 
@@ -237,6 +270,38 @@ describe("production browser security policy", () => {
 		expect(disabledProxy.trim()).toBe("return 404;");
 		expect(disabledProxy).not.toContain("proxy_pass");
 		expect(prepareRelease).not.toContain("VITE_CLASSROOM_USAGE_ENABLED");
+	});
+
+	it("requires exact release provenance and effective Nginx policy inclusion", () => {
+		const repositoryRoot = resolve(process.cwd(), "..");
+		const prepareRelease = readFileSync(
+			resolve(repositoryRoot, "deploy/direct/prepare-static-release.sh"),
+			"utf8"
+		);
+		const promoteRelease = readFileSync(
+			resolve(repositoryRoot, "deploy/direct/promote-static-release.sh"),
+			"utf8"
+		);
+		const sourceGate = readFileSync(
+			resolve(repositoryRoot, "deploy/direct/verify-release-source.sh"),
+			"utf8"
+		);
+		const snippetGate = readFileSync(
+			resolve(
+				repositoryRoot,
+				"deploy/direct/verify-nginx-snippet-dump.sh"
+			),
+			"utf8"
+		);
+
+		expect(prepareRelease).toContain("verify-release-source.sh");
+		expect(sourceGate).toContain("refs/remotes/origin/main");
+		expect(sourceGate).toContain('tag_type" != "tag"');
+		expect(sourceGate).toContain("anderson-webops/math\\.avasan\\.org");
+		expect(promoteRelease).toContain("nginx -T");
+		expect(promoteRelease).toContain("verify-nginx-snippet-dump.sh");
+		expect(snippetGate).toContain("grep -Fxc");
+		expect(snippetGate).toContain("exactly once");
 	});
 
 	it("derives CI release identity from the package and rejects unknown revisions", () => {
@@ -257,7 +322,9 @@ describe("production browser security policy", () => {
 			"utf8"
 		);
 
-		expect(continuousIntegration).toContain("SOURCE_REVISION: ${{ github.sha }}");
+		expect(continuousIntegration).toContain(
+			"SOURCE_REVISION: ${{ github.sha }}"
+		);
 		expect(continuousIntegration).not.toContain(
 			"MATH_RELEASE_VERSION=1.0.0"
 		);
@@ -284,7 +351,26 @@ describe("production browser security policy", () => {
 		expect(maps).toContain('/admin "no-store";');
 		expect(serverPolicy).toContain("add_header X-Robots-Tag");
 		expect(serverPolicy).toContain("add_header Cache-Control");
-		expect(serverPolicy).toContain("return 302 https://cs.avasan.org/admin;");
+		expect(serverPolicy).toContain(
+			"return 302 https://cs.avasan.org/admin;"
+		);
+	});
+
+	it("rejects generated legacy route artifacts through the branded 404", () => {
+		const serverPolicy = readFileSync(
+			resolve(process.cwd(), "../deploy/nginx/server-policy.conf"),
+			"utf8"
+		);
+		const maps = readFileSync(
+			resolve(process.cwd(), "../deploy/nginx/http-maps.conf"),
+			"utf8"
+		);
+
+		expect(maps).toContain("$math_legacy_artifact_request");
+		expect(maps).toContain("graph-sketcher");
+		expect(maps).toContain("index\\.html");
+		expect(serverPolicy).toContain("if ($math_legacy_artifact_request)");
+		expect(serverPolicy).toContain("error_page 404 /404.html;");
 	});
 
 	it("serves release identity without caching it", () => {

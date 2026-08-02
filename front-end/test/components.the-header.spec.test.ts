@@ -32,7 +32,7 @@ describe("TheHeader.vue", () => {
 		);
 		expect(links).toEqual([
 			["Graph Sketcher", "/"],
-			["Math courses", "/courses"]
+			["Math courses", "/courses/"]
 		]);
 		expect(wrapper.text()).not.toMatch(
 			/Admin|Log out|Student|Python IDE|Student privacy/
