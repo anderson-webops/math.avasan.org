@@ -300,6 +300,13 @@ describe("production browser security policy", () => {
 		expect(sourceGate).toContain("anderson-webops/math\\.avasan\\.org");
 		expect(promoteRelease).toContain("nginx -T");
 		expect(promoteRelease).toContain("verify-nginx-snippet-dump.sh");
+		expect(promoteRelease).toContain(
+			"existing verified current Math release symlink"
+		);
+		expect(promoteRelease).toContain(
+			"Restored and verified the previous Math release"
+		);
+		expect(promoteRelease).not.toContain('unlink -- "$current_link"');
 		expect(snippetGate).toContain("grep -Fxc");
 		expect(snippetGate).toContain("exactly once");
 	});
