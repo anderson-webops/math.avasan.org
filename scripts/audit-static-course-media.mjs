@@ -1,9 +1,15 @@
 #!/usr/bin/env node
 
+import { spawn } from "node:child_process";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { spawn } from "node:child_process";
+import process from "node:process";
+
+const staticMediaRequestModuleUrl = new URL(
+	"./static-media-request.mjs",
+	import.meta.url
+).href;
 
 const auditSource = String.raw`
 import {
@@ -30,6 +36,10 @@ import {
 	staticMediaFilename,
 	staticMediaUrlsFromText
 } from "@/stores/courses/staticMedia";
+import {
+	fetchWithRetry,
+	requestStaticMedia
+} from ${JSON.stringify(staticMediaRequestModuleUrl)};
 
 const knownPending = new Set(KNOWN_PENDING_STATIC_MEDIA_FILENAMES);
 const localMirrorRoot = process.env.STATIC_COURSE_MEDIA_MIRROR
@@ -231,22 +241,18 @@ async function probeOrigins() {
 	}
 
 	for (const [origin, url] of representativeUrls) {
-		let lastError = "";
-		let reachable = false;
-		for (let attempt = 0; attempt < originProbeAttempts; attempt += 1) {
-			try {
-				await fetch(url, {
-					method: "HEAD",
-					signal: requestSignal()
-				});
-				recordTransportSuccess(origin);
-				reachable = true;
-				break;
-			} catch (err) {
-				lastError = err instanceof Error ? err.message : String(err);
-			}
-		}
-		if (!reachable) {
+		try {
+			await fetchWithRetry(
+				url,
+				{ method: "HEAD" },
+				{
+					maxAttempts: originProbeAttempts,
+					signalFactory: requestSignal
+				}
+			);
+			recordTransportSuccess(origin);
+		} catch (err) {
+			const lastError = err instanceof Error ? err.message : String(err);
 			unreachableOrigins.set(
 				origin,
 				"Origin stayed unreachable across " +
@@ -284,17 +290,9 @@ async function inspectUrl(url, references) {
 		error = blockedOriginError;
 	} else {
 		try {
-			let response = await fetch(url, {
-				method: "HEAD",
-				signal: requestSignal()
+			const response = await requestStaticMedia(url, {
+				signalFactory: requestSignal
 			});
-			if (response.status === 405 || response.status === 403) {
-				response = await fetch(url, {
-					headers: { Range: "bytes=0-0" },
-					method: "GET",
-					signal: requestSignal()
-				});
-			}
 			recordTransportSuccess(origin);
 			status = response.status;
 			ok = response.ok || response.status === 206;
@@ -437,6 +435,7 @@ try {
 	if (forceKill) clearTimeout(forceKill);
 
 	process.exitCode = exitCode;
-} finally {
+}
+finally {
 	await rm(tempDir, { force: true, recursive: true });
 }

@@ -51,7 +51,12 @@ snippet are each loaded exactly once before activation. It then atomically
 moves `current`, tests and reloads Nginx, checks release identity and headers,
 verifies the Admin handoff, and requires branded true `404` responses for
 unknown and generated legacy artifact paths. A failed gate restores the prior
-symlink and snippets.
+symlink and snippets, then smoke-checks that restored release. Promotion
+requires `current` to resolve to a complete prior release beneath
+`/srv/math.avasan.org/releases`; it deliberately fails closed instead of using
+an unverified first deployment as its own rollback target. Before the first
+managed promotion, preserve the verified live build as an immutable release
+and point `current` to it.
 Do not record deployment success before promotion and public smoke checks pass.
 
 ## Nginx contract
