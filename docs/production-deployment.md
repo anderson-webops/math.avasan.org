@@ -49,11 +49,15 @@ Do not record deployment success before promotion and public smoke checks pass.
 
 ## Nginx contract
 
-Install `deploy/nginx/http-maps.conf` once in Nginx's `http` context. Include
-`deploy/nginx/server-policy.conf` inside the existing Math HTTPS virtual host so
-its current IPv4/IPv6, certificates, HTTP/2, and HTTP/3 settings stay intact.
-`deploy/nginx/default.conf` is a minimal standalone reference for a native
-port-80 test server; production port 80 should remain an HTTPS redirect.
+The promotion script installs the maps, server policy, and selected usage
+policy as stable root-owned files under `/etc/nginx/snippets`. Include the maps
+snippet once in Nginx's `http` context and include the server-policy snippet
+inside the existing Math HTTPS virtual host so its current IPv4/IPv6,
+certificates, HTTP/2, and HTTP/3 settings stay intact. Keeping these snippets
+outside the release symlink ensures an older static release can still be
+restored and Nginx reloaded. `deploy/nginx/default.conf` is a minimal standalone
+reference for a native port-80 test server; production port 80 should remain an
+HTTPS redirect.
 
 The effective HTTPS host must:
 

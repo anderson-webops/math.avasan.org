@@ -146,7 +146,7 @@ describe("production browser security policy", () => {
 
 		expect(nginx).toContain("location = /api/classroom-usage");
 		expect(nginx).toContain(
-			"include /srv/math.avasan.org/current/.math-classroom-usage.inc;"
+			"include /etc/nginx/snippets/math.avasan.org-classroom-usage.inc;"
 		);
 		expect(enabledProxy).not.toContain("resolver 127.0.0.11");
 		expect(enabledProxy).toContain(
