@@ -15,6 +15,13 @@ fit-to-data controls, imports, and SVG, PNG, CSV, and project exports. A
 recovery copy stays in the current browser tab. Graph contents are not sent to
 another service.
 
+The Graph Sketcher header also offers one optional coordinate-learning game:
+Scratch project `1367463968`. The game is not part of the graph document and
+cannot read graph contents. Its third-party frame does not exist until a
+student chooses **Play coordinate game on Scratch**, and closing the dialog
+removes the frame. Opening it makes a normal web request to Scratch; Math does
+not attach an account, identifier, graph, or analytics event to that request.
+
 ## Math Courses
 
 The course library follows the canonical upstream math pathway:

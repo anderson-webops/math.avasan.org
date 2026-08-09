@@ -74,6 +74,26 @@ subdomains, and no-store Admin responses. The release continues to deny
 framing, objects, arbitrary connections, inline scripts, undeclared APIs, and
 soft-200 unknown routes.
 
+### Bounded optional Scratch activity — 2026-08-09
+
+The Math-only coordinate activity uses one reviewed public Scratch project,
+`1367463968`. The player is absent from the page until the student chooses the
+clearly labeled launcher. It runs in a sandboxed cross-origin frame with no
+referrer, receives no graph or account state, has no `postMessage` bridge, and
+is destroyed by either visible Close control or a backdrop click. Escape also
+closes while focus remains in the Math dialog; the cross-origin Scratch player
+owns keystrokes while it has focus. The CSP permits frames from exactly
+`https://scratch.mit.edu`; scripts and connections in the Math document remain
+same-origin only.
+
+The third-party Scratch document currently attempts to load Google Tag
+Manager. This traffic is controlled by Scratch rather than the Math site, so
+the UI and public privacy disclosure identify the external load. The iframe is
+never prefetched or created during ordinary Graph Sketcher use. The project is
+live and mutable under the same ID, so its author, title, remix provenance, and
+classroom suitability must be reviewed before each release that changes the
+allowlist.
+
 ### Hardened dependency and target-platform reproducibility
 
 The previous toolchain and dependency tree were behind the supported
@@ -142,6 +162,9 @@ positives do not weaken current-source or future-history scanning.
   public static site.
 - Aggregate usage must remain disabled unless the documented school/district
   authorization and privacy prerequisites are satisfied.
+- The Scratch allowlist must remain limited to the reviewed coordinate project;
+  adding or replacing a third-party activity requires a new content, privacy,
+  and security review.
 - A source release is complete only after the public host reports the same
   commit and the post-deployment suite passes.
 - Private-repository GitHub job availability is not a release gate for this

@@ -33,8 +33,46 @@ context("Public math navigation", () => {
 	it("loads Graph Sketcher as the homepage", () => {
 		cy.url().should("eq", `${Cypress.config().baseUrl}/`);
 		cy.contains("h1", "Graph Sketcher").should("be.visible");
+		cy.contains("button", "Play coordinate game on Scratch").should(
+			"be.visible"
+		);
+		cy.get("iframe[src*='scratch.mit.edu']").should("not.exist");
 		cy.contains("button", "Student sign in").should("not.exist");
 		cy.get("#course-select").should("not.exist");
+	});
+
+	it("loads the reviewed coordinate game only after an explicit click", () => {
+		cy.intercept(
+			"GET",
+			"https://scratch.mit.edu/projects/1367463968/embed",
+			{
+				body: "<!doctype html><html><body>Scratch game fixture</body></html>",
+				headers: { "content-type": "text/html" },
+				statusCode: 200
+			}
+		).as("coordinateGame");
+
+		cy.get("iframe[src*='scratch.mit.edu']").should("not.exist");
+		cy.get("a[href*='scratch.mit.edu/projects/1367463968']").should(
+			"not.exist"
+		);
+		cy.contains("button", "Play coordinate game on Scratch").click();
+		cy.wait("@coordinateGame");
+		cy.get("dialog[open]")
+			.should("have.attr", "aria-modal", "true")
+			.find("iframe")
+			.should(
+				"have.attr",
+				"src",
+				"https://scratch.mit.edu/projects/1367463968/embed"
+			)
+			.and("have.attr", "referrerpolicy", "no-referrer")
+			.and("have.attr", "sandbox", "allow-scripts allow-same-origin");
+
+		cy.contains("button", "Close game").click();
+		cy.get("dialog").should("not.exist");
+		cy.get("iframe[src*='scratch.mit.edu']").should("not.exist");
+		cy.focused().should("contain.text", "Play coordinate game on Scratch");
 	});
 
 	it("keeps only the essential public navigation", () => {

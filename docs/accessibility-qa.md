@@ -13,6 +13,13 @@ This checklist complements the automated `npm run a11y` axe smoke suite.
   not enter hidden panels.
 - Exercise New, Clear for next student, import, and export confirmation paths.
   Status changes must be announced without moving focus unexpectedly.
+- Open the coordinate game with a keyboard and confirm that focus moves into
+	the modal dialog. Verify that close controls appear before and after the
+	cross-origin player, Tab can leave the player for the final close control, a
+	backdrop click removes the Scratch frame, and focus returns to the launcher.
+	Escape closes while focus remains in the Math dialog; Scratch owns keystrokes
+	while focus is inside its player. At narrow widths, the player must scale
+	without horizontal page scrolling.
 - Confirm reduced-motion and dark-mode preferences do not obscure focus,
   selected states, graph labels, or validation messages.
 - Confirm `/admin` provides a clear keyboard-accessible handoff to Julio’s

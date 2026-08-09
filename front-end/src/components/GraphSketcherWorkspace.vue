@@ -16,6 +16,7 @@ import {
 	ref,
 	watch
 } from "vue";
+import { coordinateScratchGame } from "@/config/math-interactives";
 import { reportMathClassroomUsage } from "@/modules/classroomUsage";
 import {
 	axisFraction,
@@ -64,6 +65,7 @@ import {
 	MAX_INTERACTIVE_GRAPH_POINTS,
 	pushBoundedGraphHistorySnapshot
 } from "@/modules/graphSketcherSafety";
+import ScratchProjectOverlay from "./ScratchProjectOverlay.vue";
 
 type GraphTool = "select" | "point" | "draw" | "text" | "pan";
 type InspectorTab = "data" | "style" | "axes" | "graph";
@@ -1841,6 +1843,14 @@ onBeforeUnmount(() => {
 					browser. A recovery copy stays in browser tab storage.
 					Download a project to keep a separate copy.
 				</p>
+				<ScratchProjectOverlay
+					:description="coordinateScratchGame.description"
+					:project-id="coordinateScratchGame.projectId"
+					:source-author="coordinateScratchGame.sourceAuthor"
+					:source-title="coordinateScratchGame.sourceTitle"
+					:title="coordinateScratchGame.title"
+					:trigger-label="coordinateScratchGame.triggerLabel"
+				/>
 			</div>
 
 			<div
@@ -3267,7 +3277,7 @@ onBeforeUnmount(() => {
 	font-size: clamp(2rem, 4vw, 3.3rem);
 }
 
-.graph-header__copy > p:last-child {
+.graph-header__copy > p:not(.page-eyebrow) {
 	color: var(--graph-text-soft);
 	line-height: 1.65;
 }

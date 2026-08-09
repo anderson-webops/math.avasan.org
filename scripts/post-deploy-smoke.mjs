@@ -10,6 +10,21 @@ const expectedRelease = process.env.MATH_EXPECTED_RELEASE?.replace(/^v/, "");
 const expectedRevision = process.env.MATH_EXPECTED_REVISION;
 const verifyUsageProxy = process.env.MATH_VERIFY_USAGE_PROXY?.toLowerCase() === "true";
 const timeoutMs = Number(process.env.MATH_SITE_SMOKE_TIMEOUT_MS || 15_000);
+const expectedContentSecurityPolicy = Object.freeze({
+	"base-uri": ["'self'"],
+	"connect-src": ["'self'"],
+	"default-src": ["'self'"],
+	"font-src": ["'self'", "data:"],
+	"form-action": ["'self'"],
+	"frame-ancestors": ["'none'"],
+	"frame-src": ["https://scratch.mit.edu"],
+	"img-src": ["'self'", "blob:", "data:", "https:"],
+	"media-src": ["'self'", "blob:", "https:"],
+	"object-src": ["'none'"],
+	"script-src": ["'self'"],
+	"style-src": ["'self'", "'unsafe-inline'"],
+	"worker-src": ["'self'", "blob:"]
+});
 
 const courseTitles = [
 	"Early Elementary A: Numbers, Operations, and Measurement",
@@ -31,6 +46,25 @@ const courseTitles = [
 
 function assertion(condition, message) {
 	if (!condition) throw new Error(message);
+}
+
+function normalizedSources(sources) {
+	return [...sources].sort().join(" ");
+}
+
+function contentSecurityPolicyDirectives(policy) {
+	const directives = new Map();
+	for (const directiveText of policy.split(";")) {
+		const tokens = directiveText.trim().split(/\s+/u).filter(Boolean);
+		if (!tokens.length) continue;
+		const [name, ...sources] = tokens;
+		assertion(
+			!directives.has(name),
+			`The homepage Content-Security-Policy repeats ${name}.`
+		);
+		directives.set(name, sources);
+	}
+	return directives;
 }
 
 async function request(path, init = {}) {
@@ -58,15 +92,33 @@ async function requiredText(path) {
 	};
 }
 
-function verifySecurityHeaders(response) {
+export function verifySecurityHeaders(response) {
 	const contentSecurityPolicy = response.headers.get("content-security-policy") || "";
 	assertion(
-		contentSecurityPolicy.includes("frame-ancestors 'none'"),
-		"The homepage is missing its frame-ancestors policy."
+		contentSecurityPolicy,
+		"The homepage is missing Content-Security-Policy."
+	);
+	const actualDirectives = contentSecurityPolicyDirectives(
+		contentSecurityPolicy
 	);
 	assertion(
-		contentSecurityPolicy.includes("script-src 'self'"),
-		"The homepage is missing its same-origin script policy."
+		actualDirectives.size ===
+			Object.keys(expectedContentSecurityPolicy).length,
+		"The homepage Content-Security-Policy has an unexpected directive set."
+	);
+	for (const [name, expectedSources] of Object.entries(
+		expectedContentSecurityPolicy
+	)) {
+		assertion(
+			normalizedSources(actualDirectives.get(name) ?? []) ===
+				normalizedSources(expectedSources),
+			`The homepage Content-Security-Policy has unexpected ${name} sources.`
+		);
+	}
+	assertion(
+		response.headers.get("permissions-policy") ===
+			'accelerometer=(), camera=(), fullscreen=(self "https://scratch.mit.edu"), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()',
+		"The homepage has an unexpected Permissions-Policy."
 	);
 	assertion(
 		response.headers.get("x-content-type-options") === "nosniff",
@@ -282,6 +334,10 @@ export async function runPostDeploySmoke() {
 		containsGraphSketcherRuntimeMarkers(homepage.text) ||
 			pageAssetUrls(homepage.text, new URL("/", productionOrigin)).length > 0,
 		"The homepage did not contain or load the Graph Sketcher application."
+	);
+	assertion(
+		homepage.text.includes("Play coordinate game on Scratch"),
+		"The homepage is missing the optional coordinate-game launcher."
 	);
 
 	await verifyCanonicalRouteRedirect("/graph-sketcher", `${productionOrigin}/graph-sketcher/`);
