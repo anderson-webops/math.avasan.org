@@ -72,6 +72,8 @@ describe("GraphSketcherWorkspace.vue", () => {
 		expect(wrapper.text()).toContain("Open / import");
 		expect(wrapper.text()).toContain("Download project");
 		expect(wrapper.text()).toContain("Clear for next student");
+		expect(wrapper.text()).toContain("Play coordinate game on Scratch");
+		expect(wrapper.find("iframe").exists()).toBe(false);
 		expect(wrapper.text()).toContain("Plot a function");
 		expect(
 			wrapper

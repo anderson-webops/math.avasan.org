@@ -9,7 +9,8 @@ const YOUTUBE_HOSTS = new Set([
 	"m.youtube.com"
 ]);
 const YOUTUBE_PATH_PREFIXES = new Set(["embed", "live", "shorts"]);
-const SCRATCH_PROJECT_ID_RE = /^\d+$/;
+const SCRATCH_ORIGIN = "https://scratch.mit.edu";
+export const MATH_COORDINATE_SCRATCH_PROJECT_ID = "1367463968";
 
 function parsePublicHttpsUrl(value: string) {
 	try {
@@ -32,6 +33,13 @@ function pathSegments(url: URL) {
 	return url.pathname.split("/").filter(Boolean);
 }
 
+export function scratchProjectEmbedUrl(projectId: string) {
+	const normalizedProjectId = projectId.trim();
+	if (normalizedProjectId !== MATH_COORDINATE_SCRATCH_PROJECT_ID) return null;
+
+	return `${SCRATCH_ORIGIN}/projects/${normalizedProjectId}/embed`;
+}
+
 export function isInstructionMaterialResourceUrl(value: string) {
 	const parsed = parsePublicHttpsUrl(value);
 	if (!parsed) return false;
@@ -45,10 +53,7 @@ export function isInstructionMaterialResourceUrl(value: string) {
 	}
 
 	if (parsed.hostname === "scratch.mit.edu") {
-		return (
-			segments[0] === "projects" &&
-			SCRATCH_PROJECT_ID_RE.test(segments[1] ?? "")
-		);
+		return segments[0] === "projects" && /^\d+$/.test(segments[1] ?? "");
 	}
 
 	return STATIC_INSTRUCTION_HOSTS.has(parsed.hostname) && segments.length > 0;

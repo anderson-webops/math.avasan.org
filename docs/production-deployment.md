@@ -21,6 +21,12 @@ uses the credential-stripping include in `deploy/nginx`, which accepts only the
 exact bounded same-origin POST and forwards no student, browser, network, or
 graph identity.
 
+The optional coordinate game is a separate, student-initiated third-party
+Scratch embed. The immutable release contains only its reviewed project ID and
+launcher; no frame or Scratch request exists until the launcher is selected.
+The project itself remains live content hosted by Scratch and is not covered by
+the Math release identity.
+
 ## Prepare and promote
 
 Create a clean checkout beneath `/srv/math.avasan.org/releases/<revision>` as
@@ -77,6 +83,8 @@ The effective HTTPS host must:
 - serve the small branded `/404.html` with a true `404` status;
 - send CSP, COOP, CORP, HSTS, referrer, permissions, nosniff, and framing
   protections on all responses;
+- allow child frames from exactly `https://scratch.mit.edu` for the reviewed
+  coordinate game while continuing to reject broad frame sources;
 - serve `/release.json` with `Cache-Control: no-store`;
 - redirect `/admin` and `/admin/` to `https://cs.avasan.org/admin` with
   `X-Robots-Tag: noindex` and `Cache-Control: no-store`;
@@ -98,8 +106,10 @@ Run the `Verify production deployment` workflow with the released version,
 full revision, and usage state matching `/release.json`. It verifies Graph
 Sketcher, its alias, all 15 course titles, release identity, COOP/CORP and other
 security headers, the no-store Admin handoff, branded unknown-route responses,
-and the closed API boundary. Verify forced IPv4 and IPv6 separately and confirm
-DNS remained unchanged.
+the closed API boundary, and the presence of the coordinate-game launcher with
+the exact Scratch CSP source. The core gate must not depend on Scratch being
+available. Verify the player manually after release, then verify forced IPv4
+and IPv6 separately and confirm DNS remained unchanged.
 
 Static files being copied is not enough. The public gate must pass before the
 five-minute deployer records the revision as successful; a later `--if-newer`

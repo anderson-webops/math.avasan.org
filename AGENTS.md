@@ -14,6 +14,13 @@ Keep these constraints intact:
   canonical math courses from Early Elementary A through AP Calculus.
 - Courses and Graph Sketcher are anonymous. Graph documents remain in browser
   tab storage unless the student downloads a project.
+- The only Math-specific Scratch activity is project `1367463968`, presented
+  as a coordinate-learning game from the Graph Sketcher header. Keep it in the
+  reviewed one-entry allowlist, load its exact `scratch.mit.edu` embed only
+  after an explicit student action, and destroy the frame when the dialog
+  closes. Do not add this project to CS, Classes, or Instruction Material, add
+  other external interactives implicitly, or connect the game to accounts,
+  graph contents, storage, or analytics.
 - `/admin` is an unlisted, noindex handoff to the single protected Admin at
   `https://cs.avasan.org/admin`; do not create a second teacher account system.
 - When school-authorized aggregate collection is enabled, Math may attempt only

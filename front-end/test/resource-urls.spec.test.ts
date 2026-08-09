@@ -1,10 +1,31 @@
 import { describe, expect, it } from "vitest";
 import {
 	isInstructionMaterialResourceUrl,
+	MATH_COORDINATE_SCRATCH_PROJECT_ID,
+	scratchProjectEmbedUrl,
 	isYouTubeVideoUrl
 } from "@/modules/resourceUrls";
 
 describe("resource URL classification", () => {
+	it("derives an embed URL only for the reviewed Math project", () => {
+		expect(MATH_COORDINATE_SCRATCH_PROJECT_ID).toBe("1367463968");
+		expect(scratchProjectEmbedUrl(MATH_COORDINATE_SCRATCH_PROJECT_ID)).toBe(
+			"https://scratch.mit.edu/projects/1367463968/embed"
+		);
+		expect(scratchProjectEmbedUrl(" 1367463968 ")).toBe(
+			"https://scratch.mit.edu/projects/1367463968/embed"
+		);
+		for (const invalidProjectId of [
+			"",
+			"not-a-project",
+			"123456789",
+			"1367463968/embed",
+			"https://scratch.mit.edu/projects/1367463968"
+		]) {
+			expect(scratchProjectEmbedUrl(invalidProjectId)).toBeNull();
+		}
+	});
+
 	it.each([
 		"https://github.com/instruction-material/algebra-1",
 		"https://scratch.mit.edu/projects/123456789/",

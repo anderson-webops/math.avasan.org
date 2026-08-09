@@ -16,6 +16,7 @@ declare module 'vue' {
     LazyMarkdownContent: typeof import('./components/LazyMarkdownContent.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    ScratchProjectOverlay: typeof import('./components/ScratchProjectOverlay.vue')['default']
     TheHeader: typeof import('./components/TheHeader.vue')['default']
   }
 }

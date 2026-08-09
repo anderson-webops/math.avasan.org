@@ -1,9 +1,26 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { verifySecurityHeaders } from "../../scripts/post-deploy-smoke.mjs";
 
 const requiredPolicy =
-	"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+	"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; frame-src https://scratch.mit.edu; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+const requiredPermissionsPolicy =
+	'accelerometer=(), camera=(), fullscreen=(self "https://scratch.mit.edu"), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()';
+
+function securityResponse(contentSecurityPolicy = requiredPolicy) {
+	return new Response("", {
+		headers: {
+			"Content-Security-Policy": contentSecurityPolicy,
+			"Cross-Origin-Opener-Policy": "same-origin",
+			"Cross-Origin-Resource-Policy": "same-origin",
+			"Permissions-Policy": requiredPermissionsPolicy,
+			"Strict-Transport-Security":
+				"max-age=31536000; includeSubDomains",
+			"X-Content-Type-Options": "nosniff"
+		}
+	});
+}
 
 describe("production browser security policy", () => {
 	it("keeps executable scripts external and compatible with the CSP", () => {
@@ -47,7 +64,7 @@ describe("production browser security policy", () => {
 		expect(notFound).not.toMatch(/<script\b/i);
 	});
 
-	it("uses the restrictive frame and script policy on the native host", () => {
+	it("allows only the reviewed Scratch frame and keeps scripts restrictive", () => {
 		const nginx = readFileSync(
 			resolve(process.cwd(), "../deploy/nginx/server-policy.conf"),
 			"utf8"
@@ -58,8 +75,30 @@ describe("production browser security policy", () => {
 		expect(nginx).toContain('Cross-Origin-Opener-Policy "same-origin"');
 		expect(nginx).toContain('Cross-Origin-Resource-Policy "same-origin"');
 		expect(nginx).toContain("includeSubDomains");
+		expect(nginx).toContain("frame-src https://scratch.mit.edu");
 		expect(nginx).not.toContain("frame-src 'self'");
+		expect(nginx).not.toMatch(/frame-src\s+https:(?:\s|;)/);
+		expect(nginx).not.toContain("frame-src *");
 		expect(nginx).not.toContain("script-src 'unsafe-inline'");
+		expect(nginx).toContain(
+			'fullscreen=(self \\"https://scratch.mit.edu\\")'
+		);
+	});
+
+	it("rejects every broadened production CSP source", () => {
+		expect(() => verifySecurityHeaders(securityResponse())).not.toThrow();
+		for (const relaxedPolicy of [
+			requiredPolicy.replace("default-src 'self'", "default-src *"),
+			requiredPolicy.replace("connect-src 'self'", "connect-src *"),
+			requiredPolicy.replace(
+				"script-src 'self'",
+				"script-src 'self' https://evil.example"
+			),
+			`${requiredPolicy}; frame-src https://scratch.mit.edu`
+		]) {
+			expect(() => verifySecurityHeaders(securityResponse(relaxedPolicy)))
+				.toThrow();
+		}
 	});
 
 	it("keeps one production build and excludes unsupported deploy configurations", () => {
@@ -122,6 +161,15 @@ describe("production browser security policy", () => {
 			"The container is the only supported production artifact"
 		);
 		expect(postDeploySmoke).toContain("/__math-deployment-probe-missing/");
+		expect(postDeploySmoke).toContain(
+			"expectedContentSecurityPolicy"
+		);
+		expect(postDeploySmoke).toContain(
+			"The homepage has an unexpected Permissions-Policy."
+		);
+		expect(postDeploySmoke).toContain(
+			'accelerometer=(), camera=(), fullscreen=(self "https://scratch.mit.edu"), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()'
+		);
 		expect(postDeploySmoke).toContain(
 			"/courses/__math-deployment-probe-missing"
 		);
