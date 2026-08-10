@@ -41,14 +41,14 @@
 		"@vitejs/plugin-vue": "^6.0.8",
 		"@vue/test-utils": "^2.4.11",
 		"beasties": "^0.4.3",
-		"cypress": "^15.19.0",
+		"cypress": "^15.20.0",
 		"eslint-plugin-format": "^2.0.1",
 		"lint-staged": "^17.3.0",
 		"simple-git-hooks": "^2.13.1",
-		"typescript-eslint": "^8.65.0",
-		"unplugin-auto-import": "^21.0.0",
+		"typescript-eslint": "^8.66.0",
+		"unplugin-auto-import": "^21.1.0",
 		"unplugin-vue-components": "^32.1.0",
-		"vite": "^8.2.0",
+		"vite": "^8.2.1",
 		"vite-ssg": "^28.3.0",
 		"vite-ssg-sitemap": "^0.10.0",
 		"vitest": "^4.1.10",
@@ -81,7 +81,7 @@
 	},
 	"resolutions": {
 		"unplugin": "^3.3.0",
-		"vite": "^8.2.0",
+		"vite": "^8.2.1",
 		"vue-router": "^5.2.0"
 	},
 	"simple-git-hooks": {
