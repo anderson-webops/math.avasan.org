@@ -562,4 +562,46 @@ describe("GraphSketcherWorkspace.vue", () => {
 			"3 series"
 		);
 	});
+
+	it("cancels a pending file import when pasted rows take its place", async () => {
+		let resolveText: ((value: string) => void) | undefined;
+		const delayedText = new Promise<string>(resolve => {
+			resolveText = resolve;
+		});
+		const staleDocument = createBlankGraphDocument();
+		staleDocument.title = "Stale imported graph";
+
+		const wrapper = mount(GraphSketcherWorkspace);
+		await wrapper.vm.$nextTick();
+		const input = wrapper.get(
+			"input[aria-label='Open or import a graph project']"
+		);
+		Object.defineProperty(input.element, "files", {
+			configurable: true,
+			value: [
+				{
+					arrayBuffer: vi.fn(),
+					name: "stale.graphsketch",
+					size: 100,
+					text: () => delayedText
+				}
+			]
+		});
+
+		await input.trigger("change");
+		await wrapper
+			.get("textarea[placeholder^='Time,']")
+			.setValue("Time,Observed\n0,10\n1,12");
+		await buttonWithText(wrapper, "Import rows").trigger("click");
+		resolveText?.(graphDocumentToJson(staleDocument));
+		await delayedText;
+		await new Promise(resolve => setTimeout(resolve, 0));
+		await wrapper.vm.$nextTick();
+
+		expect(wrapper.text()).not.toContain("Stale imported graph");
+		expect(wrapper.text()).toContain("Imported 1 series from 2 row(s).");
+		expect(wrapper.text()).not.toContain(
+			"The graph changed while the file was opening"
+		);
+	});
 });

@@ -92,7 +92,7 @@ describe("ScratchProjectOverlay", () => {
 			"allow-scripts allow-same-origin"
 		);
 		expect(frame.attributes("allow")).toBe("fullscreen");
-		expect(frame.attributes("allowfullscreen")).toBe("");
+		expect(frame.attributes("allowfullscreen")).toBeUndefined();
 		expect(frame.attributes("allowtransparency")).toBe("true");
 		expect(frame.attributes("width")).toBe("485");
 		expect(frame.attributes("height")).toBe("402");

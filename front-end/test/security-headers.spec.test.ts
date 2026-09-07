@@ -392,6 +392,41 @@ describe("production browser security policy", () => {
 		expect(postDeploySmoke).not.toContain("[0-9a-f]{40}|unknown");
 	});
 
+	it("keeps the release toolchain pinned while allowing Dependabot's npm runtime", () => {
+		const repositoryRoot = resolve(process.cwd(), "..");
+		const packageManifest = JSON.parse(
+			readFileSync(resolve(repositoryRoot, "package.json"), "utf8")
+		) as {
+			engines: { npm: string };
+			packageManager: string;
+		};
+		const continuousIntegration = readFileSync(
+			resolve(repositoryRoot, ".github/workflows/ci.yml"),
+			"utf8"
+		);
+		const postDeploy = readFileSync(
+			resolve(repositoryRoot, ".github/workflows/post-deploy.yml"),
+			"utf8"
+		);
+		const nativePreparation = readFileSync(
+			resolve(repositoryRoot, "deploy/direct/prepare-static-release.sh"),
+			"utf8"
+		);
+
+		expect(packageManifest.packageManager).toBe("npm@12.0.2");
+		expect(packageManifest.engines.npm).toBe(">=11.19.0 <13");
+		expect(continuousIntegration).toContain("NPM_VERSION: 12.0.2");
+		expect(continuousIntegration).toContain(
+			'test "$(npm --version)" = "${NPM_VERSION}"'
+		);
+		expect(postDeploy).toContain(
+			'test "$(npm --version)" = "12.0.2"'
+		);
+		expect(nativePreparation).toContain(
+			'"$(npm --version)" != "12.0.2"'
+		);
+	});
+
 	it("marks the Admin handoff noindex in the redirect response", () => {
 		const serverPolicy = readFileSync(
 			resolve(process.cwd(), "../deploy/nginx/server-policy.conf"),

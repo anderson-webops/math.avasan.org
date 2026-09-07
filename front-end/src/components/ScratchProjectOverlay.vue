@@ -134,7 +134,6 @@ onBeforeUnmount(() => {
 						:src="embedUrl"
 						:title="`${title}, hosted by Scratch`"
 						allow="fullscreen"
-						allowfullscreen
 						allowtransparency="true"
 						frameborder="0"
 						height="402"

@@ -1457,6 +1457,7 @@ function removePoint(index: number) {
 
 function importPastedData() {
 	try {
+		cancelPendingFileImport();
 		const result = importDelimitedGraphData(pastedData.value);
 		const shouldReplace =
 			graphDocument.value.series.length === 1 &&
