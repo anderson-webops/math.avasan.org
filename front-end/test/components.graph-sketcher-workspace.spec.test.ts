@@ -7,7 +7,11 @@ import {
 	MAX_GRAPH_DOCUMENT_BYTES,
 	MAX_GRAPH_EXPRESSION_LENGTH
 } from "@/modules/graphSketcher";
-import { GRAPH_SKETCHER_SESSION_STORAGE_KEY } from "@/modules/graphSketcherSafety";
+import {
+	GRAPH_SKETCHER_SESSION_STORAGE_KEY,
+	MAX_GRAPH_PREVIEW_POINTS,
+	MAX_INTERACTIVE_GRAPH_HANDLES
+} from "@/modules/graphSketcherSafety";
 
 function installSessionStorageStub() {
 	const values = new Map<string, string>();
@@ -492,7 +496,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 		);
 	});
 
-	it("renders every marker while sampling only large-graph editing handles", async () => {
+	it("samples a large on-screen preview while preserving the complete graph", async () => {
 		const document = createBlankGraphDocument();
 		document.title = "Large marker-only graph";
 		document.series[0].lineStyle = "none";
@@ -512,12 +516,23 @@ describe("GraphSketcherWorkspace.vue", () => {
 		const wrapper = mount(GraphSketcherWorkspace);
 		await wrapper.vm.$nextTick();
 
-		expect(wrapper.findAll(".graph-point")).toHaveLength(5_000);
-		const markerPath = wrapper.get(".graph-series__markers");
-		expect(markerPath.attributes("d").match(/\bM /g)).toHaveLength(5_001);
-		expect(wrapper.text()).toContain(
-			"Lines, markers, and error bars still use all 5,001 points"
+		expect(wrapper.findAll(".graph-point")).toHaveLength(
+			MAX_INTERACTIVE_GRAPH_HANDLES
 		);
+		const markerPath = wrapper.get(".graph-series__markers");
+		expect(markerPath.attributes("d").match(/\bM /g)).toHaveLength(
+			MAX_GRAPH_PREVIEW_POINTS
+		);
+		expect(wrapper.text()).toContain(
+			"All 5,001 points remain in saved data and exports"
+		);
+		expect(
+			JSON.parse(
+				window.sessionStorage.getItem(
+					GRAPH_SKETCHER_SESSION_STORAGE_KEY
+				) ?? "{}"
+			).series[0].points
+		).toHaveLength(5_001);
 	});
 
 	it("does not let a delayed file import overwrite newer graph edits", async () => {

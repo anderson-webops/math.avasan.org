@@ -14,7 +14,7 @@ import {
 	onBeforeUnmount,
 	onMounted,
 	ref,
-	watch
+	toRaw
 } from "vue";
 import { coordinateScratchGame } from "@/config/math-interactives";
 import { reportMathClassroomUsage } from "@/modules/classroomUsage";
@@ -62,6 +62,8 @@ import {
 	GRAPH_SKETCHER_SESSION_STORAGE_KEY,
 	graphHistorySnapshotFits,
 	graphPngDimensions,
+	MAX_GRAPH_PREVIEW_POINTS,
+	MAX_INTERACTIVE_GRAPH_HANDLES,
 	MAX_INTERACTIVE_GRAPH_POINTS,
 	pushBoundedGraphHistorySnapshot
 } from "@/modules/graphSketcherSafety";
@@ -125,6 +127,8 @@ const redoStack = ref<string[]>([]);
 const isClientReady = ref(false);
 const MAX_TABLE_ROWS = 300;
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
+let saveIdleCallback: number | undefined;
+let sessionSavePending = false;
 let wheelTimer: ReturnType<typeof setTimeout> | undefined;
 let newGraphConfirmationTimer: ReturnType<typeof setTimeout> | undefined;
 let endSessionConfirmationTimer: ReturnType<typeof setTimeout> | undefined;
@@ -231,8 +235,8 @@ const visiblePointCount = computed(() =>
 		0
 	)
 );
-const arePointHandlesSampled = computed(
-	() => visiblePointCount.value > MAX_INTERACTIVE_GRAPH_POINTS
+const isCanvasPreviewSampled = computed(
+	() => visiblePointCount.value > MAX_GRAPH_PREVIEW_POINTS
 );
 
 function graphSeriesPointVisualPaths(series: GraphSeries) {
@@ -332,16 +336,32 @@ function graphSeriesPointVisualPaths(series: GraphSeries) {
 
 const renderedSeries = computed(() => {
 	const series = visibleSeries.value;
-	const sampledIndexes = evenlySampleSeriesIndexes(
-		series.map(item => item.points.length)
+	const previewIndexes = evenlySampleSeriesIndexes(
+		series.map(item => item.points.length),
+		MAX_GRAPH_PREVIEW_POINTS
+	);
+	const handleIndexes = evenlySampleSeriesIndexes(
+		series.map(item => item.points.length),
+		MAX_INTERACTIVE_GRAPH_HANDLES
 	);
 	return series.map((item, seriesIndex) => {
-		const visualPaths = graphSeriesPointVisualPaths(item);
+		const sampledPoints = previewIndexes[seriesIndex].map(index => ({
+			index,
+			point: item.points[index]
+		}));
+		const previewSeries =
+			sampledPoints.length === item.points.length
+				? item
+				: {
+						...item,
+						points: sampledPoints.map(sampled => sampled.point)
+					};
+		const visualPaths = graphSeriesPointVisualPaths(previewSeries);
 		return {
-			areaPath: graphSeriesAreaPath(graphDocument.value, item),
+			areaPath: graphSeriesAreaPath(graphDocument.value, previewSeries),
 			dashArray: graphLineDashArray(item.lineStyle),
-			path: graphSeriesPath(graphDocument.value, item),
-			points: sampledIndexes[seriesIndex]
+			path: graphSeriesPath(graphDocument.value, previewSeries),
+			points: handleIndexes[seriesIndex]
 				.map(index => {
 					const point = item.points[index];
 					return {
@@ -441,7 +461,7 @@ const legendLayout = computed(() => {
 });
 
 function graphSnapshot() {
-	return JSON.stringify(graphDocument.value);
+	return JSON.stringify(toRaw(graphDocument.value));
 }
 
 function graphPointCount(document = graphDocument.value) {
@@ -505,6 +525,7 @@ function commitMutation(
 	if (before === after) return false;
 	redoStack.value = [];
 	pushUndoSnapshot(before);
+	recordGraphChange();
 	statusMessage.value = label;
 	return true;
 }
@@ -518,6 +539,7 @@ function replaceDocument(next: GraphDocument, label: string) {
 	if (before !== graphSnapshot()) {
 		redoStack.value = [];
 		pushUndoSnapshot(before);
+		recordGraphChange();
 	}
 	importWarnings.value = [];
 	statusMessage.value = label;
@@ -525,6 +547,7 @@ function replaceDocument(next: GraphDocument, label: string) {
 
 function restoreSnapshot(snapshot: string) {
 	graphDocument.value = graphDocumentFromJson(snapshot);
+	recordGraphChange();
 	if (
 		!graphDocument.value.series.some(
 			series => series.id === activeSeriesId.value
@@ -585,14 +608,12 @@ function redo() {
 
 function saveSessionGraph() {
 	if (typeof window === "undefined" || suppressSessionSave) return;
-	if (saveTimer) {
-		clearTimeout(saveTimer);
-		saveTimer = undefined;
-	}
+	cancelScheduledSessionSave();
+	sessionSavePending = false;
 	try {
 		window.sessionStorage.setItem(
 			GRAPH_SKETCHER_SESSION_STORAGE_KEY,
-			graphDocumentToJson(graphDocument.value)
+			JSON.stringify(toRaw(graphDocument.value))
 		);
 		saveState.value = "saved";
 	} catch {
@@ -602,18 +623,50 @@ function saveSessionGraph() {
 	}
 }
 
-function scheduleSessionSave() {
-	if (typeof window === "undefined" || suppressSessionSave) return;
-	if (saveTimer) clearTimeout(saveTimer);
-	saveState.value = "saving";
-	saveTimer = setTimeout(saveSessionGraph, 250);
+function cancelScheduledSessionSave() {
+	if (saveTimer) {
+		clearTimeout(saveTimer);
+		saveTimer = undefined;
+	}
+	if (saveIdleCallback !== undefined) {
+		window.cancelIdleCallback(saveIdleCallback);
+		saveIdleCallback = undefined;
+	}
 }
 
-watch(graphDocument, () => (graphRevision += 1), {
-	deep: true,
-	flush: "sync"
-});
-watch(graphDocument, scheduleSessionSave, { deep: true });
+function scheduleSessionSave() {
+	if (typeof window === "undefined" || suppressSessionSave) return;
+	cancelScheduledSessionSave();
+	sessionSavePending = true;
+	saveState.value = "saving";
+	const isLargeGraph = graphPointCount() > MAX_INTERACTIVE_GRAPH_POINTS;
+	saveTimer = setTimeout(
+		() => {
+			saveTimer = undefined;
+			if (isLargeGraph && "requestIdleCallback" in window) {
+				saveIdleCallback = window.requestIdleCallback(
+					() => {
+						saveIdleCallback = undefined;
+						saveSessionGraph();
+					},
+					{ timeout: 2_000 }
+				);
+				return;
+			}
+			saveSessionGraph();
+		},
+		isLargeGraph ? 1_000 : 250
+	);
+}
+
+function flushPendingSessionGraph() {
+	if (sessionSavePending) saveSessionGraph();
+}
+
+function recordGraphChange() {
+	graphRevision += 1;
+	scheduleSessionSave();
+}
 
 function loadSessionGraph() {
 	if (typeof window === "undefined") return;
@@ -699,10 +752,8 @@ function endSharedSession() {
 		clearTimeout(endSessionConfirmationTimer);
 		endSessionConfirmationTimer = undefined;
 	}
-	if (saveTimer) {
-		clearTimeout(saveTimer);
-		saveTimer = undefined;
-	}
+	cancelScheduledSessionSave();
+	sessionSavePending = false;
 	if (wheelTimer) {
 		clearTimeout(wheelTimer);
 		wheelTimer = undefined;
@@ -927,6 +978,7 @@ function onCanvasPointerDown(event: PointerEvent) {
 		series.markerShape = "none";
 		series.points.push(graphPoint);
 		graphDocument.value.series.push(series);
+		recordGraphChange();
 		activeSeriesId.value = series.id;
 		pointerGesture.value = {
 			kind: "draw",
@@ -1044,6 +1096,7 @@ function onCanvasPointerMove(event: PointerEvent) {
 			point.x = graphPoint.x;
 			point.y = graphPoint.y;
 			refreshDerivedGraphSeries(graphDocument.value);
+			recordGraphChange();
 		}
 		return;
 	}
@@ -1060,6 +1113,7 @@ function onCanvasPointerMove(event: PointerEvent) {
 			annotation.x = canvasPoint.x;
 			annotation.y = canvasPoint.y;
 		}
+		recordGraphChange();
 		return;
 	}
 
@@ -1079,6 +1133,7 @@ function onCanvasPointerMove(event: PointerEvent) {
 			(canvasPoint.y - gesture.startY) / plotBounds.value.height
 		);
 		refreshDerivedGraphSeries(graphDocument.value);
+		recordGraphChange();
 		return;
 	}
 
@@ -1101,6 +1156,7 @@ function onCanvasPointerMove(event: PointerEvent) {
 			hasGraphCapacity({ points: 1 })
 		) {
 			series.points.push(graphPoint);
+			recordGraphChange();
 			gesture.lastDrawX = canvasPoint.x;
 			gesture.lastDrawY = canvasPoint.y;
 		}
@@ -1143,6 +1199,7 @@ function onCanvasWheel(event: WheelEvent) {
 	zoomGraphAxis(graphDocument.value.xAxis, graphPoint.x, factor);
 	zoomGraphAxis(graphDocument.value.yAxis, graphPoint.y, factor);
 	refreshDerivedGraphSeries(graphDocument.value);
+	recordGraphChange();
 	statusMessage.value = factor < 1 ? "Zoomed in." : "Zoomed out.";
 	if (wheelTimer) clearTimeout(wheelTimer);
 	wheelTimer = setTimeout(() => {
@@ -1819,12 +1876,14 @@ function annotationRectangle(
 onMounted(() => {
 	loadSessionGraph();
 	isClientReady.value = true;
+	window.addEventListener("pagehide", flushPendingSessionGraph);
 	void reportMathClassroomUsage("graph-open");
 });
 
 onBeforeUnmount(() => {
 	cancelPendingFileImport();
-	if (saveTimer) saveSessionGraph();
+	window.removeEventListener("pagehide", flushPendingSessionGraph);
+	flushPendingSessionGraph();
 	if (wheelTimer) clearTimeout(wheelTimer);
 	if (newGraphConfirmationTimer) clearTimeout(newGraphConfirmationTimer);
 	if (endSessionConfirmationTimer) {
@@ -2397,11 +2456,11 @@ onBeforeUnmount(() => {
 					</svg>
 				</div>
 
-				<p v-if="arePointHandlesSampled" class="graph-sampling-notice">
-					Editing handles and point labels are evenly sampled to keep
-					the canvas responsive. Lines, markers, and error bars still
-					use all {{ visiblePointCount.toLocaleString() }} points;
-					saved data and exports remain complete.
+				<p v-if="isCanvasPreviewSampled" class="graph-sampling-notice">
+					The on-screen preview, editing handles, and point labels are
+					evenly sampled to keep this large graph responsive. All
+					{{ visiblePointCount.toLocaleString() }} points remain in
+					saved data and exports.
 				</p>
 
 				<div class="graph-status" role="status" aria-live="polite">
