@@ -11,7 +11,7 @@ export default antfu(
 				tabWidth: 4,
 				useTabs: true,
 				trailingComma: "none",
-				printWidth: 120,
+				printWidth: 80,
 				endOfLine: "lf"
 			}
 		},

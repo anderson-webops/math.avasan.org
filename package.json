@@ -44,23 +44,23 @@
 			"minimatch": "^3.1.5"
 		},
 		"brace-expansion": "5.0.9",
-		"fast-uri": "3.1.4",
+		"fast-uri": "3.1.6",
 		"glob": "13.0.6",
-		"js-yaml": "4.3.0",
+		"js-yaml": "4.3.2",
 		"linkify-it": "6.1.0",
 		"nanoid": "3.3.18",
-		"postcss": "8.5.26",
+		"postcss": "8.5.28",
 		"shell-quote": "1.10.0",
-		"svgo": "4.0.2",
+		"svgo": "4.1.0",
 		"systeminformation": "5.33.1",
 		"tar": "7.5.22",
 		"valibot": "1.4.2",
 		"@vue/language-core": {
 			"minimatch": "^10.2.6"
 		},
-		"path-to-regexp": "8.4.0",
+		"path-to-regexp": "8.4.2",
 		"serialize-javascript": "7.0.5",
-		"picomatch": "4.0.4",
+		"picomatch": "4.0.5",
 		"anymatch": {
 			"picomatch": "2.3.2"
 		},
@@ -80,8 +80,8 @@
 				"picomatch": "2.3.2"
 			}
 		},
-		"vite": "^8.2.0",
-		"vue-router": "^5.2.0",
+		"vite": "^8.2.2",
+		"vue-router": "^5.3.1",
 		"undici": "7.29.0",
 		"@cypress/request": {
 			"uuid": "14.0.0",
@@ -89,26 +89,27 @@
 		}
 	},
 	"allowScripts": {
-		"cypress@15.19.0": true,
+		"cypress@15.21.1": true,
 		"esbuild@0.28.1": true,
+		"esbuild@0.28.2": true,
 		"fsevents@2.3.3": true,
-		"puppeteer@25.4.0": false,
-		"simple-git-hooks@2.13.1": true
+		"puppeteer@25.10.0": false,
+		"simple-git-hooks@2.14.0": true
 	},
 	"devDependencies": {
-		"@antfu/eslint-config": "^9.2.0",
-		"@typescript-eslint/eslint-plugin": "^8.65.0",
-		"@typescript-eslint/parser": "^8.65.0",
-		"axe-core": "^4.12.1",
-		"eslint": "^10.8.0",
+		"@antfu/eslint-config": "^9.5.1",
+		"@typescript-eslint/eslint-plugin": "^8.69.0",
+		"@typescript-eslint/parser": "^8.69.0",
+		"axe-core": "^4.13.0",
+		"eslint": "^10.9.1",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-prettier": "^5.5.6",
 		"eslint-plugin-vue": "^10.10.0",
 		"globals": "^17.8.0",
 		"prettier": "^3.9.6",
-		"puppeteer": "^25.4.0",
+		"puppeteer": "^25.10.0",
 		"taze": "^21.1.0",
-		"tsx": "^4.23.4",
+		"tsx": "^4.23.13",
 		"typescript": "^6.0.3"
 	}
 }
