@@ -96,19 +96,19 @@
 		"simple-git-hooks@2.13.1": true
 	},
 	"devDependencies": {
-		"@antfu/eslint-config": "^9.2.0",
-		"@typescript-eslint/eslint-plugin": "^8.65.0",
-		"@typescript-eslint/parser": "^8.65.0",
-		"axe-core": "^4.12.1",
-		"eslint": "^10.8.0",
+		"@antfu/eslint-config": "^9.5.1",
+		"@typescript-eslint/eslint-plugin": "^8.69.0",
+		"@typescript-eslint/parser": "^8.69.0",
+		"axe-core": "^4.13.0",
+		"eslint": "^10.9.1",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-prettier": "^5.5.6",
 		"eslint-plugin-vue": "^10.10.0",
 		"globals": "^17.8.0",
 		"prettier": "^3.9.6",
-		"puppeteer": "^25.4.0",
+		"puppeteer": "^25.9.0",
 		"taze": "^21.1.0",
-		"tsx": "^4.23.4",
+		"tsx": "^4.23.13",
 		"typescript": "^6.0.3"
 	}
 }
