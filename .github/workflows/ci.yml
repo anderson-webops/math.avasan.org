@@ -207,6 +207,7 @@ jobs:
             - name: Cypress
               uses: cypress-io/github-action@09090944bd8aaa2a517cefb6e38bf1aae336b42b # v7.4.3
               with:
+                  browser: chrome
                   install: false
                   working-directory: front-end
                   config-file: cypress.config.ts
