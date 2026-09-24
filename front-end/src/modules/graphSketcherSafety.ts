@@ -5,7 +5,7 @@ export const MAX_GRAPH_PREVIEW_POINTS = 1_500;
 export const MAX_INTERACTIVE_GRAPH_HANDLES = 750;
 export const MAX_GRAPH_HISTORY_ENTRIES = 60;
 export const MAX_GRAPH_HISTORY_ESTIMATED_BYTES = 24 * 1024 * 1024;
-export const MAX_GRAPH_PNG_PIXELS = 16_777_216;
+export const MAX_GRAPH_PNG_PIXELS = 4_194_304;
 
 export function estimatedGraphSnapshotBytes(snapshot: string) {
 	return snapshot.length * 2;

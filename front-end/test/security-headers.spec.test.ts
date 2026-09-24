@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { verifySecurityHeaders } from "../../scripts/post-deploy-smoke.mjs";
 
 const requiredPolicy =
-	"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; frame-src https://scratch.mit.edu; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+	"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; frame-src https://scratch.mit.edu; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
 const requiredPermissionsPolicy =
 	'accelerometer=(), camera=(), fullscreen=(self "https://scratch.mit.edu"), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()';
 
@@ -147,10 +147,11 @@ describe("production browser security policy", () => {
 		);
 
 		expect(deploymentGuide).toContain(
-			"one reviewed static build output: `front-end/dist`"
+			"one reviewed static runtime"
 		);
+		expect(deploymentGuide).toContain("exact `front-end/dist`");
 		expect(deploymentGuide).toMatch(
-			/The native host is\s+the only supported production serving path/
+			/The native host is\s+the only supported production\s+serving path/
 		);
 		expect(deploymentGuide).toContain("`classroomUsageEnabled`");
 		expect(deploymentGuide).toContain("use `try_files $uri $uri/ =404;`");
@@ -289,6 +290,14 @@ describe("production browser security policy", () => {
 			resolve(repositoryRoot, "deploy/direct/prepare-static-release.sh"),
 			"utf8"
 		);
+		const packageRelease = readFileSync(
+			resolve(repositoryRoot, "scripts/package-static-artifact.sh"),
+			"utf8"
+		);
+		const artifactContract = readFileSync(
+			resolve(repositoryRoot, "deploy/static-artifact.json"),
+			"utf8"
+		);
 		const deploymentConfig = JSON.parse(
 			readFileSync(
 				resolve(
@@ -307,14 +316,16 @@ describe("production browser security policy", () => {
 		);
 
 		expect(deploymentConfig.classroomUsageEnabled).toBe(false);
-		expect(prepareRelease).toContain(
-			"front-end/src/config/classroom-usage.json"
-		);
-		expect(prepareRelease).toContain(
+		expect(packageRelease).toContain("front-end/dist/release.json");
+		expect(packageRelease).toContain(
 			"deploy/nginx/classroom-usage-${usage_mode}.inc"
 		);
-		expect(prepareRelease).toContain(".math-classroom-usage.inc");
-		expect(prepareRelease).toContain(".math-static-release.json");
+		expect(packageRelease).toContain(
+			'"$stage/deploy/nginx/classroom-usage.inc"'
+		);
+		expect(artifactContract).toContain(
+			'"deploy/nginx/classroom-usage.inc"'
+		);
 		expect(disabledProxy.trim()).toBe("return 404;");
 		expect(disabledProxy).not.toContain("proxy_pass");
 		expect(prepareRelease).not.toContain("VITE_CLASSROOM_USAGE_ENABLED");
@@ -343,16 +354,27 @@ describe("production browser security policy", () => {
 		);
 
 		expect(prepareRelease).toContain("verify-release-source.sh");
+		expect(prepareRelease).toContain("EXPECTED_SOURCE_REVISION");
+		expect(prepareRelease).toContain("git -C \"$candidate\" archive");
 		expect(sourceGate).toContain("refs/remotes/origin/main");
 		expect(sourceGate).toContain('tag_type" != "tag"');
 		expect(sourceGate).toContain("anderson-webops/math\\.avasan\\.org");
+		expect(promoteRelease).toContain("/usr/bin/gh attestation verify");
+		expect(promoteRelease).toContain("--source-digest \"$commit\"");
+		expect(promoteRelease).toContain(
+			'--source-ref "refs/tags/v$version"'
+		);
+		expect(promoteRelease).toContain("--deny-self-hosted-runners");
+		expect(promoteRelease).toContain('--version "$version"');
+		expect(promoteRelease).not.toContain("verify-release-source.sh");
+		expect(promoteRelease).not.toContain("git -C");
 		expect(promoteRelease).toContain("nginx -T");
 		expect(promoteRelease).toContain("verify-nginx-snippet-dump.sh");
 		expect(promoteRelease).toContain(
 			"existing verified current Math release symlink"
 		);
 		expect(promoteRelease).toContain(
-			"Restored and verified the previous Math release"
+			"Restored and verified the sealed previous Math release"
 		);
 		expect(promoteRelease).not.toContain('unlink -- "$current_link"');
 		expect(snippetGate).toContain("grep -Fxc");
@@ -379,6 +401,16 @@ describe("production browser security policy", () => {
 
 		expect(continuousIntegration).toContain(
 			"SOURCE_REVISION: ${{ github.sha }}"
+		);
+		expect(continuousIntegration).toContain('tags: ["v*"]');
+		expect(continuousIntegration).toContain(
+			"Verify annotated tag at exact main revision"
+		);
+		expect(continuousIntegration).toContain(
+			'git cat-file -t "refs/tags/${tag}"'
+		);
+		expect(continuousIntegration).toContain(
+			"refs/remotes/origin/main^{commit}"
 		);
 		expect(continuousIntegration).not.toContain(
 			"MATH_RELEASE_VERSION=1.0.0"
@@ -457,9 +489,13 @@ describe("production browser security policy", () => {
 		);
 
 		expect(maps).toContain("$math_legacy_artifact_request");
+		expect(maps).toContain("map $uri $math_legacy_artifact_request");
+		expect(maps).not.toContain("map $request_uri");
 		expect(maps).toContain("graph-sketcher");
 		expect(maps).toContain("index\\.html");
 		expect(serverPolicy).toContain("if ($math_legacy_artifact_request)");
+		expect(serverPolicy).toContain("location = /python-ide");
+		expect(serverPolicy).toContain("location ^~ /python-ide/");
 		expect(serverPolicy).toContain("error_page 404 /404.html;");
 	});
 

@@ -1,49 +1,28 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import {
+	plainHttpUrls,
+	publishedPlainHttpReferences
+} from "../scripts/verify-course-resource-policy.mts";
 
-const sourceRoot = join(process.cwd(), "src");
-const ignoredDirectories = new Set([".git", "dist", "node_modules"]);
+describe("published course transport policy", () => {
+	it("contains no student-facing plain HTTP navigation or media target", async () => {
+		expect(await publishedPlainHttpReferences()).toEqual([]);
+	});
 
-function sourceFiles(directory: string): string[] {
-	const files: string[] = [];
+	it("detects an unsafe course reference in a negative fixture", () => {
+		expect(
+			plainHttpUrls("Reference: http://example.test/course/table.html")
+		).toEqual(["http://example.test/course/table.html"]);
+	});
 
-	for (const entry of readdirSync(directory)) {
-		if (ignoredDirectories.has(entry)) continue;
-
-		const path = join(directory, entry);
-		const stats = statSync(path);
-
-		if (stats.isDirectory()) {
-			files.push(...sourceFiles(path));
-		} else if (/\.(?:vue|ts|tsx|js)$/.test(entry)) {
-			files.push(path);
-		}
-	}
-
-	return files;
-}
-
-describe("external links", () => {
-	it("uses explicit noopener noreferrer on links that open new tabs", () => {
-		const failures: string[] = [];
-
-		for (const file of sourceFiles(sourceRoot)) {
-			const text = readFileSync(file, "utf8");
-			const linkPattern = /<a\b[^>]*target=["']_blank["'][^>]*>/g;
-
-			for (const match of text.matchAll(linkPattern)) {
-				const tag = match[0];
-				const rel = tag.match(/\brel=["']([^"']*)["']/)?.[1] ?? "";
-				const relValues = new Set(rel.split(/\s+/).filter(Boolean));
-
-				if (!relValues.has("noopener") || !relValues.has("noreferrer")) {
-					const line = text.slice(0, match.index).split("\n").length;
-					failures.push(`${file}:${line} ${tag}`);
-				}
-			}
-		}
-
-		expect(failures).toEqual([]);
+	it("detects every plain HTTP reference in one value", () => {
+		expect(
+			plainHttpUrls(
+				"http://one.example/a and http://two.example/b?image=1"
+			)
+		).toEqual([
+			"http://one.example/a",
+			"http://two.example/b?image=1"
+		]);
 	});
 });

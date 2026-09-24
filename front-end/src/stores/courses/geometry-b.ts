@@ -649,7 +649,7 @@ export const geometryBCourse: RawCourse = {
 						].join("\n"),
 						[
 							"**Reference links**",
-							"- Pyramid volume visualization: http://pythagoreanmath.com/wp-content/uploads/2014/08/deriving-the-volume-of-a-pyramid.png",
+							"- Pyramid volume visualization: the historical external image is omitted because an authenticated HTTPS copy could not be verified.",
 							"- Sphere volume comparison visual: https://ds055uzetaobb.cloudfront.net/brioche/uploads/Fv9rxkzWWN-90675.svg?width=350",
 							"- Sphere surface-area comparison visual: https://www.mathsisfun.com/geometry/images/sphere-cylinder-area2.svg"
 						].join("\n"),

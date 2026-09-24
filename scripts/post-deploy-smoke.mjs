@@ -18,8 +18,8 @@ const expectedContentSecurityPolicy = Object.freeze({
 	"form-action": ["'self'"],
 	"frame-ancestors": ["'none'"],
 	"frame-src": ["https://scratch.mit.edu"],
-	"img-src": ["'self'", "blob:", "data:", "https:"],
-	"media-src": ["'self'", "blob:", "https:"],
+	"img-src": ["'self'", "blob:", "data:"],
+	"media-src": ["'self'", "blob:"],
 	"object-src": ["'none'"],
 	"script-src": ["'self'"],
 	"style-src": ["'self'", "'unsafe-inline'"],
@@ -196,10 +196,19 @@ async function verifyUnknownRouteBoundary() {
 		"/index.html",
 		"/admin.html",
 		"/admin/index.html",
+		"/admin/index%2ehtml",
+		"/admin/index%2Ehtml",
 		"/courses.html",
 		"/courses/index.html",
+		"/courses%2ehtml",
+		"/courses/index%2Ehtml",
 		"/graph-sketcher.html",
 		"/graph-sketcher/index.html",
+		"/graph-sketcher%2Ehtml",
+		"/graph-sketcher/index%2ehtml",
+		"/%69ndex.html",
+		"/python-ide",
+		"/python-ide/asset.js",
 		"/.vite/ssr-manifest.json"
 	];
 
@@ -213,6 +222,22 @@ async function verifyUnknownRouteBoundary() {
 			(await response.text()).includes("Page not found"),
 			`${path} did not return the branded Math 404 page.`
 		);
+		if (path.startsWith("/admin")) {
+			assertion(
+				response.headers
+					.get("cache-control")
+					?.toLowerCase()
+					.includes("no-store"),
+				`${path} must not be cached.`
+			);
+			assertion(
+				response.headers
+					.get("x-robots-tag")
+					?.toLowerCase()
+					.includes("noindex"),
+				`${path} must not be indexed.`
+			);
+		}
 	}
 }
 

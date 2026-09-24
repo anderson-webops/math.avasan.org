@@ -122,7 +122,9 @@ describe("CourseExplorer public catalog", () => {
 		vi.restoreAllMocks();
 	});
 
-	async function mountPublicCatalog() {
+	async function mountPublicCatalog(
+		definitionFactory = courseDefinition
+	) {
 		const pinia = createPinia();
 		setActivePinia(pinia);
 		const coursesStore = useCoursesStore();
@@ -134,7 +136,7 @@ describe("CourseExplorer public catalog", () => {
 					...coursesStore.archivedCourses
 				].find(course => course.id === id);
 				return summary
-					? (courseDefinition(summary.id, summary.name) as any)
+					? (definitionFactory(summary.id, summary.name) as any)
 					: null;
 			});
 
@@ -197,6 +199,23 @@ describe("CourseExplorer public catalog", () => {
 		expect(wrapper.get(".course-hero h2").text()).toBe("AP Calculus");
 		expect(wrapper.text()).not.toContain("Course preview");
 		expect(wrapper.text()).not.toContain("Use the browser workspace");
+	});
+
+	it("requires an explicit click before contacting an external image host", async () => {
+		const { wrapper } = await mountPublicCatalog((id, name) => {
+			const definition = courseDefinition(id, name);
+			definition.modules[0].curriculum[0].mediaLink =
+				"https://static.classes.jacobdanderson.net/algebra-1a/review.svg";
+			return definition;
+		});
+
+		expect(wrapper.find("img[src^='https://']").exists()).toBe(false);
+		const resource = wrapper.get(
+			"a[href='https://static.classes.jacobdanderson.net/algebra-1a/review.svg']"
+		);
+		expect(resource.text()).toContain("Open course image");
+		expect(resource.attributes("target")).toBe("_blank");
+		expect(resource.attributes("rel")).toContain("noreferrer");
 	});
 
 	it("contains no account, API, or Python IDE imports", () => {

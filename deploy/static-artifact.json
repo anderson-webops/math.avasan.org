@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "service": "math.avasan.org",
+  "entrypoints": [
+    "front-end/dist/index.html"
+  ],
+  "required": [
+    "front-end/dist/index.html",
+    "front-end/dist/404.html",
+    "front-end/dist/admin/index.html",
+    "front-end/dist/courses/index.html",
+    "front-end/dist/graph-sketcher/index.html",
+    "front-end/dist/release.json",
+    "front-end/dist/robots.txt",
+    "front-end/dist/site.webmanifest",
+    "front-end/dist/sitemap.xml",
+    "front-end/dist/theme.js",
+    "deploy/nginx/http-maps.conf",
+    "deploy/nginx/server-policy.conf",
+    "deploy/nginx/classroom-usage.inc"
+  ],
+  "legacyRollback": {
+    "maximumVersion": "1.0.16",
+    "required": [
+      "front-end/dist/index.html",
+      "front-end/dist/404.html",
+      "front-end/dist/admin/index.html",
+      "front-end/dist/courses/index.html",
+      "front-end/dist/graph-sketcher/index.html",
+      "front-end/dist/release.json",
+      "deploy/nginx/http-maps.conf",
+      "deploy/nginx/server-policy.conf",
+      "deploy/nginx/classroom-usage.inc"
+    ]
+  },
+  "runtime": {
+    "type": "static",
+    "server": "host-managed nginx",
+    "applicationProcesses": 0
+  },
+  "modulesOutsideDist": [],
+  "productionDependencies": [],
+  "generatedClients": [],
+  "nativeBindings": [],
+  "staticAssets": [
+    "front-end/dist"
+  ],
+  "policyAssets": [
+    "deploy/nginx/http-maps.conf",
+    "deploy/nginx/server-policy.conf",
+    "deploy/nginx/classroom-usage.inc"
+  ],
+  "writableState": [],
+  "privateConfiguration": "No credentials, private configuration, graph data, or student data belong in the artifact.",
+  "sourceAuthentication": "Production accepts only an artifact with GitHub Actions provenance for the exact annotated version tag, main-branch commit, and pinned CI workflow.",
+  "topology": "Preserve /srv/math.avasan.org/current/front-end/dist, the three existing root-owned Nginx snippet paths, current certificates and IPv4/IPv6 listeners, and the separately protected CS Admin and optional aggregate-usage boundaries. The artifact requires no Node service, package manager, container, database, queue, spool, cache, or migration."
+}

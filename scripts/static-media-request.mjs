@@ -32,6 +32,7 @@ export async function fetchWithRetry(url, init, options = {}) {
 			const signal = signalFactory?.();
 			const response = await fetchImpl(url, {
 				...init,
+				redirect: "manual",
 				...(signal ? { signal } : {})
 			});
 			if (!isRetryableStatus(response.status) || attempt === maxAttempts) {

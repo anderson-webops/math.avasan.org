@@ -1,7 +1,6 @@
 .DS_Store
 .vite-ssg-dist
 .vite-ssg-temp
-*.local
 dist
 dist-ssr
 node_modules
@@ -9,6 +8,4 @@ node_modules
 *.log
 cypress/downloads
 /.cache/
-/public/python-ide/assets/
-/public/python-ide/assets.zip
 #public/assets/fonts

@@ -28,6 +28,7 @@ import {
 	normalizeGraphDocument,
 	plotBoundsForCanvas
 } from "@/modules/graphSketcher";
+import { MAX_GRAPH_PNG_PIXELS } from "@/modules/graphSketcherSafety";
 import GraphSketcherArchiveWorker from "@/workers/graphSketcherArchive.worker?worker";
 
 export interface GraphDelimitedImportResult {
@@ -50,6 +51,12 @@ const MAX_LEGACY_VERTICES = 20_000;
 const MAX_LEGACY_LABELS = 10_000;
 const MAX_IMPORT_MESSAGES = 12;
 const MAX_DELIMITED_COLUMNS = MAX_GRAPH_SERIES + 1;
+export const MAX_DELIMITED_IMPORT_CELLS = 250_000;
+export const MAX_DELIMITED_IMPORT_CHARACTERS = 2 * 1024 * 1024;
+export const MAX_GRAPHICAL_EXPORT_POINTS = 10_000;
+export const MAX_GRAPHICAL_EXPORT_ELEMENTS = 30_000;
+export const MAX_GRAPHICAL_EXPORT_TEXT_CHARACTERS = 256 * 1024;
+export const MAX_GRAPHICAL_EXPORT_ESTIMATED_BYTES = 8 * 1024 * 1024;
 const DELIMITERS = [",", "\t", ";", "|"] as const;
 const SERIES_COLORS = [
 	"#2563eb",
@@ -78,12 +85,25 @@ function parseDelimitedRows(
 	text: string,
 	delimiter: string,
 	maxColumns = Number.POSITIVE_INFINITY,
-	maxRows = Number.POSITIVE_INFINITY
+	maxRows = Number.POSITIVE_INFINITY,
+	maxCells = MAX_DELIMITED_IMPORT_CELLS
 ) {
 	const rows: string[][] = [];
 	let row: string[] = [];
 	let cell = "";
 	let inQuotes = false;
+	let cellCount = 0;
+
+	const appendCell = () => {
+		if (cellCount >= maxCells) {
+			throw new Error(
+				`Data imports are limited to ${MAX_DELIMITED_IMPORT_CELLS.toLocaleString()} parsed cells.`
+			);
+		}
+		row.push(cell.trim());
+		cellCount += 1;
+		cell = "";
+	};
 
 	const finishRow = () => {
 		if (row.length >= maxColumns) {
@@ -91,7 +111,7 @@ function parseDelimitedRows(
 				`Data imports are limited to ${MAX_GRAPH_SERIES} series columns.`
 			);
 		}
-		row.push(cell.trim());
+		appendCell();
 		if (row.some(value => value.length > 0)) {
 			if (rows.length >= maxRows) {
 				throw new Error(
@@ -101,7 +121,6 @@ function parseDelimitedRows(
 			rows.push(row);
 		}
 		row = [];
-		cell = "";
 	};
 
 	for (let index = 0; index < text.length; index += 1) {
@@ -125,8 +144,7 @@ function parseDelimitedRows(
 					`Data imports are limited to ${MAX_GRAPH_SERIES} series columns.`
 				);
 			}
-			row.push(cell.trim());
-			cell = "";
+			appendCell();
 		} else if (character === "\n" || character === "\r") {
 			if (character === "\r" && text[index + 1] === "\n") index += 1;
 			finishRow();
@@ -240,6 +258,11 @@ function importLongFormRows(
 export function importDelimitedGraphData(
 	text: string
 ): GraphDelimitedImportResult {
+	if (text.length > MAX_DELIMITED_IMPORT_CHARACTERS) {
+		throw new Error(
+			`Data imports are limited to ${MAX_DELIMITED_IMPORT_CHARACTERS.toLocaleString()} decoded characters.`
+		);
+	}
 	if (!text.trim())
 		throw new Error("Paste or load at least one row of data.");
 	if (new TextEncoder().encode(text).byteLength > MAX_GRAPH_DOCUMENT_BYTES) {
@@ -249,7 +272,8 @@ export function importDelimitedGraphData(
 		text,
 		detectedDelimiter(text),
 		MAX_DELIMITED_COLUMNS,
-		MAX_GRAPH_POINTS + 1
+		MAX_GRAPH_POINTS + 1,
+		MAX_DELIMITED_IMPORT_CELLS
 	);
 	if (!rows.length) throw new Error("No data rows were found.");
 	if (rows.length > MAX_GRAPH_POINTS + 1) {
@@ -1273,9 +1297,81 @@ function legendCoordinates(
 	};
 }
 
-export function graphDocumentToSvg(input: GraphDocument) {
+export function assertGraphicalExportWithinBudget(document: GraphDocument) {
+	let points = 0;
+	let elements = 220 + document.annotations.length;
+	let textCharacters =
+		document.title.length +
+		(document.description?.length ?? 0) +
+		document.xAxis.title.length +
+		document.yAxis.title.length;
+	let estimatedBytes = 32 * 1024;
+
+	for (const annotation of document.annotations) {
+		textCharacters += annotation.text.length;
+		estimatedBytes += 220 + annotation.text.length * 6;
+	}
+
+	for (const series of document.series) {
+		if (!series.isVisible) continue;
+		points += series.points.length;
+		elements += 2;
+		textCharacters += series.name.length;
+		estimatedBytes += 320 + series.name.length * 6;
+
+		for (const point of series.points) {
+			elements +=
+				(series.markerShape === "none" ? 0 : 1) +
+				(point.xError ? 1 : 0) +
+				(point.yError ? 1 : 0) +
+				(point.label ? 1 : 0);
+			textCharacters += point.label?.length ?? 0;
+			estimatedBytes +=
+				220 +
+				(point.xError ? 260 : 0) +
+				(point.yError ? 260 : 0) +
+				(point.label?.length ?? 0) * 6;
+		}
+	}
+
+	if (
+		points > MAX_GRAPHICAL_EXPORT_POINTS ||
+		elements > MAX_GRAPHICAL_EXPORT_ELEMENTS ||
+		textCharacters > MAX_GRAPHICAL_EXPORT_TEXT_CHARACTERS ||
+		estimatedBytes > MAX_GRAPHICAL_EXPORT_ESTIMATED_BYTES
+	) {
+		throw new Error(
+			"This graph is too large for a safe SVG or PNG export. Download the editable project or CSV data instead."
+		);
+	}
+
+	return { elements, estimatedBytes, points, textCharacters };
+}
+
+export function graphDocumentToSvg(
+	input: GraphDocument,
+	intrinsicSize?: { width: number; height: number }
+) {
+	assertGraphicalExportWithinBudget(input);
 	const document = normalizeGraphDocument(input);
+	assertGraphicalExportWithinBudget(document);
 	const { canvas } = document;
+	const intrinsicWidth = intrinsicSize
+		? Math.floor(intrinsicSize.width)
+		: canvas.width;
+	const intrinsicHeight = intrinsicSize
+		? Math.floor(intrinsicSize.height)
+		: canvas.height;
+	if (
+		!Number.isFinite(intrinsicWidth) ||
+		!Number.isFinite(intrinsicHeight) ||
+		intrinsicWidth < 1 ||
+		intrinsicHeight < 1 ||
+		(intrinsicSize &&
+			intrinsicWidth * intrinsicHeight > MAX_GRAPH_PNG_PIXELS)
+	) {
+		throw new Error("PNG dimensions exceed the safe browser pixel budget.");
+	}
 	const bounds = plotBoundsForCanvas(canvas);
 	const xTicks = graphAxisTicks(document.xAxis);
 	const yTicks = graphAxisTicks(document.yAxis);
@@ -1454,8 +1550,8 @@ export function graphDocumentToSvg(input: GraphDocument) {
 			: "";
 
 	return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${
-		canvas.height
+<svg xmlns="http://www.w3.org/2000/svg" width="${intrinsicWidth}" height="${
+		intrinsicHeight
 	}" viewBox="0 0 ${canvas.width} ${canvas.height}" role="img" aria-labelledby="graph-title graph-description">
   <title id="graph-title">${escapeXml(document.title)}</title>
   <desc id="graph-description">${escapeXml(document.description || "Graph created with Graph Sketcher")}</desc>

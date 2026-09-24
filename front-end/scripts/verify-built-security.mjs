@@ -20,6 +20,18 @@ async function htmlFiles(directory) {
 	return files.flat();
 }
 
+async function outputFiles(directory) {
+	const entries = await readdir(directory, { withFileTypes: true });
+	const files = await Promise.all(
+		entries.map(entry => {
+			const target = path.join(directory, entry.name);
+			if (entry.isDirectory()) return outputFiles(target);
+			return entry.isFile() ? [target] : [];
+		})
+	);
+	return files.flat();
+}
+
 async function pathExists(target) {
 	try {
 		await access(target);
@@ -64,6 +76,31 @@ const forbiddenArtifacts = [
 	"courses.html",
 	"graph-sketcher.html"
 ];
+const exactStaticFiles = new Set([
+	...requiredFiles,
+	"apple-touch-icon.png",
+	"favicon-16x16.png",
+	"favicon-32x32.png",
+	"favicon.svg",
+	"icon-192.png",
+	"icon-512.png",
+	"og.png",
+	"robots.txt",
+	"site.webmanifest",
+	"theme.js"
+]);
+const assetSuffixes = new Set([
+	".avif",
+	".css",
+	".gif",
+	".jpg",
+	".jpeg",
+	".js",
+	".png",
+	".svg",
+	".webp",
+	".woff2"
+]);
 for (const relativePath of requiredFiles) {
 	if (!(await pathExists(path.join(distDir, relativePath)))) {
 		failures.push(`missing required static route artifact ${relativePath}`);
@@ -74,6 +111,18 @@ for (const relativePath of forbiddenArtifacts) {
 		failures.push(
 			`contains undeclared static route artifact ${relativePath}`
 		);
+	}
+}
+for (const file of await outputFiles(distDir)) {
+	const relativePath = path.relative(distDir, file).split(path.sep).join("/");
+	const suffix = path.extname(relativePath).toLowerCase();
+	const allowed =
+		exactStaticFiles.has(relativePath) ||
+		(relativePath.startsWith("assets/") && assetSuffixes.has(suffix)) ||
+		(relativePath.startsWith("licenses/") &&
+			(suffix === ".md" || suffix === ".txt"));
+	if (!allowed || relativePath.startsWith("python-ide/") || suffix === ".map") {
+		failures.push(`contains undeclared static output ${relativePath}`);
 	}
 }
 

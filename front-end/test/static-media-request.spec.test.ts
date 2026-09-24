@@ -97,7 +97,10 @@ describe("static media requests", () => {
 
 			expect(result.status).toBe(clientStatus);
 			expect(fetchImpl).toHaveBeenCalledTimes(1);
-			expect(fetchImpl.mock.calls[0]?.[1]).toEqual({ method: "HEAD" });
+			expect(fetchImpl.mock.calls[0]?.[1]).toEqual({
+				method: "HEAD",
+				redirect: "manual"
+			});
 			expect(sleep).not.toHaveBeenCalled();
 		}
 	);
@@ -120,13 +123,31 @@ describe("static media requests", () => {
 			expect(fetchImpl).toHaveBeenCalledTimes(2);
 			expect(fetchImpl.mock.calls[0]?.[1]).toEqual({
 				method: "HEAD",
+				redirect: "manual",
 				signal: signals[0]
 			});
 			expect(fetchImpl.mock.calls[1]?.[1]).toEqual({
 				headers: { Range: "bytes=0-0" },
 				method: "GET",
+				redirect: "manual",
 				signal: signals[1]
 			});
+		}
+	);
+
+	it.each([301, 302, 303, 307, 308])(
+		"never follows an HTTP %i redirect from the approved media origin",
+		async redirectStatus => {
+			const fetchImpl = queuedFetch([response(redirectStatus)]);
+
+			const result = await requestStaticMedia(
+				"https://static.classes.jacobdanderson.net/course/image.svg",
+				{ fetchImpl }
+			);
+
+			expect(result.status).toBe(redirectStatus);
+			expect(fetchImpl).toHaveBeenCalledTimes(1);
+			expect(fetchImpl.mock.calls[0]?.[1]?.redirect).toBe("manual");
 		}
 	);
 

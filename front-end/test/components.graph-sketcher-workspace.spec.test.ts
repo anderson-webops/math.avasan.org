@@ -7,6 +7,7 @@ import {
 	MAX_GRAPH_DOCUMENT_BYTES,
 	MAX_GRAPH_EXPRESSION_LENGTH
 } from "@/modules/graphSketcher";
+import { MAX_DELIMITED_IMPORT_CHARACTERS } from "@/modules/graphSketcherFiles";
 import {
 	GRAPH_SKETCHER_SESSION_STORAGE_KEY,
 	MAX_GRAPH_PREVIEW_POINTS,
@@ -79,6 +80,11 @@ describe("GraphSketcherWorkspace.vue", () => {
 		expect(wrapper.text()).toContain("Play coordinate game on Scratch");
 		expect(wrapper.find("iframe").exists()).toBe(false);
 		expect(wrapper.text()).toContain("Plot a function");
+		expect(
+			wrapper
+				.get("textarea[placeholder^='Time,']")
+				.attributes("maxlength")
+		).toBe(String(MAX_DELIMITED_IMPORT_CHARACTERS));
 		expect(
 			wrapper
 				.get("[aria-label='Graph project actions']")
@@ -493,6 +499,33 @@ describe("GraphSketcherWorkspace.vue", () => {
 		expect(arrayBuffer).not.toHaveBeenCalled();
 		expect(wrapper.text()).toContain(
 			"The graph file is larger than the 8 MB browser limit."
+		);
+	});
+
+	it("rejects an oversized delimited file before decoding it", async () => {
+		const wrapper = mount(GraphSketcherWorkspace);
+		await wrapper.vm.$nextTick();
+		const text = vi.fn();
+		const input = wrapper.get(
+			"input[aria-label='Open or import a graph project']"
+		);
+		Object.defineProperty(input.element, "files", {
+			configurable: true,
+			value: [
+				{
+					arrayBuffer: vi.fn(),
+					name: "too-many-cells.csv",
+					size: MAX_DELIMITED_IMPORT_CHARACTERS + 1,
+					text
+				}
+			]
+		});
+
+		await input.trigger("change");
+
+		expect(text).not.toHaveBeenCalled();
+		expect(wrapper.text()).toContain(
+			"The data file is larger than the 2 MB browser import limit."
 		);
 	});
 

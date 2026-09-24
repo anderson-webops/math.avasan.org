@@ -13,7 +13,10 @@ import {
 	graphDocumentToCsv,
 	graphDocumentToSvg,
 	importDelimitedGraphData,
-	importLegacyGraphSketcherDocument
+	importLegacyGraphSketcherDocument,
+	MAX_DELIMITED_IMPORT_CELLS,
+	MAX_DELIMITED_IMPORT_CHARACTERS,
+	MAX_GRAPHICAL_EXPORT_POINTS
 } from "@/modules/graphSketcherFiles";
 
 const originalWorker = globalThis.Worker;
@@ -188,6 +191,24 @@ describe("Graph Sketcher file compatibility", () => {
 		expect(boundedIssues.at(-1)).toMatch(/additional import issues/i);
 	});
 
+	it("rejects aggregate delimited cell and decoded-character exhaustion", () => {
+		const cellHeavy = Array.from({ length: 2_000 }, () =>
+			Array(129).fill("").join(",")
+		).join("\n");
+		expect(cellHeavy.length).toBeLessThan(
+			MAX_DELIMITED_IMPORT_CHARACTERS
+		);
+		expect(() => importDelimitedGraphData(cellHeavy)).toThrow(
+			new RegExp(MAX_DELIMITED_IMPORT_CELLS.toLocaleString())
+		);
+
+		expect(() =>
+			importDelimitedGraphData(
+				"1".repeat(MAX_DELIMITED_IMPORT_CHARACTERS + 1)
+			)
+		).toThrow(/decoded characters/i);
+	});
+
 	it("exports portable data and escaped standalone SVG", () => {
 		const document = createSampleGraphDocument();
 		document.title = `Cooling <script>alert("no")</script>`;
@@ -201,6 +222,44 @@ describe("Graph Sketcher file compatibility", () => {
 		expect(svg).toContain("Cooling &lt;script&gt;");
 		expect(svg).not.toContain("<script>");
 		expect(svg).toContain(">Measured</text>");
+
+		const rasterSvg = graphDocumentToSvg(document, {
+			height: 512,
+			width: 768
+		});
+		expect(rasterSvg).toContain('width="768" height="512"');
+		expect(rasterSvg).toContain(
+			`viewBox="0 0 ${document.canvas.width} ${document.canvas.height}"`
+		);
+		expect(() =>
+			graphDocumentToSvg(document, { height: 4096, width: 4096 })
+		).toThrow(/pixel budget/i);
+	});
+
+	it("rejects over-budget graphical exports before serializing every point", () => {
+		const document = createSampleGraphDocument();
+		document.series = [
+			{
+				...document.series[0],
+				points: Array.from(
+					{ length: MAX_GRAPHICAL_EXPORT_POINTS + 1 },
+					(_, index) => ({
+						x: index,
+						y: index % 13,
+						label: `point-${index}`,
+						xError: 0.5,
+						yError: 0.25
+					})
+				)
+			}
+		];
+
+		expect(() => graphDocumentToSvg(document)).toThrow(
+			/too large for a safe SVG or PNG export/i
+		);
+		expect(graphDocumentToCsv(document)).toContain(
+			`point-${MAX_GRAPHICAL_EXPORT_POINTS}`
+		);
 	});
 
 	it("neutralizes spreadsheet formulas in exported names and labels", () => {

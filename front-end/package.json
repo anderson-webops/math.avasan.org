@@ -9,7 +9,7 @@
 	"private": true,
 	"main": "dist/script.js",
 	"scripts": {
-		"build": "vite-ssg build && node scripts/canonicalize-sitemap.mts && node scripts/normalize-static-routes.mjs && node scripts/write-release-metadata.mjs && node scripts/verify-built-security.mjs",
+		"build": "tsx --tsconfig tsconfig.json scripts/verify-course-resource-policy.mts && vite-ssg build && node scripts/canonicalize-sitemap.mts && node scripts/normalize-static-routes.mjs && node scripts/write-release-metadata.mjs && node scripts/verify-built-security.mjs",
 		"dev": "vite --port 3333 --open",
 		"start": "vite --port 3333 --open --host",
 		"serve": "vite --port 3333 --open --host",
@@ -88,7 +88,10 @@
 		"pre-commit": "test -x ./node_modules/.bin/lint-staged || { echo 'lint-staged is not installed. Run npm install.'; exit 1; }; ./node_modules/.bin/lint-staged"
 	},
 	"lint-staged": {
-		"*.{ts,js,vue}": [
+		"front-end/*.{js,mjs,mts,ts}": [
+			"eslint --fix"
+		],
+		"front-end/src/**/*.{js,ts,vue}": [
 			"eslint --fix"
 		]
 	},

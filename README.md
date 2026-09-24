@@ -46,6 +46,9 @@ Current math content is selectively ported from
 [`instruction-material/classes.jacobdanderson.net`](https://github.com/instruction-material/classes.jacobdanderson.net).
 Course media uses
 [`static.classes.jacobdanderson.net`](https://static.classes.jacobdanderson.net).
+Local release-bound course images may render inline. Images on another origin
+are shown as explicit links and are never requested merely because a student
+opened a course page.
 Unavailable upstream media remains labeled as pending instead of being
 replaced with fabricated assets.
 
@@ -91,13 +94,19 @@ identifiers. The reviewed state is committed in
 with a different tracking setting. Graph contents remain in the current browser
 tab unless the student downloads a project.
 
+Delimited imports have aggregate decoded-character and parsed-cell limits.
+SVG and PNG export also enforce point, element, text, estimated-output, and
+pixel budgets before graphical serialization. Oversized documents can still be
+saved as the editable project or exported as CSV when those formats are within
+their own bounds.
+
 Production serves the repository's exact built static output through the
-native Nginx host and atomic release symlink. Docker, container registries,
-Netlify, and alternate build paths are not supported. The checked-in native
-policy supplies the strict API boundary and the dormant, credential-stripping
-usage proxy selected only from committed source. Build identity, host
-requirements, atomic promotion, and the required public verification gate are
-documented in
+native Nginx host and atomic release symlink. CI packages and attests the full
+static runtime, including its release identity and Nginx policies. A separately
+reviewed root-owned helper validates the artifact without executing the
+candidate checkout. Docker, container registries, Netlify, and alternate build
+paths are not supported. Build identity, host requirements, atomic promotion,
+rollback, and the required public verification gate are documented in
 [`docs/production-deployment.md`](docs/production-deployment.md).
 
 The independent browser adaptation of GraphSketcher is distributed under its

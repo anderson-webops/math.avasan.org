@@ -508,7 +508,7 @@ function isImage(link: string) {
 }
 
 function isEmbeddedMedia(link: string) {
-	return isImage(link);
+	return link.startsWith("/course-assets/") && isImage(link);
 }
 
 function staticAssetName(url: string) {
@@ -569,6 +569,9 @@ function mediaLabel(url: string) {
 	if (isYouTubeVideoUrl(url)) {
 		return "Demo video";
 	}
+	if (isImage(url)) {
+		return "Open course image";
+	}
 
 	return "Media resource";
 }
@@ -576,7 +579,11 @@ function mediaLabel(url: string) {
 function resourceLinks(item: CourseModuleItem): ResourceLink[] {
 	const mediaUrl = item.mediaLink?.trim();
 
-	if (mediaUrl && !isEmbeddedMedia(mediaUrl)) {
+	if (
+		mediaUrl &&
+		!isEmbeddedMedia(mediaUrl) &&
+		!isItemStaticMediaUnavailable(item)
+	) {
 		return [
 			{
 				kind: "media",
@@ -946,7 +953,6 @@ function writeStoredValue(key: string, value: string) {
 									<div
 										v-else-if="
 											item.mediaLink &&
-											isEmbeddedMedia(item.mediaLink) &&
 											isItemStaticMediaUnavailable(item)
 										"
 										class="item-media item-media-placeholder"
@@ -1079,7 +1085,6 @@ function writeStoredValue(key: string, value: string) {
 									<div
 										v-else-if="
 											item.mediaLink &&
-											isEmbeddedMedia(item.mediaLink) &&
 											isItemStaticMediaUnavailable(item)
 										"
 										class="item-media item-media-placeholder"

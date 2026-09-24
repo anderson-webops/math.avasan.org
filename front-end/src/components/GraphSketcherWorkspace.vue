@@ -55,7 +55,8 @@ import {
 	graphDocumentToCsv,
 	graphDocumentToSvg,
 	importDelimitedGraphData,
-	importLegacyGraphSketcherDocument
+	importLegacyGraphSketcherDocument,
+	MAX_DELIMITED_IMPORT_CHARACTERS
 } from "@/modules/graphSketcherFiles";
 import {
 	evenlySampleSeriesIndexes,
@@ -1733,6 +1734,11 @@ async function handleFileSelection(event: Event) {
 			);
 		}
 		if (/\.(?:csv|tsv)$/i.test(file.name)) {
+			if (file.size > MAX_DELIMITED_IMPORT_CHARACTERS) {
+				throw new Error(
+					"The data file is larger than the 2 MB browser import limit."
+				);
+			}
 			const text = await file.text();
 			if (shouldDiscardImport()) return;
 			pastedData.value = text;
@@ -1792,31 +1798,37 @@ function downloadProject() {
 }
 
 function exportSvg() {
-	downloadBlob(
-		new Blob([graphDocumentToSvg(graphDocument.value)], {
-			type: "image/svg+xml;charset=utf-8"
-		}),
-		graphProjectFileName(graphDocument.value.title).replace(
-			/\.graphsketch$/,
-			".svg"
-		)
-	);
-	statusMessage.value = "Exported a scalable SVG graph.";
+	try {
+		downloadBlob(
+			new Blob([graphDocumentToSvg(graphDocument.value)], {
+				type: "image/svg+xml;charset=utf-8"
+			}),
+			graphProjectFileName(graphDocument.value.title).replace(
+				/\.graphsketch$/,
+				".svg"
+			)
+		);
+		statusMessage.value = "Exported a scalable SVG graph.";
+	} catch (error) {
+		statusMessage.value =
+			error instanceof Error ? error.message : "Could not export SVG.";
+	}
 }
 
 async function exportPng() {
-	const svg = graphDocumentToSvg(graphDocument.value);
-	const sourceUrl = URL.createObjectURL(
-		new Blob([svg], { type: "image/svg+xml;charset=utf-8" })
-	);
+	let sourceUrl: string | undefined;
 	try {
-		const image = new Image();
-		image.src = sourceUrl;
-		await image.decode();
 		const dimensions = graphPngDimensions(
 			graphDocument.value.canvas.width,
 			graphDocument.value.canvas.height
 		);
+		const svg = graphDocumentToSvg(graphDocument.value, dimensions);
+		sourceUrl = URL.createObjectURL(
+			new Blob([svg], { type: "image/svg+xml;charset=utf-8" })
+		);
+		const image = new Image();
+		image.src = sourceUrl;
+		await image.decode();
 		const canvas = window.document.createElement("canvas");
 		canvas.width = dimensions.width;
 		canvas.height = dimensions.height;
@@ -1845,7 +1857,7 @@ async function exportPng() {
 		statusMessage.value =
 			error instanceof Error ? error.message : "Could not export PNG.";
 	} finally {
-		URL.revokeObjectURL(sourceUrl);
+		if (sourceUrl) URL.revokeObjectURL(sourceUrl);
 	}
 }
 
@@ -2695,6 +2707,7 @@ onBeforeUnmount(() => {
 							Rows
 							<textarea
 								v-model="pastedData"
+								:maxlength="MAX_DELIMITED_IMPORT_CHARACTERS"
 								rows="6"
 								placeholder="Time,Measured,Reference&#10;0,82,80&#10;2,66,65"
 							/>

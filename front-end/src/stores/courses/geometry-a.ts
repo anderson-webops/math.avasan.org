@@ -630,7 +630,7 @@ export const geometryACourse: RawCourse = {
 							"- Perpendicular-line construction: https://www.khanacademy.org/math/geometry-home/geometric-constructions/geo-bisectors/v/constructing-a-perpendicular-line-using-a-compass-and-straightedge?modal=1",
 							"- Perpendicular-bisector construction: https://www.khanacademy.org/math/geometry-home/geometric-constructions/geo-bisectors/v/constructing-a-perpendicular-line-using-a-compass-and-straightedge?modal=1",
 							"- Equilateral-triangle construction: https://www.khanacademy.org/math/geometry-home/geometric-constructions/polygons-inscribed-in-circles/v/constructing-equilateral-triangle-inscribed-in-circle?modal=1",
-							"- Trigonometry table reference: http://math2.org/math/trig/tables.htm",
+							"- Trigonometry table reference: the external Math2 table is omitted because an authenticated HTTPS copy could not be verified.",
 							"- Scientific calculator reference: https://www.desmos.com/scientific"
 						].join("\n"),
 						"**Static-media note:** Legacy static diagrams are not embedded directly while those files are pending. The appendix lists stable static media URLs by original filename so diagrams can be added later without changing course references."

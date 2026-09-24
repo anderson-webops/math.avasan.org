@@ -4,6 +4,7 @@ on:
     workflow_dispatch:
     push:
         branches: [main]
+        tags: ["v*"]
     pull_request:
         branches: [main]
 
@@ -325,10 +326,20 @@ jobs:
                   grep -Fq '"classroomUsageEnabled": false' front-end/dist/release.json
                   bash -n deploy/direct/prepare-static-release.sh
                   bash -n deploy/direct/promote-static-release.sh
+                  bash -n deploy/direct/install-trusted-helpers.sh
+                  bash -n deploy/direct/prepare-legacy-rollback.sh
                   bash -n deploy/direct/verify-release-source.sh
                   bash -n deploy/direct/verify-nginx-snippet-dump.sh
+                  bash -n scripts/package-static-artifact.sh
+                  python3 -B scripts/static-artifact.py --help >/dev/null
+                  npm run test:artifact
+                  test -x deploy/direct/install-trusted-helpers.sh
+                  test -x deploy/direct/prepare-legacy-rollback.sh
+                  test -x deploy/direct/prepare-static-release.sh
+                  test -x deploy/direct/promote-static-release.sh
                   test -x deploy/direct/verify-release-source.sh
                   test -x deploy/direct/verify-nginx-snippet-dump.sh
+                  test -x scripts/package-static-artifact.sh
                   test ! -e front-end/dist/.vite
                   test ! -e front-end/dist/404/index.html
                   test ! -e front-end/dist/admin.html
@@ -336,3 +347,97 @@ jobs:
                   test ! -e front-end/dist/graph-sketcher.html
                   grep -Fq '<loc>https://math.avasan.org/courses/</loc>' front-end/dist/sitemap.xml
                   ! grep -Fq '<loc>https://math.avasan.org/404</loc>' front-end/dist/sitemap.xml
+
+    release-artifact:
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        needs:
+            - lint
+            - typecheck
+            - test
+            - accessibility
+            - static-media
+            - test-e2e
+            - build
+            - native-arm64
+            - native-static-runtime
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+        permissions:
+            contents: read
+            id-token: write
+            attestations: write
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  fetch-depth: 0
+                  persist-credentials: false
+
+            - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: npm
+
+            - name: Use the repository npm version
+              run: npm install --global "npm@${NPM_VERSION}"
+
+            - name: Verify pinned toolchain
+              run: |
+                  test "$(node --version)" = "v${NODE_VERSION}"
+                  test "$(npm --version)" = "${NPM_VERSION}"
+
+            - name: Verify annotated tag at exact main revision
+              id: identity
+              run: |
+                  source_commit="$(git rev-parse --verify 'HEAD^{commit}')"
+                  tag="${GITHUB_REF_NAME}"
+                  test "$(git cat-file -t "refs/tags/${tag}")" = tag
+                  test "$(git rev-parse --verify "refs/tags/${tag}^{commit}")" = "$source_commit"
+                  version="$(python3 -c 'import json; print(json.load(open("package.json", encoding="utf-8"))["version"])')"
+                  test "$tag" = "v${version}"
+                  git fetch --no-tags origin '+refs/heads/main:refs/remotes/origin/main'
+                  test "$(git rev-parse --verify 'refs/remotes/origin/main^{commit}')" = "$source_commit"
+                  printf 'commit=%s\nversion=%s\n' "$source_commit" "$version" >> "$GITHUB_OUTPUT"
+
+            - name: Install locked dependencies
+              run: npm ci --include=optional --strict-allow-scripts
+              env:
+                  CYPRESS_INSTALL_BINARY: "0"
+
+            - name: Build exact release identity
+              env:
+                  SOURCE_REVISION: ${{ steps.identity.outputs.commit }}
+              run: npm run build
+
+            - name: Package complete static runtime
+              id: package
+              run: |
+                  output="${RUNNER_TEMP}/math-static-artifact"
+                  mkdir -p "$output"
+                  scripts/package-static-artifact.sh "$GITHUB_WORKSPACE" "$output" "${{ steps.identity.outputs.commit }}"
+                  archive="$(find "$output" -maxdepth 1 -type f -name '*.tar.gz' -print -quit)"
+                  test -n "$archive"
+                  receipt="${archive%.tar.gz}.json"
+                  checksum="${archive}.sha256"
+                  test -f "$receipt"
+                  test -f "$checksum"
+                  printf 'archive=%s\nreceipt=%s\nchecksum=%s\n' \
+                    "$archive" "$receipt" "$checksum" >> "$GITHUB_OUTPUT"
+
+            - name: Attest exact static runtime
+              id: attest
+              uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+              with:
+                  subject-path: ${{ steps.package.outputs.archive }}
+
+            - name: Upload artifact, manifest receipt, checksum, and provenance
+              uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.0
+              with:
+                  name: math-static-artifact-${{ steps.identity.outputs.commit }}
+                  if-no-files-found: error
+                  retention-days: 30
+                  compression-level: 0
+                  path: |
+                      ${{ steps.package.outputs.archive }}
+                      ${{ steps.package.outputs.receipt }}
+                      ${{ steps.package.outputs.checksum }}
+                      ${{ steps.attest.outputs.bundle-path }}

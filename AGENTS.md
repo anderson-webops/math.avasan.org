@@ -86,6 +86,19 @@ Math course media remains sourced from
 `https://static.classes.jacobdanderson.net`. Missing upstream media must remain
 clearly identified as pending; do not fabricate placeholder assets.
 
+Only release-bound local course images may load automatically. Present an
+external HTTPS image or media resource as an explicit `noopener noreferrer`
+link, preserve pending-media placeholders, and keep the production image/media
+CSP limited to local, `data:`, and `blob:` sources.
+
+Production promotion accepts only the complete CI-built artifact with GitHub
+Actions provenance for the exact annotated version tag, main-branch commit,
+and pinned workflow. Root
+must use the separately reviewed installed helper and must never execute the
+candidate checkout or trust its Git refs, package expressions, scripts, ignored
+files, or pre-existing build output. Preserve the sealed, version-aware prior
+artifact and its exact Nginx policies for rollback.
+
 ## Dependency and Lockfile Discipline
 
 - Use the pinned npm toolchain and root `package-lock.json`; do not mix package
