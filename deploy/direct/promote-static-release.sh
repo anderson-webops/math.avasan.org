@@ -62,6 +62,9 @@ helper_root="$(cd -- "$script_dir/../.." && pwd -P)"
 artifact_tool="$helper_root/scripts/static-artifact.py"
 path_guard="$script_dir/trusted-paths.py"
 snippet_gate="$script_dir/verify-nginx-snippet-dump.sh"
+captured_header_gate="$script_dir/verify-captured-response-headers.py"
+worker_gate="$script_dir/nginx-worker-generation.py"
+transaction_library="$script_dir/static-promotion-transaction.sh"
 base=/srv/math.avasan.org
 release_root="$base/artifact-releases"
 incoming_root="$base/artifact-incoming"
@@ -126,7 +129,26 @@ finished=false
 rollback_failed=false
 previous_target=""
 previous_kind=""
+previous_profile=""
 candidate=""
+
+readonly python_bin=/usr/bin/python3
+readonly timeout_bin=/usr/bin/timeout
+readonly install_bin=/usr/bin/install
+readonly mv_bin=/usr/bin/mv
+readonly ln_bin=/usr/bin/ln
+readonly unlink_bin=/usr/bin/unlink
+readonly cmp_bin=/usr/bin/cmp
+readonly grep_bin=/usr/bin/grep
+readonly curl_bin=/usr/bin/curl
+readonly sleep_bin=/usr/bin/sleep
+readonly nginx_bin=/usr/sbin/nginx
+readonly systemctl_bin=/usr/bin/systemctl
+readonly rm_bin=/usr/bin/rm
+readonly mktemp_bin=/usr/bin/mktemp
+readonly -a install_arguments=(-o root -g root -m 0644)
+readonly acceptance_attempts=20
+readonly worker_state_root="$recovery_root"
 
 # shellcheck disable=SC2329 # Invoked from the EXIT trap.
 cleanup() {
@@ -146,164 +168,8 @@ cleanup() {
 	fi
 }
 
-activate_target() {
-	local target="$1"
-	if [[ -L "$next_link" ]]; then /usr/bin/unlink -- "$next_link" || return 1; fi
-	/usr/bin/ln -s -- "$target" "$next_link" || return 1
-	/usr/bin/mv -Tf -- "$next_link" "$current_link"
-}
-
-verify_release_tree() {
-	local target="$1" expected="$2" expected_version="${3:-}"
-	local arguments=(verify "$target" --commit "$expected")
-	if [[ -n "$expected_version" ]]; then
-		arguments+=(--version "$expected_version")
-	fi
-	/usr/bin/python3 -I "$path_guard" --tree "$target" \
-		&& /usr/bin/timeout --signal=KILL 30s \
-			/usr/bin/python3 -I "$artifact_tool" "${arguments[@]}"
-}
-
-verify_legacy_tree() {
-	local target="$1" expected="$2"
-	/usr/bin/python3 -I "$path_guard" --tree "$target" \
-		&& /usr/bin/timeout --signal=KILL 30s \
-			/usr/bin/python3 -I "$artifact_tool" verify "$target" \
-				--commit "$expected" --allow-legacy
-}
-
-install_snippet() {
-	local source="$1" target="$2"
-	/usr/bin/install -o root -g root -m 0644 -- "$source" "${target}.next.$$" \
-		&& /usr/bin/mv -Tf -- "${target}.next.$$" "$target"
-}
-
-install_release_policies() {
-	local target="$1"
-	install_snippet "$target/deploy/nginx/http-maps.conf" "$maps_target" \
-		&& install_snippet "$target/deploy/nginx/server-policy.conf" "$policy_target" \
-		&& install_snippet "$target/deploy/nginx/classroom-usage.inc" "$usage_target"
-}
-
-verify_installed_policies() {
-	local target="$1"
-	/usr/bin/cmp -s "$target/deploy/nginx/http-maps.conf" "$maps_target" \
-		&& /usr/bin/cmp -s "$target/deploy/nginx/server-policy.conf" "$policy_target" \
-		&& /usr/bin/cmp -s "$target/deploy/nginx/classroom-usage.inc" "$usage_target" \
-		&& /usr/sbin/nginx -T >"$nginx_dump" 2>&1 \
-		&& "$snippet_gate" "$nginx_dump" "$maps_target" "$policy_target" "$usage_target"
-}
-
-strict_page_headers() {
-	local headers="$1"
-	/usr/bin/grep -Eiq "^Content-Security-Policy:.*img-src 'self' data: blob:;.*media-src 'self' blob:;.*frame-src https://scratch\.mit\.edu;.*frame-ancestors 'none'" "$headers" \
-		&& /usr/bin/grep -Eiq '^Cross-Origin-Opener-Policy:[[:space:]]*same-origin' "$headers" \
-		&& /usr/bin/grep -Eiq '^Cross-Origin-Resource-Policy:[[:space:]]*same-origin' "$headers" \
-		&& /usr/bin/grep -Eiq '^X-Content-Type-Options:[[:space:]]*nosniff' "$headers" \
-		&& /usr/bin/grep -Eiq '^X-Frame-Options:[[:space:]]*DENY' "$headers"
-}
-
-request_status() {
-	local family="$1" resolve="$2" response="$3" headers="$4" url="$5"
-	shift 5
-	/usr/bin/curl --noproxy '*' "$family" --path-as-is --silent --show-error --max-time 5 \
-		--resolve "$resolve" --header "Host: $host_header" --output "$response" \
-		--dump-header "$headers" --write-out '%{http_code}' "$@" "$url"
-}
-
-denied_paths_match() {
-	local family="$1" resolve="$2" response="$3" headers="$4"
-	local path status
-	for path in \
-		/404 /404/ /404.html /404/index.html /index.html /%69ndex.html \
-		/admin.html /admin/index.html /admin/index%2ehtml /admin/index%2Ehtml \
-		/courses.html /courses/index.html /courses%2ehtml /courses/index%2Ehtml \
-		/graph-sketcher.html /graph-sketcher/index.html /graph-sketcher%2Ehtml \
-		/python-ide /python-ide/asset.js /.vite/ssr-manifest.json; do
-		status="$(request_status "$family" "$resolve" "$response" "$headers" "$site_origin$path")" || return 1
-		[[ "$status" == 404 ]] || return 1
-		/usr/bin/grep -Fq 'Page not found' "$response" || return 1
-		if [[ "$path" == /admin* ]]; then
-			/usr/bin/grep -Eiq '^Cache-Control:.*no-store' "$headers" || return 1
-			/usr/bin/grep -Eiq '^X-Robots-Tag:.*noindex' "$headers" || return 1
-		fi
-	done
-}
-
-family_matches() {
-	local family="$1" resolve="$2" response="$3" headers="$4" target="$5"
-	local status
-	/usr/bin/curl --noproxy '*' "$family" --path-as-is --fail --silent --show-error --max-time 5 \
-		--resolve "$resolve" "$site_origin/release.json" --output "$response" \
-		&& /usr/bin/cmp -s "$target/front-end/dist/release.json" "$response" \
-		|| return 1
-	status="$(request_status "$family" "$resolve" "$response" "$headers" "$site_origin/")" || return 1
-	[[ "$status" == 200 ]] && strict_page_headers "$headers" || return 1
-	status="$(request_status "$family" "$resolve" "$response" "$headers" "$site_origin/admin")" || return 1
-	[[ "$status" == 302 ]] \
-		&& /usr/bin/grep -Eiq '^Location:[[:space:]]*https://cs\.avasan\.org/admin' "$headers" \
-		&& /usr/bin/grep -Eiq '^Cache-Control:.*no-store' "$headers" \
-		&& /usr/bin/grep -Eiq '^X-Robots-Tag:.*noindex' "$headers" \
-		|| return 1
-	status="$(request_status "$family" "$resolve" "$response" "$headers" "$site_origin/courses")" || return 1
-	[[ "$status" == 301 ]] && /usr/bin/grep -Fiq "Location: $site_origin/courses/" "$headers" || return 1
-	status="$(request_status "$family" "$resolve" "$response" "$headers" "$site_origin/graph-sketcher")" || return 1
-	[[ "$status" == 301 ]] && /usr/bin/grep -Fiq "Location: $site_origin/graph-sketcher/" "$headers" || return 1
-	denied_paths_match "$family" "$resolve" "$response" "$headers" || return 1
-	status="$(request_status "$family" "$resolve" "$response" "$headers" "$site_origin/__math-artifact-probe-missing")" || return 1
-	[[ "$status" == 404 ]] && /usr/bin/grep -Fq 'Page not found' "$response" || return 1
-	status="$(request_status "$family" "$resolve" "$response" "$headers" "$site_origin/" --request POST)" || return 1
-	[[ "$status" == 405 ]]
-}
-
-wait_for_target() {
-	local target="$1"
-	for _ in {1..20}; do
-		if family_matches --ipv4 "$resolve_ipv4" "$response_ipv4" "$headers_ipv4" "$target" \
-			&& family_matches --ipv6 "$resolve_ipv6" "$response_ipv6" "$headers_ipv6" "$target"; then
-			return 0
-		fi
-		/usr/bin/sleep 1
-	done
-	return 1
-}
-
-# shellcheck disable=SC2329 # Invoked from the EXIT trap.
-rollback() {
-	local failed=0
-	if [[ "$previous_kind" == legacy ]]; then
-		verify_legacy_tree "$previous_target" "$expected_current" >/dev/null || failed=1
-	else
-		verify_release_tree "$previous_target" "$expected_current" >/dev/null || failed=1
-	fi
-	install_release_policies "$previous_target" || failed=1
-	verify_installed_policies "$previous_target" >/dev/null || failed=1
-	activate_target "$previous_target" || failed=1
-	/usr/sbin/nginx -t && /usr/bin/systemctl reload nginx || failed=1
-	wait_for_target "$previous_target" || failed=1
-	return "$failed"
-}
-
-# shellcheck disable=SC2329 # Registered as the EXIT trap.
-on_exit() {
-	local status=$?
-	trap - EXIT
-	trap '' HUP INT TERM
-	if [[ "$mutation_started" == true && "$finished" != true ]]; then
-		if ! rollback; then
-			rollback_failed=true
-			echo "CRITICAL: rollback needs operator recovery; record retained at $state_record" >&2
-		else
-			echo "Restored and verified the sealed previous Math release after candidate failure." >&2
-		fi
-		if [[ "$status" == 0 ]]; then status=1; fi
-	fi
-	cleanup
-	if [[ "$rollback_failed" != true && -n "$state_record" ]]; then
-		/usr/bin/rm -f -- "$state_record"
-	fi
-	exit "$status"
-}
+# shellcheck source=deploy/direct/static-promotion-transaction.sh
+. "$transaction_library"
 trap on_exit EXIT
 trap 'exit 129' HUP
 trap 'exit 130' INT
@@ -363,6 +229,7 @@ case "$current_target" in
 		previous_target="$current_target"
 		previous_kind=legacy
 		verify_legacy_tree "$previous_target" "$expected_current" >/dev/null
+		previous_profile="$(legacy_recovery_profile "$previous_target" "$expected_current")"
 		;;
 	"$release_root"/*)
 		if [[ "$legacy_archive" != "-" ]]; then
@@ -372,6 +239,7 @@ case "$current_target" in
 		previous_target="$current_target"
 		previous_kind=release
 		verify_release_tree "$previous_target" "$expected_current" >/dev/null
+		previous_profile="$(release_recovery_profile "$previous_target" "$expected_current")"
 		;;
 	"$legacy_root"/*)
 		if [[ "$legacy_archive" == "-" ]]; then
@@ -407,6 +275,7 @@ case "$current_target" in
 		legacy_temp=""
 		previous_target="$sealed_legacy"
 		previous_kind=legacy
+		previous_profile="$(legacy_recovery_profile "$previous_target" "$expected_current")"
 		if ! /usr/bin/cmp -s \
 			"$current_target/front-end/dist/release.json" \
 			"$previous_target/front-end/dist/release.json"; then
@@ -426,12 +295,7 @@ state_record="$(/usr/bin/mktemp "$recovery_root/promotion-state-XXXXXXXX")"
 /usr/bin/chmod 0600 "$state_record"
 
 mutation_started=true
-install_release_policies "$candidate"
-verify_installed_policies "$candidate"
-activate_target "$candidate"
-if /usr/sbin/nginx -t \
-	&& /usr/bin/systemctl reload nginx \
-	&& wait_for_target "$candidate"; then
+if promote_candidate "$candidate"; then
 	finished=true
 	echo "Promoted attested immutable Math artifact $commit and verified IPv4/IPv6 identity, routes, and policy."
 	exit 0

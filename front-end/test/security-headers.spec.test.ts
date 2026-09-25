@@ -341,6 +341,13 @@ describe("production browser security policy", () => {
 			resolve(repositoryRoot, "deploy/direct/promote-static-release.sh"),
 			"utf8"
 		);
+		const promotionTransaction = readFileSync(
+			resolve(
+				repositoryRoot,
+				"deploy/direct/static-promotion-transaction.sh"
+			),
+			"utf8"
+		);
 		const sourceGate = readFileSync(
 			resolve(repositoryRoot, "deploy/direct/verify-release-source.sh"),
 			"utf8"
@@ -368,12 +375,12 @@ describe("production browser security policy", () => {
 		expect(promoteRelease).toContain('--version "$version"');
 		expect(promoteRelease).not.toContain("verify-release-source.sh");
 		expect(promoteRelease).not.toContain("git -C");
-		expect(promoteRelease).toContain("nginx -T");
+		expect(promotionTransaction).toContain('"$nginx_bin" -T');
 		expect(promoteRelease).toContain("verify-nginx-snippet-dump.sh");
 		expect(promoteRelease).toContain(
 			"existing verified current Math release symlink"
 		);
-		expect(promoteRelease).toContain(
+		expect(promotionTransaction).toContain(
 			"Restored and verified the sealed previous Math release"
 		);
 		expect(promoteRelease).not.toContain('unlink -- "$current_link"');

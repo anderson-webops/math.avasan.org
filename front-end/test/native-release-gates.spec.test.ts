@@ -156,6 +156,13 @@ describe("privileged static artifact boundary", () => {
 			resolve(repositoryRoot, "deploy/direct/install-trusted-helpers.sh"),
 			"utf8"
 		);
+		const transaction = readFileSync(
+			resolve(
+				repositoryRoot,
+				"deploy/direct/static-promotion-transaction.sh"
+			),
+			"utf8"
+		);
 
 		expect(promoter).toContain("/usr/bin/gh attestation verify");
 		expect(promoter).toContain('--source-ref "refs/tags/v$version"');
@@ -167,23 +174,33 @@ describe("privileged static artifact boundary", () => {
 		expect(promoter).not.toContain("git -C");
 		expect(installer).toContain("trusted-paths.py");
 		expect(installer).toContain("gh-config");
+		expect(promoter).toContain('. "$transaction_library"');
+		expect(transaction).toContain("promote_candidate");
 	});
 
 	it("reuses a sealed legacy rollback only through the legacy verifier", () => {
-		const promoter = readFileSync(
+		const transaction = readFileSync(
 			resolve(repositoryRoot, "deploy/direct/promote-static-release.sh"),
 			"utf8"
 		);
-		const existingLegacyBranch = promoter.match(
-			/if \[\[ -e "\$sealed_legacy"[\s\S]*?else\n\s+\/usr\/bin\/mv/
-		)?.[0];
-
-		expect(existingLegacyBranch).toBeDefined();
-		expect(existingLegacyBranch).toContain(
-			'verify_legacy_tree "$sealed_legacy"'
+		const transactionSource = readFileSync(
+			resolve(
+				repositoryRoot,
+				"deploy/direct/static-promotion-transaction.sh"
+			),
+			"utf8"
 		);
-		expect(existingLegacyBranch).not.toContain(
-			'verify_release_tree "$sealed_legacy"'
+
+		expect(transaction).toContain(
+			'previous_profile="$(legacy_recovery_profile'
+		);
+		expect(transactionSource).toContain("legacy-v1.0.16");
+		expect(transactionSource).toContain("legacy_v1_family_matches");
+		expect(transactionSource).toContain(
+			'wait_for_previous_target "$previous_target" "$previous_profile"'
+		);
+		expect(transactionSource).toMatch(
+			/verify_legacy_tree[^]*?\|\| return 1[^]*?install_release_policies/
 		);
 	});
 

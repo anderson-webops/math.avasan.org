@@ -34,7 +34,7 @@ class StaticArtifactTest(unittest.TestCase):
                 pass
         self.temporary.cleanup()
 
-    def fixture(self, name, version="1.0.17", usage=False):
+    def fixture(self, name, version="1.0.17", usage=False, commit=COMMIT):
         root = self.root / name
         output = root / "front-end/dist"
         policies = root / "deploy/nginx"
@@ -42,7 +42,7 @@ class StaticArtifactTest(unittest.TestCase):
         policies.mkdir(parents=True)
         metadata = {
             "classroomUsageEnabled": usage,
-            "revision": COMMIT,
+            "revision": commit,
             "version": version,
         }
         files = {
@@ -137,13 +137,27 @@ class StaticArtifactTest(unittest.TestCase):
             reader.read()
 
     def test_legacy_archive_requires_explicit_bounded_mode(self):
-        fixture = self.fixture("legacy", version="1.0.16")
+        fixture = self.fixture(
+            "legacy",
+            version=artifact.LEGACY_VERSION,
+            commit=artifact.LEGACY_COMMIT,
+        )
         archive = self.root / "legacy.tar.gz"
-        result = artifact.pack(fixture, archive, COMMIT, allow_legacy=True)
+        result = artifact.pack(
+            fixture,
+            archive,
+            artifact.LEGACY_COMMIT,
+            allow_legacy=True,
+        )
         rejected = self.root / "legacy-rejected"
         rejected.mkdir()
         with self.assertRaisesRegex(ValueError, "legacy rollback artifacts"):
-            artifact.unpack(rejected, archive, result["sha256"], COMMIT)
+            artifact.unpack(
+                rejected,
+                archive,
+                result["sha256"],
+                artifact.LEGACY_COMMIT,
+            )
 
         accepted = self.root / "legacy-accepted"
         accepted.mkdir()
@@ -151,10 +165,33 @@ class StaticArtifactTest(unittest.TestCase):
             accepted,
             archive,
             result["sha256"],
-            COMMIT,
+            artifact.LEGACY_COMMIT,
             allow_legacy=True,
         )
         self.assertEqual(manifest["purpose"], "legacy-rollback")
+
+    def test_legacy_archive_rejects_every_other_version_or_commit(self):
+        wrong_version = self.fixture(
+            "legacy-wrong-version",
+            version="1.0.15",
+            commit=artifact.LEGACY_COMMIT,
+        )
+        with self.assertRaisesRegex(ValueError, "reviewed v1.0.16"):
+            artifact.pack(
+                wrong_version,
+                self.root / "legacy-wrong-version.tar.gz",
+                artifact.LEGACY_COMMIT,
+                allow_legacy=True,
+            )
+
+        wrong_commit = self.fixture("legacy-wrong-commit", version="1.0.16")
+        with self.assertRaisesRegex(ValueError, "reviewed v1.0.16"):
+            artifact.pack(
+                wrong_commit,
+                self.root / "legacy-wrong-commit.tar.gz",
+                COMMIT,
+                allow_legacy=True,
+            )
 
     def test_rejects_links_and_undeclared_static_output(self):
         symlink_fixture = self.fixture("symlink")

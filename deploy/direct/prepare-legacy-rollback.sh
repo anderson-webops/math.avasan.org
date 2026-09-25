@@ -21,6 +21,10 @@ if [[ ! "$commit" =~ ^[0-9a-f]{40}$ || -L "$2" ]]; then
 	echo "Expected current commit must be exact and output must be a real directory." >&2
 	exit 1
 fi
+if [[ "$commit" != cc774b9c75c425f97bb5c6768f31985ae4ad0cfc ]]; then
+	echo "Legacy capture is bounded to the reviewed v1.0.16 release." >&2
+	exit 1
+fi
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 helper_root="$(cd -- "$script_dir/../.." && pwd -P)"
@@ -52,6 +56,12 @@ for required in front-end/dist/index.html front-end/dist/404.html front-end/dist
 		exit 1
 	fi
 done
+/usr/bin/python3 -I -c '
+import json, pathlib, sys
+release=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+expected={"classroomUsageEnabled": False, "revision": sys.argv[2], "version": "1.0.16"}
+if release != expected: raise SystemExit("active release is not the reviewed v1.0.16 identity")
+' "$current_target/front-end/dist/release.json" "$commit"
 for snippet in \
 	math.avasan.org-http-maps.conf \
 	math.avasan.org-server-policy.conf \

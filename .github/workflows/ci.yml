@@ -294,6 +294,7 @@ jobs:
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
+                  fetch-depth: 0
                   persist-credentials: false
 
             - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -326,20 +327,29 @@ jobs:
                   grep -Fq '"classroomUsageEnabled": false' front-end/dist/release.json
                   bash -n deploy/direct/prepare-static-release.sh
                   bash -n deploy/direct/promote-static-release.sh
+                  bash -n deploy/direct/static-promotion-transaction.sh
                   bash -n deploy/direct/install-trusted-helpers.sh
                   bash -n deploy/direct/prepare-legacy-rollback.sh
                   bash -n deploy/direct/verify-release-source.sh
                   bash -n deploy/direct/verify-nginx-snippet-dump.sh
+                  bash -n scripts/test-static-promotion-rollback.sh
                   bash -n scripts/package-static-artifact.sh
+                  python3 -B deploy/direct/nginx-worker-generation.py --help >/dev/null
                   python3 -B scripts/static-artifact.py --help >/dev/null
                   npm run test:artifact
+                  npm run test:captured-headers
+                  npm run test:promotion-recovery
                   test -x deploy/direct/install-trusted-helpers.sh
                   test -x deploy/direct/prepare-legacy-rollback.sh
                   test -x deploy/direct/prepare-static-release.sh
                   test -x deploy/direct/promote-static-release.sh
+                  test -x deploy/direct/nginx-worker-generation.py
+                  test -x deploy/direct/static-promotion-transaction.sh
+                  test -x deploy/direct/verify-captured-response-headers.py
                   test -x deploy/direct/verify-release-source.sh
                   test -x deploy/direct/verify-nginx-snippet-dump.sh
                   test -x scripts/package-static-artifact.sh
+                  test -x scripts/test-static-promotion-rollback.sh
                   test ! -e front-end/dist/.vite
                   test ! -e front-end/dist/404/index.html
                   test ! -e front-end/dist/admin.html

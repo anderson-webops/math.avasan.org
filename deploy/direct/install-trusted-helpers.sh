@@ -62,7 +62,10 @@ ensure_directory "$base/.deployment-recovery/gh-config" 700
 /usr/bin/install -o root -g root -m 0755 \
 	"$script_dir/promote-static-release.sh" \
 	"$script_dir/prepare-legacy-rollback.sh" \
+	"$script_dir/static-promotion-transaction.sh" \
+	"$script_dir/nginx-worker-generation.py" \
 	"$script_dir/trusted-paths.py" \
+	"$script_dir/verify-captured-response-headers.py" \
 	"$script_dir/verify-nginx-snippet-dump.sh" \
 	"$helper_root/deploy/direct/"
 /usr/bin/install -o root -g root -m 0755 \

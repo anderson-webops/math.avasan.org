@@ -25,6 +25,8 @@ MAX_COMPRESSED_BYTES = 128 * 1024 * 1024
 MAX_MANIFEST_BYTES = 1024 * 1024
 MAX_ARCHIVE_EXPANDED_BYTES = MAX_BYTES + MAX_MANIFEST_BYTES + (MAX_FILES + 1) * 2048
 CHUNK = 1024 * 1024
+LEGACY_VERSION = "1.0.16"
+LEGACY_COMMIT = "cc774b9c75c425f97bb5c6768f31985ae4ad0cfc"
 POLICY_FILES = {
     "deploy/nginx/http-maps.conf": "http-maps.conf",
     "deploy/nginx/server-policy.conf": "server-policy.conf",
@@ -239,6 +241,8 @@ def validate(root, manifest, allow_legacy=False):
         )
         if version > maximum:
             raise ValueError("release is too new for the bounded legacy rollback contract")
+        if release["version"] != LEGACY_VERSION or manifest["commit"] != LEGACY_COMMIT:
+            raise ValueError("legacy rollback identity must be the reviewed v1.0.16 release")
 
     validate_policies(root, release, purpose)
     homepage = (root / "front-end/dist/index.html").read_text(encoding="utf-8")

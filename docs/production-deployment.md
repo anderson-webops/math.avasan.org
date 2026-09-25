@@ -107,8 +107,8 @@ attested the exact archive bytes.
 ## One-time legacy rollback transition
 
 Before the first artifact-format activation, use the installed root-owned
-helper to capture the currently active `v1.0.16` or earlier static release and
-the exact installed snippets:
+helper to capture the exact reviewed `v1.0.16` static release at
+`cc774b9c75c425f97bb5c6768f31985ae4ad0cfc` and the exact installed snippets:
 
 ```bash
 /usr/local/libexec/math-avasan-static-release/<helper-version>/deploy/direct/prepare-legacy-rollback.sh \
@@ -122,6 +122,14 @@ legacy archive only during the transition from the existing
 artifact root and compares its release identity with the active release. It
 does not rebuild, reinterpret, or mutate the old release. Later promotions use
 only complete artifact-format releases.
+
+Rollback acceptance is version-aware. The trusted helper recognizes only the
+exact sealed v1.0.16 identity for the legacy profile, verifies the restored
+snippet bytes and effective Nginx inclusion, compares served static security
+headers with the policy captured inside that sealed artifact, and exercises the
+routes documented for v1.0.16. It never asks the retained artifact to satisfy
+new-only CSP or encoded-route requirements. Candidate acceptance remains on the
+current strict policy and route matrix.
 
 ## Promote and roll back
 
@@ -149,7 +157,9 @@ execution-time bounds, verifies
 the full manifest, seals the root-owned tree, and re-verifies any existing
 content-addressed target. It then records protected recovery state, installs
 the artifact-bound snippets, verifies their effective inclusion through
-`nginx -T`, atomically changes `current`, reloads Nginx, and checks IPv4 and
+`nginx -T`, validates and reloads the stricter candidate policy before
+waiting for the exact pre-reload Nginx worker generation to retire, atomically
+changes `current`, and checks IPv4 and
 IPv6 release identity, security headers, canonical routes, encoded legacy
 aliases, the Admin handoff, true 404 behavior, and unsafe-method rejection.
 
@@ -158,6 +168,19 @@ and its exact snippets, reloads Nginx, and repeats acceptance checks. A failed
 rollback retains the root-only recovery record and blocks another promotion
 until an operator reviews it. Keep the prior immutable release for rollback.
 Do not record deployment success before promotion and public smoke checks pass.
+The recovery path stops before policy or content mutation if prior-artifact
+verification fails. CI fault-injects a late IPv6 candidate acceptance failure
+after real activation and proves exact v1.0.16 content, policy, identity,
+dual-stack behavior, and recovery-record cleanup are restored.
+The same test runs a disposable master with deliberately lingering old workers,
+so candidate activation cannot occur merely because a graceful reload command
+returned. A retirement timeout fails closed and retains protected recovery
+state for operator review.
+
+The installed promoter requires a protected executable `/usr/bin/gh` with
+attestation verification support. Install that host prerequisite through the
+normal server package-management review before attempting activation; never
+skip provenance verification because the CLI is absent.
 
 ## Nginx contract
 
