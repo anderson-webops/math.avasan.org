@@ -315,6 +315,14 @@ jobs:
                   SOURCE_REVISION: ${{ github.sha }}
               run: npm run build
 
+            - name: Install Nginx for response-header regression
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install --yes --no-install-recommends nginx
+
+            - name: Verify denied-route headers with real Nginx
+              run: npm run test:real-nginx-headers
+
             - name: Verify native deployment contracts
               run: |
                   test ! -e Dockerfile
@@ -333,6 +341,7 @@ jobs:
                   bash -n deploy/direct/verify-release-source.sh
                   bash -n deploy/direct/verify-nginx-snippet-dump.sh
                   bash -n scripts/test-static-promotion-rollback.sh
+                  bash -n scripts/test-real-nginx-headers.sh
                   bash -n scripts/package-static-artifact.sh
                   python3 -B deploy/direct/nginx-worker-generation.py --help >/dev/null
                   python3 -B scripts/static-artifact.py --help >/dev/null
@@ -350,6 +359,7 @@ jobs:
                   test -x deploy/direct/verify-nginx-snippet-dump.sh
                   test -x scripts/package-static-artifact.sh
                   test -x scripts/test-static-promotion-rollback.sh
+                  test -x scripts/test-real-nginx-headers.sh
                   test ! -e front-end/dist/.vite
                   test ! -e front-end/dist/404/index.html
                   test ! -e front-end/dist/admin.html

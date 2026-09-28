@@ -1,7 +1,7 @@
 {
 	"name": "math-avasan-org",
 	"type": "module",
-	"version": "1.0.18",
+	"version": "1.0.19",
 	"private": true,
 	"packageManager": "npm@12.0.2",
 	"engines": {
@@ -33,6 +33,7 @@
 		"test:artifact": "python3 -B -m unittest scripts/test_static_artifact.py",
 		"test:captured-headers": "python3 -B -m unittest scripts/test_captured_response_headers.py",
 		"test:promotion-recovery": "bash scripts/test-static-promotion-rollback.sh",
+		"test:real-nginx-headers": "bash scripts/test-real-nginx-headers.sh",
 		"test:static-media-request": "npm run -w front-end test:unit -- test/static-media-request.spec.test.ts",
 		"typecheck": "npm run -w front-end typecheck",
 		"up": "npm exec --yes -- taze major -I && npm run -w front-end up",

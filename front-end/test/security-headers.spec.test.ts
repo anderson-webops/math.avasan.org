@@ -476,10 +476,14 @@ describe("production browser security policy", () => {
 			"utf8"
 		);
 
-		expect(maps).toContain('/admin "noindex, nofollow, noarchive";');
-		expect(maps).toContain('/admin "no-store";');
+		expect(maps).toContain("map $uri $math_admin_request");
+		expect(maps).toContain("map $math_admin_request $math_robots_tag");
+		expect(maps).toContain(
+			'map "$uri:$math_admin_request" $math_cache_control'
+		);
 		expect(serverPolicy).toContain("add_header X-Robots-Tag");
 		expect(serverPolicy).toContain("add_header Cache-Control");
+		expect(serverPolicy).toContain("if ($math_admin_request)");
 		expect(serverPolicy).toContain(
 			"return 302 https://cs.avasan.org/admin;"
 		);
@@ -497,7 +501,9 @@ describe("production browser security policy", () => {
 
 		expect(maps).toContain("$math_legacy_artifact_request");
 		expect(maps).toContain("map $uri $math_legacy_artifact_request");
-		expect(maps).not.toContain("map $request_uri");
+		expect(maps).not.toContain(
+			"map $request_uri $math_legacy_artifact_request"
+		);
 		expect(maps).toContain("graph-sketcher");
 		expect(maps).toContain("index\\.html");
 		expect(serverPolicy).toContain("if ($math_legacy_artifact_request)");
@@ -516,7 +522,7 @@ describe("production browser security policy", () => {
 			"utf8"
 		);
 
-		expect(maps).toContain('/release.json "no-store";');
+		expect(maps).toContain('/release.json:0 "no-store";');
 		expect(serverPolicy).toContain("add_header Cache-Control");
 		expect(serverPolicy).toContain("location = /release.json");
 		expect(serverPolicy).toContain("error_page 404 /404.html;");
