@@ -99,8 +99,12 @@ kill -0 "$server_pid"
 request() {
 	local method="$1" path="$2" expected_status="$3"
 	local headers="$test_root/headers" body="$test_root/body" status
+	local method_arguments=(--request "$method")
+	if [[ "$method" == HEAD ]]; then
+		method_arguments=(--head)
+	fi
 	status="$(curl --noproxy '*' --path-as-is --silent --show-error --max-time 2 \
-		--request "$method" --dump-header "$headers" --output "$body" \
+		"${method_arguments[@]}" --dump-header "$headers" --output "$body" \
 		--write-out '%{http_code}' "http://127.0.0.1:$port$path")"
 	[[ "$status" == "$expected_status" ]]
 }
