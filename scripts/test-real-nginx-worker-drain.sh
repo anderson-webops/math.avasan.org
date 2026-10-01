@@ -84,5 +84,24 @@ done
 worker_state="$(mktemp "$test_root/worker-state-XXXXXXXX")"
 python3 -I "$repo_root/deploy/direct/nginx-worker-generation.py" capture "$server_pid" "$worker_state"
 kill -HUP "$server_pid"
-python3 -I "$repo_root/deploy/direct/nginx-worker-generation.py" wait "$worker_state" --timeout 8
+if ! python3 -I "$repo_root/deploy/direct/nginx-worker-generation.py" wait "$worker_state" --timeout 8; then
+	printf '%s\n' 'Disposable Nginx reload log:' >&2
+	sed -n '1,100p' "$test_root/error.log" >&2
+	printf '%s\n' 'Captured worker process states:' >&2
+	python3 -I - "$worker_state" <<'PY' >&2
+import json
+import pathlib
+import sys
+
+state = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+for worker in state["workers"]:
+    stat_path = pathlib.Path("/proc") / str(worker["pid"]) / "stat"
+    try:
+        fields = stat_path.read_text(encoding="ascii").rsplit(") ", 1)[1].split()
+        print(f"pid={worker['pid']} state={fields[0]} ppid={fields[1]}")
+    except FileNotFoundError:
+        print(f"pid={worker['pid']} retired")
+PY
+	exit 1
+fi
 echo "Real Nginx retired a worker holding an incomplete request under the bounded drain policy."
