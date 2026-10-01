@@ -149,6 +149,7 @@ readonly rm_bin=/usr/bin/rm
 readonly mktemp_bin=/usr/bin/mktemp
 readonly -a install_arguments=(-o root -g root -m 0644)
 readonly acceptance_attempts=20
+readonly worker_retirement_timeout=30
 readonly worker_state_root="$recovery_root"
 
 # shellcheck disable=SC2329 # Invoked from the EXIT trap.

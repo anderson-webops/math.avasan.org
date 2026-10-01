@@ -81,27 +81,42 @@ for _ in {1..100}; do
 done
 [[ -s "$test_root/client-ready" ]]
 
-worker_state="$(mktemp "$test_root/worker-state-XXXXXXXX")"
-python3 -I "$repo_root/deploy/direct/nginx-worker-generation.py" capture "$server_pid" "$worker_state"
-kill -HUP "$server_pid"
-if ! python3 -I "$repo_root/deploy/direct/nginx-worker-generation.py" wait "$worker_state" --timeout 8; then
-	printf '%s\n' 'Disposable Nginx reload log:' >&2
-	sed -n '1,100p' "$test_root/error.log" >&2
-	printf '%s\n' 'Captured worker process states:' >&2
-	python3 -I - "$worker_state" <<'PY' >&2
-import json
-import pathlib
-import sys
+cat >"$test_root/mock-nginx" <<'MOCK_NGINX'
+#!/usr/bin/env bash
+exec "$TEST_NGINX_BIN" -p "$TEST_ROOT/" -c "$TEST_ROOT/nginx.conf" "$@"
+MOCK_NGINX
+cat >"$test_root/mock-systemctl" <<'MOCK_SYSTEMCTL'
+#!/usr/bin/env bash
+case "$1" in
+	show) printf '%s\n' "$TEST_MASTER_PID" ;;
+	reload) kill -HUP "$TEST_MASTER_PID" ;;
+	*) exit 2 ;;
+esac
+MOCK_SYSTEMCTL
+chmod 0755 "$test_root/mock-nginx" "$test_root/mock-systemctl"
+export TEST_NGINX_BIN="$nginx_bin" TEST_ROOT="$test_root" TEST_MASTER_PID="$server_pid"
 
-state = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
-for worker in state["workers"]:
-    stat_path = pathlib.Path("/proc") / str(worker["pid"]) / "stat"
-    try:
-        fields = stat_path.read_text(encoding="ascii").rsplit(") ", 1)[1].split()
-        print(f"pid={worker['pid']} state={fields[0]} ppid={fields[1]}")
-    except FileNotFoundError:
-        print(f"pid={worker['pid']} retired")
-PY
-	exit 1
+nginx_bin="$test_root/mock-nginx"
+systemctl_bin="$test_root/mock-systemctl"
+python_bin="$(command -v python3)"
+worker_gate="$repo_root/deploy/direct/nginx-worker-generation.py"
+drain_gate="$repo_root/deploy/direct/verify-nginx-worker-drain.py"
+mktemp_bin="$(command -v mktemp)"
+rm_bin="$(command -v rm)"
+worker_state_root="$test_root"
+worker_retirement_timeout=8
+state_record="$test_root/promotion-state-test"
+mutation_started=false
+. "$repo_root/deploy/direct/static-promotion-transaction.sh"
+
+if prepare_worker_drain >"$test_root/preflight.log" 2>&1; then
+	[[ "$preflight_failure_code" -eq 0 ]]
+	echo "Real Nginx retired its old worker before serving mutation."
+else
+	[[ "$preflight_failure_code" -eq 75 ]]
+	grep -Fq 'no release pointer or policy changed' "$test_root/preflight.log"
+	echo "Real Nginx kept an incomplete-header worker; promotion safely refused before recovery lock."
 fi
-echo "Real Nginx retired a worker holding an incomplete request under the bounded drain policy."
+[[ "$mutation_started" == false ]]
+[[ ! -e "$state_record" ]]
+curl --noproxy '*' --fail --silent --show-error --max-time 2 "http://127.0.0.1:$port/" >/dev/null

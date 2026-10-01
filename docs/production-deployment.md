@@ -195,6 +195,10 @@ for a temporary old-worker retirement failure. The fleet adapter should preserve
 those distinctions rather than classifying both as a bad source release. An
 interrupted preflight cannot leave a promotion-state record because that record
 is created only after the preflight succeeds.
+Some Nginx versions can keep an incomplete-header worker alive beyond the
+configured shutdown timeout. The Linux regression therefore accepts either
+observed retirement or a code-75 preflight refusal before any serving mutation;
+it never treats the timeout setting alone as proof that workers drained.
 `worker_shutdown_timeout` is a global Nginx setting affecting other virtual
 hosts, so its installation requires a separate host review. Do not insert it
 into a site-local `http` or `server` snippet, change the installed host config

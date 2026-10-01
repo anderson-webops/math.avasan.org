@@ -174,6 +174,7 @@ rm_bin="$(command -v rm)"
 mktemp_bin="$(command -v mktemp)"
 install_arguments=(-m 0644)
 acceptance_attempts=1
+worker_retirement_timeout=8
 artifact_tool="$repo_root/scripts/static-artifact.py"
 path_guard="$repo_root/deploy/direct/trusted-paths.py"
 snippet_gate="$repo_root/deploy/direct/verify-nginx-snippet-dump.sh"

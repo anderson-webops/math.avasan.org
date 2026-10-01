@@ -257,7 +257,7 @@ reload_nginx() {
 		return 1
 	fi
 	if ! "$systemctl_bin" reload nginx.service \
-		|| ! "$python_bin" -I "$worker_gate" wait "$worker_state" --timeout 30; then
+		|| ! "$python_bin" -I "$worker_gate" wait "$worker_state" --timeout "$worker_retirement_timeout"; then
 		"$rm_bin" -f -- "$worker_state"
 		return 1
 	fi
