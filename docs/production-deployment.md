@@ -182,6 +182,24 @@ attestation verification support. Install that host prerequisite through the
 normal server package-management review before attempting activation; never
 skip provenance verification because the CLI is absent.
 
+Before any serving release or policy mutation, the installed promoter requires exactly one
+`worker_shutdown_timeout 10s;` (or another value from 1 through 15 seconds)
+in the Nginx main configuration. The trusted helper checks the effective
+`nginx -T` output, then reloads the unchanged configuration and waits for the
+pre-reload worker generation to retire before it installs candidate policy.
+If that old generation cannot drain, promotion stops without a recovery record
+or change to the serving release or policy. This proves the workers entering the transaction have
+loaded the bounded policy; checking only the on-disk file would not.
+The helper exits 78 for a missing or incompatible host drain contract and 75
+for a temporary old-worker retirement failure. The fleet adapter should preserve
+those distinctions rather than classifying both as a bad source release. An
+interrupted preflight cannot leave a promotion-state record because that record
+is created only after the preflight succeeds.
+`worker_shutdown_timeout` is a global Nginx setting affecting other virtual
+hosts, so its installation requires a separate host review. Do not insert it
+into a site-local `http` or `server` snippet, change the installed host config
+from this source checkout, or relax the 30-second retirement gate.
+
 ## Nginx contract
 
 The artifact supplies the maps, server policy, and selected usage policy at

@@ -64,6 +64,7 @@ ensure_directory "$base/.deployment-recovery/gh-config" 700
 	"$script_dir/prepare-legacy-rollback.sh" \
 	"$script_dir/static-promotion-transaction.sh" \
 	"$script_dir/nginx-worker-generation.py" \
+	"$script_dir/verify-nginx-worker-drain.py" \
 	"$script_dir/trusted-paths.py" \
 	"$script_dir/verify-captured-response-headers.py" \
 	"$script_dir/verify-nginx-snippet-dump.sh" \

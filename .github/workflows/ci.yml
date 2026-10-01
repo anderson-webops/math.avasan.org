@@ -323,6 +323,9 @@ jobs:
             - name: Verify denied-route headers with real Nginx
               run: npm run test:real-nginx-headers
 
+            - name: Verify bounded real Nginx worker drain
+              run: bash scripts/test-real-nginx-worker-drain.sh
+
             - name: Verify native deployment contracts
               run: |
                   test ! -e Dockerfile
@@ -342,8 +345,11 @@ jobs:
                   bash -n deploy/direct/verify-nginx-snippet-dump.sh
                   bash -n scripts/test-static-promotion-rollback.sh
                   bash -n scripts/test-real-nginx-headers.sh
+                  bash -n scripts/test-real-nginx-worker-drain.sh
                   bash -n scripts/package-static-artifact.sh
                   python3 -B deploy/direct/nginx-worker-generation.py --help >/dev/null
+                  python3 -B deploy/direct/verify-nginx-worker-drain.py --help >/dev/null
+                  python3 -B scripts/test_nginx_worker_drain_policy.py
                   python3 -B scripts/static-artifact.py --help >/dev/null
                   npm run test:artifact
                   npm run test:captured-headers
@@ -353,6 +359,7 @@ jobs:
                   test -x deploy/direct/prepare-static-release.sh
                   test -x deploy/direct/promote-static-release.sh
                   test -x deploy/direct/nginx-worker-generation.py
+                  test -x deploy/direct/verify-nginx-worker-drain.py
                   test -x deploy/direct/static-promotion-transaction.sh
                   test -x deploy/direct/verify-captured-response-headers.py
                   test -x deploy/direct/verify-release-source.sh
@@ -360,6 +367,7 @@ jobs:
                   test -x scripts/package-static-artifact.sh
                   test -x scripts/test-static-promotion-rollback.sh
                   test -x scripts/test-real-nginx-headers.sh
+                  test -x scripts/test-real-nginx-worker-drain.sh
                   test ! -e front-end/dist/.vite
                   test ! -e front-end/dist/404/index.html
                   test ! -e front-end/dist/admin.html

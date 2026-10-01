@@ -64,6 +64,7 @@ path_guard="$script_dir/trusted-paths.py"
 snippet_gate="$script_dir/verify-nginx-snippet-dump.sh"
 captured_header_gate="$script_dir/verify-captured-response-headers.py"
 worker_gate="$script_dir/nginx-worker-generation.py"
+drain_gate="$script_dir/verify-nginx-worker-drain.py"
 transaction_library="$script_dir/static-promotion-transaction.sh"
 base=/srv/math.avasan.org
 release_root="$base/artifact-releases"
@@ -288,6 +289,11 @@ case "$current_target" in
 		exit 1
 		;;
 esac
+
+if ! prepare_worker_drain; then
+	echo "Host worker-drain preflight failed before release mutation." >&2
+	exit "$preflight_failure_code"
+fi
 
 state_record="$(/usr/bin/mktemp "$recovery_root/promotion-state-XXXXXXXX")"
 /usr/bin/printf '%s\n%s\n%s\n%s\n' \

@@ -264,6 +264,20 @@ reload_nginx() {
 	"$rm_bin" -f -- "$worker_state"
 }
 
+prepare_worker_drain() {
+	preflight_failure_code=78
+	if ! "$nginx_bin" -T 2>/dev/null | "$python_bin" -I "$drain_gate"; then
+		echo "Host adapter update required: Nginx main configuration needs worker_shutdown_timeout of 1-15s." >&2
+		return 1
+	fi
+	preflight_failure_code=75
+	if ! reload_nginx; then
+		echo "Existing Nginx workers did not retire before release mutation; no release pointer or policy changed." >&2
+		return 1
+	fi
+	preflight_failure_code=0
+}
+
 promote_candidate() {
 	local target="$1"
 	# Load the candidate's narrower policy before exposing candidate content.

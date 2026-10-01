@@ -101,6 +101,8 @@ set -euo pipefail
 case "${1:-}" in
 	-t) exit 0 ;;
 	-T)
+		printf '# configuration file /etc/nginx/nginx.conf:\n'
+		printf 'worker_shutdown_timeout %s;\n' "${MATH_TEST_WORKER_TIMEOUT:-10s}"
 		printf '# configuration file %s:\n' \
 			"$MATH_TEST_MAPS_TARGET" "$MATH_TEST_POLICY_TARGET" "$MATH_TEST_USAGE_TARGET"
 		;;
@@ -114,6 +116,7 @@ case "${1:-}" in
 	show) cat "$MATH_TEST_MASTER_PID_FILE" ;;
 	reload)
 		[[ "${2:-}" == nginx.service ]]
+		[[ "${MATH_TEST_FAIL_RELOAD:-0}" != 1 ]] || exit 1
 		readlink -f -- "$MATH_TEST_CURRENT" >>"$MATH_TEST_RELOAD_LOG"
 		kill -HUP "$(cat "$MATH_TEST_MASTER_PID_FILE")"
 		;;
@@ -176,6 +179,7 @@ path_guard="$repo_root/deploy/direct/trusted-paths.py"
 snippet_gate="$repo_root/deploy/direct/verify-nginx-snippet-dump.sh"
 captured_header_gate="$repo_root/deploy/direct/verify-captured-response-headers.py"
 worker_gate="$repo_root/deploy/direct/nginx-worker-generation.py"
+drain_gate="$repo_root/deploy/direct/verify-nginx-worker-drain.py"
 worker_state_root="$test_root/runtime/recovery"
 host_header=math.avasan.org
 site_origin="http://$host_header:$port"
@@ -215,6 +219,31 @@ cleanup() {
 }
 
 previous_profile="$(legacy_recovery_profile "$previous_target" "$expected_current")"
+export MATH_TEST_WORKER_TIMEOUT=30s
+if prepare_worker_drain >"$test_root/preflight.log" 2>&1; then
+	echo "An unbounded host worker-drain policy was accepted." >&2
+	exit 1
+fi
+[[ "$preflight_failure_code" -eq 78 ]]
+[[ "$mutation_started" == false ]]
+[[ "$(readlink -f -- "$current_link")" == "$test_root/legacy" ]]
+cmp -s "$test_root/legacy/deploy/nginx/http-maps.conf" "$maps_target"
+[[ ! -e "$test_root/reloads.log" ]]
+grep -Fq 'Host adapter update required' "$test_root/preflight.log"
+export MATH_TEST_WORKER_TIMEOUT=10s
+export MATH_TEST_FAIL_RELOAD=1
+if prepare_worker_drain >"$test_root/transient-preflight.log" 2>&1; then
+	echo "A failed no-op reload was accepted." >&2
+	exit 1
+fi
+[[ "$preflight_failure_code" -eq 75 ]]
+[[ "$mutation_started" == false ]]
+[[ ! -e "$state_record" ]]
+[[ ! -e "$test_root/reloads.log" ]]
+grep -Fq 'no release pointer or policy changed' "$test_root/transient-preflight.log"
+unset MATH_TEST_FAIL_RELOAD
+prepare_worker_drain
+[[ "$preflight_failure_code" -eq 0 ]]
 printf '%s\n%s\n%s\n%s\n' \
 	"$previous_target" "$previous_kind" "$candidate" "$candidate_commit" >"$state_record"
 
@@ -248,14 +277,14 @@ cmp -s "$test_root/legacy/deploy/nginx/http-maps.conf" "$maps_target"
 cmp -s "$test_root/legacy/deploy/nginx/server-policy.conf" "$policy_target"
 cmp -s "$test_root/legacy/deploy/nginx/classroom-usage.inc" "$usage_target"
 [[ ! -e "$state_record" ]]
-[[ "$(wc -l <"$test_root/reloads.log")" -eq 2 ]]
+[[ "$(wc -l <"$test_root/reloads.log")" -eq 3 ]]
 while IFS= read -r reloaded_target; do
 	[[ "$reloaded_target" == "$test_root/legacy" ]]
 done <"$test_root/reloads.log"
 grep -Fq "\"family\":\"ipv6\",\"method\":\"POST\",\"path\":\"/\",\"version\":\"$candidate_version\"" "$test_root/events.log"
 grep -Fq '"family":"ipv4","method":"GET","path":"/release.json","version":"1.0.16"' "$test_root/events.log"
 grep -Fq '"family":"ipv6","method":"GET","path":"/release.json","version":"1.0.16"' "$test_root/events.log"
-[[ "$(grep -Fc 'worker-retired' "$test_root/nginx-workers.log")" -eq 2 ]]
+[[ "$(grep -Fc 'worker-retired' "$test_root/nginx-workers.log")" -eq 3 ]]
 
 for family in ipv4 ipv6; do
 	for path in \
