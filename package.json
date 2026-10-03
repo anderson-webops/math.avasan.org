@@ -1,7 +1,7 @@
 {
 	"name": "math-avasan-org",
 	"type": "module",
-	"version": "1.0.19",
+	"version": "1.0.20",
 	"private": true,
 	"packageManager": "npm@12.0.2",
 	"engines": {
@@ -27,9 +27,10 @@
 		"a11y": "node scripts/a11y-smoke.mjs",
 		"lint-serve": "npm run -w front-end lint-fix && npm run -w front-end serve",
 		"lint": "npm run lint:root && npm run -w front-end lint",
-		"lint:root": "eslint \"scripts/{audit-static-course-media,static-media-request,verify-*}.mjs\" eslint.config.js",
+		"lint:root": "eslint \"scripts/{audit-static-course-media,static-media-request,test-braces-compat,verify-*}.mjs\" eslint.config.js",
 		"lint-fix": "npm run -w front-end lint-fix",
-		"test": "npm run -w front-end test:unit",
+		"test": "npm run test:braces && npm run -w front-end test:unit",
+		"test:braces": "node --test scripts/test-braces-compat.mjs",
 		"test:artifact": "python3 -B -m unittest scripts/test_static_artifact.py",
 		"test:captured-headers": "python3 -B -m unittest scripts/test_captured_response_headers.py",
 		"test:promotion-recovery": "bash scripts/test-static-promotion-rollback.sh",
@@ -43,6 +44,7 @@
 		"verify:production": "node scripts/post-deploy-smoke.mjs"
 	},
 	"overrides": {
+		"braces": "$braces",
 		"defu": "6.1.6",
 		"eslint-plugin-import": {
 			"minimatch": "^3.1.5"
@@ -99,6 +101,9 @@
 		"fsevents@2.3.3": true,
 		"puppeteer@25.11.0": false,
 		"simple-git-hooks@2.14.0": true
+	},
+	"dependencies": {
+		"braces": "file:vendor/braces"
 	},
 	"devDependencies": {
 		"@antfu/eslint-config": "^9.5.1",
