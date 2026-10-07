@@ -49,6 +49,17 @@ source attribution, and the private CS Admin handoff are unchanged.
 - This publishes source only. No production activation, database changes,
   credential changes, or mail sending are included.
 
+Hosted run 37695494847 passed clean installation, lint, typechecking, unit
+tests, accessibility, static-media checks, and native static-runtime checks.
+Its graph browser checks still targeted the former always-visible actions;
+they now open the Project menu before using those controls. Navigation passed.
+The unchanged dependency lock has a separate release blocker: the full audit
+reports source-map-js and the tinypool/oxfmt/eslint-plugin-format chain
+(GHSA-68fv-2mgg-jv7q, GHSA-5gmw-xhrv-c9v3, GHSA-85c8-ppgw-ccpr).
+Do not waive this gate or publish a deployable artifact until it is resolved
+through a separately validated dependency update. This layout sync does not
+alter dependency resolutions or claim full hosted release acceptance.
+
 No migration is needed. Preserve the current deployment and its policies until
 an operator separately accepts a complete attested replacement artifact. Roll
 back using the retained prior artifact through the existing static native flow.

@@ -74,6 +74,7 @@ context("Graph Sketcher browser workspace", () => {
 
 	it("keeps graph edits and exports off APIs and analytics", () => {
 		cy.visit("/");
+		cy.contains("summary", "Project").click();
 		cy.contains("button", "Sample").click();
 		cy.contains("button", "Download project").click();
 		cy.contains("button", "CSV").click();
@@ -102,6 +103,7 @@ context("Graph Sketcher browser workspace", () => {
 		).should("be.visible");
 		cy.get("#canvas-title").should("contain.text", "classroom");
 
+		cy.contains("summary", "Project").click();
 		cy.contains("button", "Clear for next student").click();
 		cy.contains("button", "Confirm clear").click();
 		cy.contains(
