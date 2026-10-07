@@ -7,6 +7,7 @@ import type {
 import { storeToRefs } from "pinia";
 import {
 	computed,
+	nextTick,
 	onBeforeUnmount,
 	onMounted,
 	ref,
@@ -14,7 +15,9 @@ import {
 	watch
 } from "vue";
 import { reportMathClassroomUsage } from "@/modules/classroomUsage";
+import { lessonContentSections } from "@/modules/courseLessonPresentation";
 import { isYouTubeVideoUrl } from "@/modules/resourceUrls";
+import { useLessonViews } from "@/modules/useLessonViews";
 import { useCoursesStore } from "@/stores/courses";
 import {
 	hasPendingStaticMediaNotice,
@@ -22,6 +25,7 @@ import {
 	isStaticMediaUrl,
 	staticMediaFilename
 } from "@/stores/courses/staticMedia";
+import CourseAssignmentContent from "./CourseAssignmentContent.vue";
 import LazyMarkdownContent from "./LazyMarkdownContent.vue";
 
 interface VisibleModule extends CourseModule {
@@ -41,7 +45,6 @@ interface ResourceLink {
 const IMAGE_FILE_RE = /\.(?:avif|gif|jpe?g|png|svg|webp)(?:\?|$)/i;
 const WHITESPACE_RE = /\s+/g;
 const WWW_PREFIX_RE = /^www\./;
-const PROJECT_PREFIX_RE = /^Project:\s*/i;
 const COURSE_SELECTION_STORAGE_KEY = "math:course-explorer:selected-course";
 const MODULE_SELECTION_STORAGE_KEY_PREFIX =
 	"math:course-explorer:active-module:";
@@ -86,6 +89,7 @@ const { courses } = storeToRefs(coursesStore);
 const searchQuery = ref("");
 const selectedCourseId = ref("");
 const activeModuleId = ref("");
+const outlineOpen = ref(false);
 const selectedCourse = shallowRef<CourseDefinition | null>(null);
 const courseLoadError = ref("");
 const isCourseLoading = ref(false);
@@ -329,47 +333,13 @@ const activeModule = computed(
 		) ?? null
 );
 
-const activeCurriculumSectionLabel = computed(() =>
-	activeModule.value?.kind === "appendix"
-		? "Reference"
-		: activeModule.value?.kind === "transition"
-			? "Optional transition"
-			: "Core path"
-);
-
-const activeCurriculumHeading = computed(() =>
-	activeModule.value?.kind === "appendix"
-		? "Reference Materials"
-		: activeModule.value?.kind === "transition"
-			? "Next Step"
-			: "Curriculum"
-);
-
-const activeSupplementalSectionLabel = computed(() =>
-	activeModule.value?.kind === "appendix"
-		? "Reference practice"
-		: activeModule.value?.kind === "transition"
-			? "Optional practice"
-			: "Extra practice"
-);
-
-const activeSupplementalHeading = computed(() =>
-	activeModule.value?.kind === "appendix"
-		? "Reference Activities"
-		: "Supplemental Projects"
-);
-
-const activeCurriculumJumpHeading = computed(() =>
-	activeModule.value?.kind === "appendix"
-		? "References:"
-		: activeModule.value?.kind === "transition"
-			? "Next step:"
-			: "Lessons:"
-);
-
-const activeSupplementalJumpHeading = computed(() =>
-	activeModule.value?.kind === "appendix" ? "Activities:" : "Supplemental:"
-);
+const {
+	lessonView,
+	lessonViews,
+	activeLessonItems,
+	learningTopics,
+	lessonViewLabel
+} = useLessonViews(activeModule, currentHashAnchor, normalizedQuery);
 
 const courseReaderStatus = computed(() => {
 	if (!selectedCourse.value || !activeModule.value) return "";
@@ -399,26 +369,6 @@ function isTransitionModule(module: Pick<CourseModule, "kind">) {
 function isCoreModule(module: Pick<CourseModule, "kind">) {
 	return !isAppendixModule(module) && !isTransitionModule(module);
 }
-
-const activeModuleProjectLinks = computed(() => {
-	const module = activeModule.value;
-	if (!module) return [];
-
-	return module.curriculum.map((item, index) => ({
-		id: itemAnchorId(module.id, item.id),
-		label: `${index + 1}. ${item.title}`
-	}));
-});
-
-const activeModuleSupplementalLinks = computed(() => {
-	const module = activeModule.value;
-	if (!module) return [];
-
-	return module.supplementalProjects.map((item, index) => ({
-		id: itemAnchorId(module.id, item.id),
-		label: `${index + 1}. ${item.title.replace(PROJECT_PREFIX_RE, "")}`
-	}));
-});
 
 function normalizeSearch(value: string) {
 	return value.toLowerCase().replace(WHITESPACE_RE, " ").trim();
@@ -491,8 +441,11 @@ function selectCourse(id: string) {
 	selectedCourseId.value = id;
 }
 
-function selectModule(id: string) {
+async function selectModule(id: string) {
 	activeModuleId.value = id;
+	outlineOpen.value = false;
+	await nextTick();
+	document.getElementById("course-reader-panel")?.focus();
 }
 
 function clearSearch() {
@@ -606,6 +559,10 @@ watch(selectedCourseId, value => {
 	writeStoredValue(COURSE_SELECTION_STORAGE_KEY, value);
 });
 
+watch(normalizedQuery, query => {
+	if (query) outlineOpen.value = true;
+});
+
 watch([activeModuleId, selectedCourseId], ([moduleId, courseId]) => {
 	if (!isStorageReady.value || !courseId) return;
 	writeStoredValue(moduleSelectionStorageKey(courseId), moduleId);
@@ -658,70 +615,81 @@ function writeStoredValue(key: string, value: string) {
 	<section class="course-explorer">
 		<p class="sr-only" aria-live="polite">{{ courseReaderStatus }}</p>
 		<div v-if="hasCourseAccess" class="course-shell">
-			<header v-if="selectedCourse" class="course-hero">
-				<div class="course-hero-copy">
-					<h2>{{ selectedCourse.name }}</h2>
-				</div>
-			</header>
-
-			<div class="course-toolbar">
-				<label class="control-block" for="course-select">
-					<span class="control-label">Course</span>
-					<select
-						id="course-select"
-						v-model="selectedCourseId"
-						class="course-select"
-						:disabled="courseList.length === 0"
-						@change="selectCourse(selectedCourseId)"
-					>
-						<option
-							v-if="courseList.length === 0"
-							disabled
-							value=""
-						>
-							No assigned courses
-						</option>
-						<optgroup
-							v-for="group in courseGroups"
-							:key="group.key"
-							:label="group.label"
+			<div class="course-navigation-controls">
+				<button
+					class="site-button site-button--secondary outline-toggle"
+					type="button"
+					:aria-expanded="outlineOpen"
+					aria-controls="course-outline"
+					@click="outlineOpen = !outlineOpen"
+				>
+					Lessons
+				</button>
+				<div class="course-toolbar">
+					<label class="control-block" for="course-select">
+						<span class="sr-only">Course</span>
+						<select
+							id="course-select"
+							v-model="selectedCourseId"
+							class="course-select"
+							:disabled="courseList.length === 0"
+							@change="selectCourse(selectedCourseId)"
 						>
 							<option
-								v-for="course in group.courses"
-								:key="course.id"
-								:value="course.id"
+								v-if="courseList.length === 0"
+								disabled
+								value=""
 							>
-								{{ course.name }}
+								No assigned courses
 							</option>
-						</optgroup>
-					</select>
-				</label>
+							<optgroup
+								v-for="group in courseGroups"
+								:key="group.key"
+								:label="group.label"
+							>
+								<option
+									v-for="course in group.courses"
+									:key="course.id"
+									:value="course.id"
+								>
+									{{ course.name }}
+								</option>
+							</optgroup>
+						</select>
+					</label>
 
-				<label class="control-block search-block" for="course-search">
-					<span class="control-label">Search lessons</span>
-					<div class="search-shell">
-						<input
-							id="course-search"
-							v-model="searchQuery"
-							class="course-search"
-							name="course-search"
-							placeholder="Search module titles, lessons, or keywords"
-							type="search"
-						/>
-						<button
-							v-if="searchQuery"
-							class="clear-search"
-							type="button"
-							@click="clearSearch"
-						>
-							Clear
-						</button>
-					</div>
-				</label>
+					<label
+						class="control-block search-block"
+						for="course-search"
+					>
+						<span class="control-label">Search lessons</span>
+						<div class="search-shell">
+							<input
+								id="course-search"
+								v-model="searchQuery"
+								class="course-search"
+								name="course-search"
+								placeholder="Search module titles, lessons, or keywords"
+								type="search"
+							/>
+							<button
+								v-if="searchQuery"
+								class="clear-search"
+								type="button"
+								@click="clearSearch"
+							>
+								Clear
+							</button>
+						</div>
+					</label>
+				</div>
 			</div>
-
 			<div v-if="selectedCourse" class="course-workspace">
-				<aside class="course-outline">
+				<aside
+					id="course-outline"
+					class="course-outline"
+					:class="{ 'is-open': outlineOpen }"
+				>
 					<div class="outline-header">
 						<h3>Sections</h3>
 					</div>
@@ -758,18 +726,6 @@ function writeStoredValue(key: string, value: string) {
 								</span>
 								<span class="outline-copy">
 									<strong>{{ module.title }}</strong>
-									<small>
-										{{ module.visibleItemCount }}
-										{{
-											module.visibleItemCount === 1
-												? "item"
-												: "items"
-										}}
-										<span v-if="module.isFiltered">
-											visible out of
-											{{ module.totalItemCount }}
-										</span>
-									</small>
 								</span>
 							</button>
 						</section>
@@ -794,6 +750,7 @@ function writeStoredValue(key: string, value: string) {
 				<div
 					v-if="activeModule"
 					id="course-reader-panel"
+					tabindex="-1"
 					class="course-reader"
 				>
 					<header class="reader-header">
@@ -804,226 +761,111 @@ function writeStoredValue(key: string, value: string) {
 							</p>
 							<h3>{{ activeModule.title }}</h3>
 						</div>
-
-						<div
-							v-if="
-								activeModuleProjectLinks.length > 0 ||
-								activeModuleSupplementalLinks.length > 0
-							"
-							class="reader-link-groups"
-						>
-							<div
-								v-if="activeModuleProjectLinks.length > 0"
-								class="reader-link-group"
-							>
-								<h4 class="reader-link-heading">
-									{{ activeCurriculumJumpHeading }}
-								</h4>
-								<nav
-									aria-label="Jump to module lesson"
-									class="reader-jump-links"
-								>
-									<a
-										v-for="link in activeModuleProjectLinks"
-										:key="link.id"
-										class="jump-link"
-										:href="`#${link.id}`"
-									>
-										{{ link.label }}
-									</a>
-								</nav>
-							</div>
-
-							<div
-								v-if="activeModuleSupplementalLinks.length > 0"
-								class="reader-link-group"
-							>
-								<h4 class="reader-link-heading is-supplemental">
-									{{ activeSupplementalJumpHeading }}
-								</h4>
-								<nav
-									aria-label="Jump to supplemental project"
-									class="reader-jump-links"
-								>
-									<a
-										v-for="link in activeModuleSupplementalLinks"
-										:key="link.id"
-										class="jump-link is-supplemental"
-										:href="`#${link.id}`"
-									>
-										{{ link.label }}
-									</a>
-								</nav>
-							</div>
-						</div>
 					</header>
 
-					<section class="reader-section">
-						<div class="section-header">
-							<div>
-								<p class="section-eyebrow">
-									{{ activeCurriculumSectionLabel }}
+					<div
+						class="lesson-view-toggle"
+						role="group"
+						aria-label="Lesson view"
+					>
+						<button
+							v-for="view in lessonViews"
+							:key="view.id"
+							type="button"
+							:aria-pressed="lessonView === view.id"
+							aria-controls="lesson-view-content"
+							@click="lessonView = view.id"
+						>
+							{{ view.label }}
+						</button>
+					</div>
+					<section
+						id="lesson-view-content"
+						class="reader-section"
+						:aria-label="lessonViewLabel"
+					>
+						<div
+							v-if="lessonView === 'learn'"
+							class="learning-overview"
+						>
+							<section
+								v-if="activeModule.keyBlocks?.length"
+								class="key-blocks"
+							>
+								<h4>Key words</h4>
+								<div class="key-block-list">
+									<span
+										v-for="block in activeModule.keyBlocks"
+										:key="block"
+										>{{ block }}</span
+									>
+								</div>
+								<p
+									v-if="
+										!activeLessonItems.length &&
+										(lessonView !== 'learn' ||
+											(!learningTopics.length &&
+												!activeModule.keyBlocks
+													?.length))
+									"
+									class="lesson-view-empty"
+								>
+									No {{ lessonViewLabel.toLowerCase() }} in
+									this section.
 								</p>
-								<h4>{{ activeCurriculumHeading }}</h4>
-							</div>
-							<span class="section-count">
-								{{ activeModule.curriculum.length }}
-							</span>
+							</section>
+							<article
+								v-for="topic in learningTopics"
+								:key="topic.item.id"
+								class="learning-card"
+							>
+								<h5>{{ topic.item.title }}</h5>
+								<section
+									v-for="(section, index) in topic.sections"
+									:key="index"
+								>
+									<h6>{{ section.label }}</h6>
+									<LazyMarkdownContent
+										:content="section.content"
+									/>
+								</section>
+							</article>
 						</div>
-
-						<ol class="lesson-list">
+						<ol v-if="activeLessonItems.length" class="lesson-list">
 							<li
-								v-for="(item, index) in activeModule.curriculum"
+								v-for="(item, index) in activeLessonItems"
 								:id="itemAnchorId(activeModule.id, item.id)"
 								:key="item.id"
 								class="lesson-item"
 							>
-								<article class="lesson-card">
+								<article
+									class="lesson-card"
+									:class="{
+										'is-supplemental':
+											lessonView === 'supplemental'
+									}"
+								>
 									<header class="lesson-header">
 										<span class="lesson-index">
 											{{ index + 1 }}
 										</span>
 										<div class="lesson-title-group">
-											<p class="lesson-kicker">Lesson</p>
 											<h5>{{ item.title }}</h5>
 										</div>
 									</header>
 
 									<LazyMarkdownContent
-										v-if="item.content"
+										v-if="
+											item.content &&
+											lessonView === 'learn'
+										"
 										:content="item.content"
 									/>
-
-									<div
-										v-if="resourceLinks(item).length > 0"
-										class="resource-list"
-									>
-										<template
-											v-for="resource in resourceLinks(
-												item
-											)"
-											:key="`${item.id}-${resource.kind}`"
-										>
-											<a
-												class="resource-link"
-												:class="[`is-${resource.kind}`]"
-												:href="
-													resourceOpenUrl(resource)
-												"
-												rel="noopener noreferrer"
-												target="_blank"
-											>
-												<span
-													class="resource-link-label"
-												>
-													{{ resource.label }}
-													<span class="sr-only">
-														(opens in a new tab)
-													</span>
-												</span>
-												<small
-													class="resource-link-host"
-												>
-													{{ resource.host }}
-												</small>
-											</a>
-										</template>
-									</div>
-
-									<div
-										v-if="
-											item.mediaLink &&
-											isEmbeddedMedia(item.mediaLink) &&
-											!isItemStaticMediaUnavailable(item)
+									<CourseAssignmentContent
+										v-else-if="item.content"
+										:sections="
+											lessonContentSections(item.content)
 										"
-										class="item-media"
-									>
-										<img
-											:src="item.mediaLink"
-											:alt="`Project demo media for ${item.title}`"
-											class="item-media-image"
-											loading="lazy"
-											@error="
-												markStaticMediaUnavailable(
-													item.mediaLink
-												)
-											"
-										/>
-									</div>
-									<div
-										v-else-if="
-											item.mediaLink &&
-											isItemStaticMediaUnavailable(item)
-										"
-										class="item-media item-media-placeholder"
-										role="note"
-									>
-										<p class="item-media-placeholder-label">
-											Static asset pending
-										</p>
-										<p>
-											Pending static asset:
-											<strong>
-												{{
-													staticAssetName(
-														item.mediaLink
-													)
-												}}</strong
-											>.
-										</p>
-										<p>
-											This classroom preview will appear
-											once the media file is available.
-										</p>
-									</div>
-								</article>
-							</li>
-						</ol>
-					</section>
-
-					<section
-						v-if="activeModule.supplementalProjects.length > 0"
-						class="reader-section"
-					>
-						<div class="section-header">
-							<div>
-								<p class="section-eyebrow">
-									{{ activeSupplementalSectionLabel }}
-								</p>
-								<h4>{{ activeSupplementalHeading }}</h4>
-							</div>
-							<span class="section-count">
-								{{ activeModule.supplementalProjects.length }}
-							</span>
-						</div>
-
-						<ol class="lesson-list">
-							<li
-								v-for="(
-									item, index
-								) in activeModule.supplementalProjects"
-								:id="itemAnchorId(activeModule.id, item.id)"
-								:key="item.id"
-								class="lesson-item"
-							>
-								<article class="lesson-card is-supplemental">
-									<header class="lesson-header">
-										<span
-											class="lesson-index is-supplemental"
-										>
-											{{ index + 1 }}
-										</span>
-										<div class="lesson-title-group">
-											<p class="lesson-kicker">
-												Supplemental project
-											</p>
-											<h5>{{ item.title }}</h5>
-										</div>
-									</header>
-
-									<LazyMarkdownContent
-										v-if="item.content"
-										:content="item.content"
 									/>
 
 									<div
@@ -1949,3 +1791,5 @@ function writeStoredValue(key: string, value: string) {
 	}
 }
 </style>
+
+<style src="@/styles/courseReader.css"></style>

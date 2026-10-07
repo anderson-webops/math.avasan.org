@@ -68,6 +68,10 @@ import {
 	MAX_INTERACTIVE_GRAPH_POINTS,
 	pushBoundedGraphHistorySnapshot
 } from "@/modules/graphSketcherSafety";
+import {
+	graphForViewport,
+	graphPointerToCanvas
+} from "@/modules/graphViewport";
 import ScratchProjectOverlay from "./ScratchProjectOverlay.vue";
 
 type GraphTool = "select" | "point" | "draw" | "text" | "pan";
@@ -107,6 +111,36 @@ const graphDocument = ref<GraphDocument>(createSampleGraphDocument());
 const activeSeriesId = ref(graphDocument.value.series[0].id);
 const activeTool = ref<GraphTool>("select");
 const inspectorTab = ref<InspectorTab>("data");
+const inspectorOpen = ref(false);
+const projectMenuOpen = ref(false);
+const pageElement = ref<HTMLElement>();
+const settingsTrigger = ref<HTMLButtonElement>();
+const pageHeight = ref("calc(100dvh - 6rem)");
+const canvasShell = ref<HTMLDivElement>();
+const canvasViewportWidth = ref(0);
+let layoutObserver: ResizeObserver | undefined;
+function updateWorkspaceHeight() {
+	const width = canvasShell.value?.getBoundingClientRect().width ?? 0;
+	canvasViewportWidth.value =
+		window.innerWidth <= 600 ? Math.max(320, width - 24) : 0;
+	const top = pageElement.value?.getBoundingClientRect().top ?? 0;
+	const footer = window.document.querySelector(".site-footer");
+	const footerHeight = footer?.getBoundingClientRect().height ?? 0;
+	pageHeight.value = `${Math.max(0, window.innerHeight - Math.max(0, top) - footerHeight - 8)}px`;
+}
+async function toggleInspector() {
+	inspectorOpen.value = !inspectorOpen.value;
+	await nextTick();
+	if (inspectorOpen.value) {
+		pageElement.value
+			?.querySelector<HTMLElement>(
+				".graph-inspector [aria-selected='true']"
+			)
+			?.focus();
+	} else {
+		settingsTrigger.value?.focus();
+	}
+}
 const selectedPoint = ref<SelectedPoint | null>(null);
 const selectedAnnotationId = ref<string | null>(null);
 const pointerGesture = ref<PointerGesture | null>(null);
@@ -115,13 +149,14 @@ const isEndSessionConfirmationPending = ref(false);
 const expressionDraft = ref("sin(x)");
 const pastedData = ref("");
 const textDraft = ref("Label");
-const coordinatesText = ref("Move over the graph to inspect coordinates.");
-const statusMessage = ref(
-	"Sample graph loaded. Work is saved in this tab's browser storage."
-);
+const coordinatesText = ref("x —, y —");
+const statusMessage = ref("");
 const saveState = ref<"saving" | "saved" | "empty" | "unavailable">("saving");
 const importWarnings = ref<string[]>([]);
 const svgElement = ref<SVGSVGElement>();
+const interactiveDocument = computed(() =>
+	graphForViewport(graphDocument.value, canvasViewportWidth.value)
+);
 const fileInput = ref<HTMLInputElement>();
 const undoStack = ref<string[]>([]);
 const redoStack = ref<string[]>([]);
@@ -192,43 +227,43 @@ const selectedAnnotation = computed(() =>
 );
 
 const plotBounds = computed(() =>
-	plotBoundsForCanvas(graphDocument.value.canvas)
+	plotBoundsForCanvas(interactiveDocument.value.canvas)
 );
 const xTicks = computed(() =>
-	graphAxisTicks(graphDocument.value.xAxis).map(tick => ({
+	graphAxisTicks(interactiveDocument.value.xAxis).map(tick => ({
 		...tick,
 		x: plotBounds.value.left + tick.position * plotBounds.value.width
 	}))
 );
 const yTicks = computed(() =>
-	graphAxisTicks(graphDocument.value.yAxis).map(tick => ({
+	graphAxisTicks(interactiveDocument.value.yAxis).map(tick => ({
 		...tick,
 		y: plotBounds.value.bottom - tick.position * plotBounds.value.height
 	}))
 );
 const xAxisY = computed(() => {
-	const axis = graphDocument.value.yAxis;
+	const axis = interactiveDocument.value.yAxis;
 	if (axis.scale === "linear" && axis.minimum <= 0 && axis.maximum >= 0) {
-		return graphPointToCanvas(graphDocument.value, {
-			x: graphDocument.value.xAxis.minimum,
+		return graphPointToCanvas(interactiveDocument.value, {
+			x: interactiveDocument.value.xAxis.minimum,
 			y: 0
 		}).y;
 	}
 	return plotBounds.value.bottom;
 });
 const yAxisX = computed(() => {
-	const axis = graphDocument.value.xAxis;
+	const axis = interactiveDocument.value.xAxis;
 	if (axis.scale === "linear" && axis.minimum <= 0 && axis.maximum >= 0) {
-		return graphPointToCanvas(graphDocument.value, {
+		return graphPointToCanvas(interactiveDocument.value, {
 			x: 0,
-			y: graphDocument.value.yAxis.minimum
+			y: interactiveDocument.value.yAxis.minimum
 		}).x;
 	}
 	return plotBounds.value.left;
 });
 
 const visibleSeries = computed(() =>
-	graphDocument.value.series.filter(series => series.isVisible)
+	interactiveDocument.value.series.filter(series => series.isVisible)
 );
 const visiblePointCount = computed(() =>
 	visibleSeries.value.reduce(
@@ -244,7 +279,10 @@ function graphSeriesPointVisualPaths(series: GraphSeries) {
 	const markerSegments: string[] = [];
 	const errorBarSegments: string[] = [];
 	for (const point of series.points) {
-		const canvasPoint = graphPointToCanvas(graphDocument.value, point);
+		const canvasPoint = graphPointToCanvas(
+			interactiveDocument.value,
+			point
+		);
 		if (!canvasPoint.isValid) continue;
 
 		const { x, y } = canvasPoint;
@@ -295,11 +333,11 @@ function graphSeriesPointVisualPaths(series: GraphSeries) {
 		}
 
 		if (point.xError) {
-			const start = graphPointToCanvas(graphDocument.value, {
+			const start = graphPointToCanvas(interactiveDocument.value, {
 				x: point.x - point.xError,
 				y: point.y
 			});
-			const end = graphPointToCanvas(graphDocument.value, {
+			const end = graphPointToCanvas(interactiveDocument.value, {
 				x: point.x + point.xError,
 				y: point.y
 			});
@@ -312,11 +350,11 @@ function graphSeriesPointVisualPaths(series: GraphSeries) {
 			}
 		}
 		if (point.yError) {
-			const start = graphPointToCanvas(graphDocument.value, {
+			const start = graphPointToCanvas(interactiveDocument.value, {
 				x: point.x,
 				y: point.y + point.yError
 			});
-			const end = graphPointToCanvas(graphDocument.value, {
+			const end = graphPointToCanvas(interactiveDocument.value, {
 				x: point.x,
 				y: point.y - point.yError
 			});
@@ -359,15 +397,18 @@ const renderedSeries = computed(() => {
 					};
 		const visualPaths = graphSeriesPointVisualPaths(previewSeries);
 		return {
-			areaPath: graphSeriesAreaPath(graphDocument.value, previewSeries),
+			areaPath: graphSeriesAreaPath(
+				interactiveDocument.value,
+				previewSeries
+			),
 			dashArray: graphLineDashArray(item.lineStyle),
-			path: graphSeriesPath(graphDocument.value, previewSeries),
+			path: graphSeriesPath(interactiveDocument.value, previewSeries),
 			points: handleIndexes[seriesIndex]
 				.map(index => {
 					const point = item.points[index];
 					return {
 						canvasPoint: graphPointToCanvas(
-							graphDocument.value,
+							interactiveDocument.value,
 							point
 						),
 						index,
@@ -382,11 +423,11 @@ const renderedSeries = computed(() => {
 });
 
 const renderedAnnotations = computed(() =>
-	graphDocument.value.annotations
+	interactiveDocument.value.annotations
 		.map(annotation => {
 			const first =
 				annotation.coordinateSpace === "data"
-					? graphPointToCanvas(graphDocument.value, annotation)
+					? graphPointToCanvas(interactiveDocument.value, annotation)
 					: {
 							x: annotation.x,
 							y: annotation.y,
@@ -394,7 +435,7 @@ const renderedAnnotations = computed(() =>
 						};
 			const second =
 				annotation.coordinateSpace === "data"
-					? graphPointToCanvas(graphDocument.value, {
+					? graphPointToCanvas(interactiveDocument.value, {
 							x: annotation.x2 ?? annotation.x,
 							y: annotation.y2 ?? annotation.y
 						})
@@ -429,35 +470,37 @@ const isActiveSeriesDerived = computed(() =>
 	isDerivedSeries(activeSeries.value)
 );
 const graphAriaLabel = computed(() => {
-	const pointCount = graphDocument.value.series.reduce(
+	const pointCount = interactiveDocument.value.series.reduce(
 		(total, series) => total + series.points.length,
 		0
 	);
-	return `${graphDocument.value.title}. ${graphDocument.value.series.length} series and ${pointCount} points.`;
+	return `${interactiveDocument.value.title}. ${interactiveDocument.value.series.length} series and ${pointCount} points.`;
 });
 
 const legendLayout = computed(() => {
-	const series = graphDocument.value.series.filter(item => item.isVisible);
+	const series = interactiveDocument.value.series.filter(
+		item => item.isVisible
+	);
 	const width = Math.min(
 		260,
 		Math.max(130, ...series.map(item => item.name.length * 7 + 54))
 	);
 	const height = series.length * 24 + 18;
-	const position = graphDocument.value.canvas.legendPosition;
+	const position = interactiveDocument.value.canvas.legendPosition;
 	return {
 		height,
 		series,
 		width,
 		x: position.endsWith("Right")
-			? graphDocument.value.canvas.width -
-				graphDocument.value.canvas.paddingRight -
+			? interactiveDocument.value.canvas.width -
+				interactiveDocument.value.canvas.paddingRight -
 				width
-			: graphDocument.value.canvas.paddingLeft,
+			: interactiveDocument.value.canvas.paddingLeft,
 		y: position.startsWith("bottom")
-			? graphDocument.value.canvas.height -
-				graphDocument.value.canvas.paddingBottom -
+			? interactiveDocument.value.canvas.height -
+				interactiveDocument.value.canvas.paddingBottom -
 				height
-			: graphDocument.value.canvas.paddingTop
+			: interactiveDocument.value.canvas.paddingTop
 	};
 });
 
@@ -691,7 +734,7 @@ function loadSessionGraph() {
 		graphDocument.value = graphDocumentFromJson(stored);
 		activeSeriesId.value = graphDocument.value.series[0].id;
 		saveState.value = "saved";
-		statusMessage.value = "Restored the graph saved in this tab.";
+		statusMessage.value = "";
 		nextTick(() => {
 			suppressSessionSave = false;
 		});
@@ -839,15 +882,7 @@ function pointerCanvasPosition(event: PointerEvent | WheelEvent) {
 	const svg = svgElement.value;
 	if (!svg) return null;
 	const rect = svg.getBoundingClientRect();
-	if (!rect.width || !rect.height) return null;
-	return {
-		x:
-			((event.clientX - rect.left) / rect.width) *
-			graphDocument.value.canvas.width,
-		y:
-			((event.clientY - rect.top) / rect.height) *
-			graphDocument.value.canvas.height
-	};
+	return graphPointerToCanvas(interactiveDocument.value.canvas, rect, event);
 }
 
 function isInsidePlot(point: { x: number; y: number }) {
@@ -924,7 +959,7 @@ function onCanvasPointerDown(event: PointerEvent) {
 	if (activeTool.value === "point") {
 		lockCanvasInteraction(event);
 		const graphPoint = canvasPointToGraph(
-			graphDocument.value,
+			interactiveDocument.value,
 			canvasPoint.x,
 			canvasPoint.y
 		);
@@ -936,7 +971,7 @@ function onCanvasPointerDown(event: PointerEvent) {
 		lockCanvasInteraction(event);
 		if (!hasGraphCapacity({ annotations: 1 })) return;
 		const graphPoint = canvasPointToGraph(
-			graphDocument.value,
+			interactiveDocument.value,
 			canvasPoint.x,
 			canvasPoint.y
 		);
@@ -966,7 +1001,7 @@ function onCanvasPointerDown(event: PointerEvent) {
 		if (!hasGraphCapacity({ points: 1, series: 1 })) return;
 		const before = graphSnapshot();
 		const graphPoint = canvasPointToGraph(
-			graphDocument.value,
+			interactiveDocument.value,
 			canvasPoint.x,
 			canvasPoint.y
 		);
@@ -1074,7 +1109,7 @@ function onCanvasPointerMove(event: PointerEvent) {
 	const canvasPoint = pointerCanvasPosition(event);
 	if (!canvasPoint) return;
 	const graphPoint = canvasPointToGraph(
-		graphDocument.value,
+		interactiveDocument.value,
 		canvasPoint.x,
 		canvasPoint.y
 	);
@@ -1111,8 +1146,12 @@ function onCanvasPointerMove(event: PointerEvent) {
 			annotation.x = graphPoint.x;
 			annotation.y = graphPoint.y;
 		} else {
-			annotation.x = canvasPoint.x;
-			annotation.y = canvasPoint.y;
+			annotation.x =
+				(canvasPoint.x * graphDocument.value.canvas.width) /
+				interactiveDocument.value.canvas.width;
+			annotation.y =
+				(canvasPoint.y * graphDocument.value.canvas.height) /
+				interactiveDocument.value.canvas.height;
 		}
 		recordGraphChange();
 		return;
@@ -1192,7 +1231,7 @@ function onCanvasWheel(event: WheelEvent) {
 	svgElement.value?.focus();
 	if (!wheelBeforeSnapshot) wheelBeforeSnapshot = graphSnapshot();
 	const graphPoint = canvasPointToGraph(
-		graphDocument.value,
+		interactiveDocument.value,
 		canvasPoint.x,
 		canvasPoint.y
 	);
@@ -1890,9 +1929,23 @@ onMounted(() => {
 	isClientReady.value = true;
 	window.addEventListener("pagehide", flushPendingSessionGraph);
 	void reportMathClassroomUsage("graph-open");
+	void nextTick(() => {
+		updateWorkspaceHeight();
+		window.addEventListener("resize", updateWorkspaceHeight);
+		if (typeof ResizeObserver !== "undefined") {
+			layoutObserver = new ResizeObserver(updateWorkspaceHeight);
+			const header = window.document.querySelector(".site-header");
+			if (header) layoutObserver.observe(header);
+			const footer = window.document.querySelector(".site-footer");
+			if (footer) layoutObserver.observe(footer);
+			if (canvasShell.value) layoutObserver.observe(canvasShell.value);
+		}
+	});
 });
 
 onBeforeUnmount(() => {
+	layoutObserver?.disconnect();
+	window.removeEventListener("resize", updateWorkspaceHeight);
 	cancelPendingFileImport();
 	window.removeEventListener("pagehide", flushPendingSessionGraph);
 	flushPendingSessionGraph();
@@ -1905,16 +1958,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-	<section class="graph-sketcher-page">
-		<header class="graph-header site-surface">
+	<section
+		ref="pageElement"
+		class="graph-sketcher-page"
+		:style="{ height: pageHeight }"
+	>
+		<header class="graph-header">
 			<div class="graph-header__copy">
-				<p class="page-eyebrow">Math workspace</p>
 				<h1>Graph Sketcher</h1>
-				<p>
-					Draw, plot, label, analyze, and export graphs in the
-					browser. A recovery copy stays in browser tab storage.
-					Download a project to keep a separate copy.
-				</p>
 				<ScratchProjectOverlay
 					:description="coordinateScratchGame.description"
 					:project-id="coordinateScratchGame.projectId"
@@ -1925,79 +1976,103 @@ onBeforeUnmount(() => {
 				/>
 			</div>
 
-			<div
-				class="graph-document-actions"
-				role="group"
-				aria-label="Graph project actions"
+			<details
+				class="graph-project-menu"
+				:open="projectMenuOpen"
+				@toggle="
+					projectMenuOpen = ($event.target as HTMLDetailsElement).open
+				"
 			>
-				<button type="button" class="graph-button" @click="newGraph">
-					{{ isNewGraphConfirmationPending ? "Confirm new" : "New" }}
-				</button>
-				<button type="button" class="graph-button" @click="loadSample">
-					Sample
-				</button>
-				<button
-					type="button"
-					class="graph-button"
-					:disabled="!isClientReady"
-					@click="openFilePicker"
+				<summary>Project</summary>
+				<div
+					class="graph-document-actions"
+					role="group"
+					aria-label="Graph project actions"
 				>
-					Open / import
-				</button>
-				<button
-					type="button"
-					class="graph-button"
-					@click="downloadProject"
-				>
-					Download project
-				</button>
-				<button
-					type="button"
-					class="graph-button graph-button--danger"
-					@click="endSharedSession"
-				>
-					{{
-						isEndSessionConfirmationPending
-							? "Confirm clear"
-							: "Clear for next student"
-					}}
-				</button>
-				<div class="graph-export-menu">
 					<button
 						type="button"
 						class="graph-button"
-						@click="exportSvg"
+						@click="newGraph"
 					>
-						SVG
+						{{
+							isNewGraphConfirmationPending
+								? "Confirm new"
+								: "New"
+						}}
 					</button>
 					<button
 						type="button"
 						class="graph-button"
-						@click="exportPng"
+						@click="loadSample"
 					>
-						PNG
+						Sample
 					</button>
 					<button
 						type="button"
 						class="graph-button"
-						@click="exportCsv"
+						:disabled="!isClientReady"
+						@click="openFilePicker"
 					>
-						CSV
+						Open / import
 					</button>
+					<button
+						type="button"
+						class="graph-button"
+						@click="downloadProject"
+					>
+						Download project
+					</button>
+					<button
+						type="button"
+						class="graph-button graph-button--danger"
+						@click="endSharedSession"
+					>
+						{{
+							isEndSessionConfirmationPending
+								? "Confirm clear"
+								: "Clear for next student"
+						}}
+					</button>
+					<div class="graph-export-menu">
+						<button
+							type="button"
+							class="graph-button"
+							@click="exportSvg"
+						>
+							SVG
+						</button>
+						<button
+							type="button"
+							class="graph-button"
+							@click="exportPng"
+						>
+							PNG
+						</button>
+						<button
+							type="button"
+							class="graph-button"
+							@click="exportCsv"
+						>
+							CSV
+						</button>
+					</div>
+					<input
+						ref="fileInput"
+						class="sr-only"
+						type="file"
+						:disabled="!isClientReady"
+						aria-label="Open or import a graph project"
+						accept=".graphsketch,.ograph,.json,.csv,.tsv,application/json,text/csv,text/tab-separated-values"
+						@change="handleFileSelection"
+					/>
 				</div>
-				<input
-					ref="fileInput"
-					class="sr-only"
-					type="file"
-					:disabled="!isClientReady"
-					aria-label="Open or import a graph project"
-					accept=".graphsketch,.ograph,.json,.csv,.tsv,application/json,text/csv,text/tab-separated-values"
-					@change="handleFileSelection"
-				/>
-			</div>
+			</details>
 		</header>
 
-		<div class="graph-workspace site-surface">
+		<div
+			class="graph-workspace site-surface"
+			:class="{ 'inspector-hidden': !inspectorOpen }"
+		>
 			<aside class="graph-tools" aria-label="Graph drawing tools">
 				<div class="graph-tools__history">
 					<button
@@ -2082,24 +2157,32 @@ onBeforeUnmount(() => {
 						Fit data
 					</button>
 				</div>
-
-				<p class="graph-tools__hint">
-					Canvas focus captures arrows, space, Page Up, and Page Down
-					so the page does not scroll while editing. Wheel zoom and
-					pointer drags also stay inside the canvas.
-				</p>
 			</aside>
 
 			<section class="graph-canvas-panel" aria-labelledby="canvas-title">
 				<div class="graph-canvas-toolbar">
 					<div>
-						<p class="graph-panel-kicker">Canvas</p>
 						<h2 id="canvas-title">{{ graphDocument.title }}</h2>
 					</div>
-					<p>{{ coordinatesText }}</p>
+					<div class="graph-coordinate-tools">
+						<p>{{ coordinatesText }}</p>
+						<button
+							ref="settingsTrigger"
+							class="graph-button graph-settings-toggle"
+							type="button"
+							aria-label="Graph settings"
+							title="Graph settings"
+							:aria-expanded="inspectorOpen"
+							aria-controls="graph-inspector"
+							@click="toggleInspector"
+						>
+							⚙
+						</button>
+					</div>
 				</div>
 
 				<div
+					ref="canvasShell"
 					class="graph-canvas-shell"
 					@dragstart.stop.prevent
 					@wheel.stop.prevent="onCanvasWheel"
@@ -2108,7 +2191,7 @@ onBeforeUnmount(() => {
 						ref="svgElement"
 						class="graph-canvas"
 						:class="`tool-${activeTool}`"
-						:viewBox="`0 0 ${graphDocument.canvas.width} ${graphDocument.canvas.height}`"
+						:viewBox="`0 0 ${interactiveDocument.canvas.width} ${interactiveDocument.canvas.height}`"
 						:aria-label="graphAriaLabel"
 						draggable="false"
 						role="img"
@@ -2151,11 +2234,11 @@ onBeforeUnmount(() => {
 							class="graph-canvas__background"
 							width="100%"
 							height="100%"
-							:fill="graphDocument.canvas.backgroundColor"
+							:fill="interactiveDocument.canvas.backgroundColor"
 						/>
 						<text
 							class="graph-canvas__title"
-							:x="graphDocument.canvas.width / 2"
+							:x="interactiveDocument.canvas.width / 2"
 							y="30"
 							text-anchor="middle"
 						>
@@ -2412,7 +2495,7 @@ onBeforeUnmount(() => {
 						<text
 							class="graph-axis-title"
 							:x="(plotBounds.left + plotBounds.right) / 2"
-							:y="graphDocument.canvas.height - 18"
+							:y="interactiveDocument.canvas.height - 18"
 							text-anchor="middle"
 						>
 							{{ graphDocument.xAxis.title }}
@@ -2431,7 +2514,7 @@ onBeforeUnmount(() => {
 
 						<g
 							v-if="
-								graphDocument.canvas.showLegend &&
+								interactiveDocument.canvas.showLegend &&
 								legendLayout.series.length
 							"
 							class="graph-legend"
@@ -2475,13 +2558,33 @@ onBeforeUnmount(() => {
 					saved data and exports.
 				</p>
 
-				<div class="graph-status" role="status" aria-live="polite">
+				<div
+					v-if="statusMessage || saveState === 'unavailable'"
+					class="graph-status"
+					role="status"
+					aria-live="polite"
+				>
 					<span>{{ statusMessage }}</span>
-					<span>{{ saveStateText }}</span>
+					<span v-if="saveState === 'unavailable'">{{
+						saveStateText
+					}}</span>
 				</div>
 			</section>
 
-			<aside class="graph-inspector" aria-label="Graph inspector">
+			<aside
+				v-if="inspectorOpen"
+				id="graph-inspector"
+				class="graph-inspector"
+				aria-label="Graph settings"
+				@keydown.esc.stop.prevent="toggleInspector"
+			>
+				<button
+					class="graph-button graph-settings-close"
+					type="button"
+					@click="toggleInspector"
+				>
+					Close settings
+				</button>
 				<div
 					class="graph-inspector__tabs"
 					role="tablist"
@@ -4125,6 +4228,219 @@ onBeforeUnmount(() => {
 		border: 0;
 		box-shadow: none;
 		background: transparent;
+	}
+}
+.graph-sketcher-page {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	width: calc(100% - 1rem);
+	max-width: 1800px;
+	margin-inline: auto;
+	padding: 0.35rem 0;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+.graph-sketcher-page > .graph-header {
+	flex: 0 0 auto;
+}
+.graph-sketcher-page .graph-workspace,
+.graph-sketcher-page .graph-workspace.inspector-hidden {
+	position: relative;
+	flex: 1 1 0;
+	min-height: 0;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-rows: auto minmax(0, 1fr);
+}
+.graph-sketcher-page .graph-workspace:not(.inspector-hidden) {
+	grid-template-columns: minmax(0, 1fr) min(20rem, 35%);
+}
+.graph-sketcher-page .graph-tools {
+	grid-column: 1 / -1;
+	grid-row: 1;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.25rem 0.5rem;
+	border-right: 0;
+	border-bottom: 1px solid var(--graph-border);
+	overflow-x: auto;
+	overscroll-behavior: contain;
+	min-width: 0;
+}
+.graph-sketcher-page .graph-tools__list,
+.graph-sketcher-page .graph-tools__history,
+.graph-sketcher-page .graph-tools__zoom {
+	display: flex;
+	gap: 0.25rem;
+	flex: 0 0 auto;
+}
+.graph-sketcher-page .graph-tool {
+	min-height: 2.25rem;
+	padding: 0.3rem 0.5rem;
+	font-size: 0.85rem;
+	white-space: nowrap;
+}
+.graph-sketcher-page .graph-tool-draft {
+	display: flex;
+	min-width: 10rem;
+}
+.graph-sketcher-page .graph-canvas-panel {
+	grid-column: 1;
+	grid-row: 2;
+	display: flex;
+	flex-direction: column;
+	min-height: 0 !important;
+	min-width: 0;
+	overflow: hidden;
+}
+.graph-sketcher-page .graph-canvas-toolbar {
+	flex: 0 0 auto;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.35rem;
+	min-width: 0;
+}
+.graph-canvas-toolbar h2 {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+.graph-sketcher-page .graph-coordinate-tools {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	min-width: 0;
+}
+.graph-coordinate-tools p {
+	margin: 0;
+	font-size: 0.8rem;
+}
+.graph-sketcher-page .graph-coordinate-tools .graph-settings-toggle {
+	min-height: 2.25rem;
+	min-width: 2.25rem;
+	width: 2.25rem;
+	flex: 0 0 2.25rem;
+	padding: 0.2rem;
+	font-size: 1.25rem;
+}
+.graph-sketcher-page .graph-canvas-shell {
+	flex: 1 1 0;
+	min-height: 0;
+	min-width: 0;
+	padding: 0.5rem;
+	overflow: hidden;
+	display: flex;
+}
+.graph-sketcher-page .graph-canvas {
+	width: 100%;
+	height: 100%;
+	max-height: 100%;
+	aspect-ratio: auto;
+	min-height: 0;
+}
+.graph-sketcher-page .graph-inspector {
+	grid-column: 2;
+	grid-row: 2;
+	min-height: 0;
+	overflow: auto;
+	overscroll-behavior: contain;
+	padding: 0.5rem;
+}
+.graph-sketcher-page .graph-inspector__body {
+	max-height: none;
+	overflow: visible;
+}
+.graph-settings-close {
+	margin-bottom: 0.5rem;
+}
+.graph-status {
+	flex: 0 0 auto;
+	padding: 0.25rem 0.5rem;
+	font-size: 0.8rem;
+}
+@media (max-width: 760px) {
+	.graph-sketcher-page .graph-workspace:not(.inspector-hidden) {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.graph-sketcher-page
+		.graph-workspace:not(.inspector-hidden)
+		.graph-canvas-panel,
+	.graph-sketcher-page .graph-workspace:not(.inspector-hidden) .graph-tools {
+		display: flex;
+	}
+	.graph-sketcher-page .graph-inspector {
+		grid-column: 1;
+		grid-row: 2;
+		z-index: 2;
+		background: var(--graph-panel);
+	}
+	.graph-coordinate-tools p {
+		font-size: 0.75rem;
+	}
+}
+
+.graph-sketcher-page .graph-header {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	padding: 0;
+	gap: 0.5rem;
+	flex-wrap: nowrap;
+	align-items: center;
+}
+.graph-sketcher-page .graph-header__copy {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	min-width: 0;
+}
+.graph-sketcher-page .graph-header__copy h1 {
+	margin: 0;
+	font-size: 1.4rem;
+	line-height: 1.2;
+}
+.graph-header__copy :deep(.scratch-project-trigger) {
+	min-height: 2.75rem;
+	padding: 0.4rem 0.6rem;
+	font-size: 0.8rem;
+	font-weight: 600;
+	border-radius: 6px;
+}
+.graph-project-menu {
+	position: relative;
+	flex: 0 0 auto;
+}
+.graph-project-menu > summary {
+	cursor: pointer;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--graph-border);
+	border-radius: 6px;
+	font-size: 0.9rem;
+}
+.graph-project-menu .graph-document-actions {
+	position: absolute;
+	top: calc(100% + 0.35rem);
+	right: 0;
+	z-index: 4;
+	width: min(23rem, calc(100vw - 2rem));
+	padding: 0.75rem;
+	background: var(--graph-panel);
+	border: 1px solid var(--graph-border);
+	border-radius: 8px;
+	box-shadow: 0 10px 24px #0002;
+}
+@media (max-width: 600px) {
+	.graph-sketcher-page .graph-header__copy {
+		gap: 0.35rem;
+		flex-wrap: wrap;
+	}
+	.graph-sketcher-page .graph-header__copy h1 {
+		font-size: 1.15rem;
 	}
 }
 </style>

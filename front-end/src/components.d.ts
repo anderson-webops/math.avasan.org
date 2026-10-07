@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    CourseAssignmentContent: typeof import('./components/CourseAssignmentContent.vue')['default']
     CourseExplorer: typeof import('./components/CourseExplorer.vue')['default']
     GraphSketcherWorkspace: typeof import('./components/GraphSketcherWorkspace.vue')['default']
     LazyMarkdownContent: typeof import('./components/LazyMarkdownContent.vue')['default']
@@ -18,5 +19,6 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     ScratchProjectOverlay: typeof import('./components/ScratchProjectOverlay.vue')['default']
     TheHeader: typeof import('./components/TheHeader.vue')['default']
+    WorkspaceViewToggle: typeof import('./components/WorkspaceViewToggle.vue')['default']
   }
 }

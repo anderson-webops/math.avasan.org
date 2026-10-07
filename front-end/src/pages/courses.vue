@@ -54,7 +54,6 @@ useHead({
 <template>
 	<section class="page-shell page-shell--wide courses-page">
 		<header class="courses-header">
-			<p class="page-eyebrow">Early elementary through AP Calculus</p>
 			<h1 class="page-title">Math courses</h1>
 		</header>
 
@@ -63,6 +62,15 @@ useHead({
 </template>
 
 <style scoped>
+.courses-page {
+	padding-top: 0.75rem;
+	gap: 0.75rem;
+}
+.courses-header .page-title {
+	margin: 0;
+	font-size: 1.6rem;
+	line-height: 1.2;
+}
 .courses-page,
 .courses-header {
 	display: grid;

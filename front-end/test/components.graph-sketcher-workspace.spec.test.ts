@@ -62,7 +62,32 @@ function setCanvasBounds(canvas: Element) {
 
 enableAutoUnmount(afterEach);
 
+async function mountWorkspace(options = {}) {
+	const wrapper = mount(GraphSketcherWorkspace, options);
+	await wrapper.get("[aria-label='Graph settings']").trigger("click");
+	return wrapper;
+}
+
 describe("GraphSketcherWorkspace.vue", () => {
+	it("keeps settings collapsed and returns focus when closed", async () => {
+		const wrapper = mount(GraphSketcherWorkspace, { attachTo: document.body });
+		try {
+			const trigger = wrapper.get("[aria-label='Graph settings']");
+			expect(trigger.attributes("aria-expanded")).toBe("false");
+			expect(wrapper.find(".graph-inspector").exists()).toBe(false);
+			expect(wrapper.find(".graph-project-menu[open]").exists()).toBe(false);
+			await trigger.trigger("click");
+			expect(trigger.attributes("aria-expanded")).toBe("true");
+			expect(document.activeElement).toBe(wrapper.get("#graph-inspector-tab-data").element);
+			await wrapper.get(".graph-inspector").trigger("keydown", { key: "Escape" });
+			expect(wrapper.find(".graph-inspector").exists()).toBe(false);
+			expect(document.activeElement).toBe(trigger.element);
+			Object.defineProperty(wrapper.element, "getBoundingClientRect", { configurable: true, value: () => ({ top: 120 }) });
+			window.dispatchEvent(new Event("resize"));
+			await wrapper.vm.$nextTick();
+			expect((wrapper.element as HTMLElement).style.height).toBe(`${window.innerHeight - 128}px`);
+		} finally { wrapper.unmount(); }
+	});
 	beforeEach(() => {
 		vi.useRealTimers();
 		installSessionStorageStub();
@@ -70,7 +95,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 	});
 
 	it("renders a complete client-side graphing workspace", async () => {
-		const wrapper = mount(GraphSketcherWorkspace);
+		const wrapper = await mountWorkspace();
 
 		expect(wrapper.get("h1").text()).toBe("Graph Sketcher");
 		expect(wrapper.get("svg[role='img']").attributes("tabindex")).toBe("0");
@@ -103,7 +128,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 	});
 
 	it("exposes keyboard-operable inspector tabs and their panels", async () => {
-		const wrapper = mount(GraphSketcherWorkspace, {
+		const wrapper = await mountWorkspace({
 			attachTo: document.body
 		});
 
@@ -165,7 +190,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 	});
 
 	it("plots equations and keeps keyboard scrolling inside the canvas", async () => {
-		const wrapper = mount(GraphSketcherWorkspace);
+		const wrapper = await mountWorkspace();
 		const equation = wrapper
 			.findAll("input")
 			.find(input => input.attributes("placeholder") === "sin(x) + 0.5x");
@@ -189,7 +214,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 	});
 
 	it("keeps wheel zoom and drag gestures inside the canvas surface", async () => {
-		const wrapper = mount(GraphSketcherWorkspace);
+		const wrapper = await mountWorkspace();
 		const canvas = wrapper.get("svg[role='img']");
 		setCanvasBounds(canvas.element);
 
@@ -260,7 +285,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 	});
 
 	it("creates an editable point series when a generated curve is active", async () => {
-		const wrapper = mount(GraphSketcherWorkspace);
+		const wrapper = await mountWorkspace();
 		await buttonWithText(wrapper, "Plot function").trigger("click");
 		const pointButton = wrapper
 			.findAll("button")
@@ -300,7 +325,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 	});
 
 	it("keeps generated curves read-only and duplicates editable snapshots", async () => {
-		const wrapper = mount(GraphSketcherWorkspace);
+		const wrapper = await mountWorkspace();
 		await buttonWithText(wrapper, "Plot function").trigger("click");
 		await buttonWithText(wrapper, "Data").trigger("click");
 
@@ -324,18 +349,16 @@ describe("GraphSketcherWorkspace.vue", () => {
 			})
 		);
 
-		const wrapper = mount(GraphSketcherWorkspace);
+		const wrapper = await mountWorkspace();
 		await wrapper.vm.$nextTick();
 
 		expect(wrapper.text()).toContain("My saved graph");
-		expect(wrapper.text()).toContain(
-			"Restored the graph saved in this tab."
-		);
-		expect(wrapper.text()).toContain("Saved for this tab");
+		expect(wrapper.text()).not.toContain("Restored the graph saved");
+		expect(wrapper.text()).not.toContain("Saved for this tab");
 	});
 
 	it("flushes pending tab saves when the workspace closes", async () => {
-		const wrapper = mount(GraphSketcherWorkspace);
+		const wrapper = await mountWorkspace();
 		await buttonWithText(wrapper, "Add").trigger("click");
 		wrapper.unmount();
 
@@ -350,14 +373,14 @@ describe("GraphSketcherWorkspace.vue", () => {
 	});
 
 	it("clears the tab for the next student without saving the blank graph", async () => {
-		const wrapper = mount(GraphSketcherWorkspace);
+		const wrapper = await mountWorkspace();
 		await buttonWithText(wrapper, "Add").trigger("click");
 		wrapper.unmount();
 		expect(
 			window.sessionStorage.getItem(GRAPH_SKETCHER_SESSION_STORAGE_KEY)
 		).not.toBeNull();
 
-		const nextWrapper = mount(GraphSketcherWorkspace);
+		const nextWrapper = await mountWorkspace();
 		await nextWrapper.vm.$nextTick();
 		const equation = nextWrapper
 			.findAll("input")
@@ -378,7 +401,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 		expect(nextWrapper.text()).toContain(
 			"Cleared this tab's graph. It is ready for the next student."
 		);
-		expect(nextWrapper.text()).toContain("No graph saved in this tab");
+		expect(nextWrapper.text()).not.toContain("Saved in this tab");
 		expect(
 			window.sessionStorage.getItem(GRAPH_SKETCHER_SESSION_STORAGE_KEY)
 		).toBeNull();
@@ -410,7 +433,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 		const importedDocument = createBlankGraphDocument();
 		importedDocument.title = "Previous student's private graph";
 
-		const wrapper = mount(GraphSketcherWorkspace);
+		const wrapper = await mountWorkspace();
 		await wrapper.vm.$nextTick();
 		const input = wrapper.get(
 			"input[aria-label='Open or import a graph project']"
@@ -460,7 +483,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 				}
 			}
 		});
-		const wrapper = mount(GraphSketcherWorkspace);
+		const wrapper = await mountWorkspace();
 
 		await vi.runAllTimersAsync();
 		await wrapper.vm.$nextTick();
@@ -474,7 +497,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 	});
 
 	it("rejects oversized files before reading their contents", async () => {
-		const wrapper = mount(GraphSketcherWorkspace);
+		const wrapper = await mountWorkspace();
 		await wrapper.vm.$nextTick();
 		const text = vi.fn();
 		const arrayBuffer = vi.fn();
@@ -503,7 +526,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 	});
 
 	it("rejects an oversized delimited file before decoding it", async () => {
-		const wrapper = mount(GraphSketcherWorkspace);
+		const wrapper = await mountWorkspace();
 		await wrapper.vm.$nextTick();
 		const text = vi.fn();
 		const input = wrapper.get(
@@ -546,7 +569,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 			graphDocumentToJson(document)
 		);
 
-		const wrapper = mount(GraphSketcherWorkspace);
+		const wrapper = await mountWorkspace();
 		await wrapper.vm.$nextTick();
 
 		expect(wrapper.findAll(".graph-point")).toHaveLength(
@@ -576,7 +599,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 		const importedDocument = createBlankGraphDocument();
 		importedDocument.title = "Stale imported graph";
 
-		const wrapper = mount(GraphSketcherWorkspace);
+		const wrapper = await mountWorkspace();
 		await wrapper.vm.$nextTick();
 		const input = wrapper.get(
 			"input[aria-label='Open or import a graph project']"
@@ -619,7 +642,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 		const staleDocument = createBlankGraphDocument();
 		staleDocument.title = "Stale imported graph";
 
-		const wrapper = mount(GraphSketcherWorkspace);
+		const wrapper = await mountWorkspace();
 		await wrapper.vm.$nextTick();
 		const input = wrapper.get(
 			"input[aria-label='Open or import a graph project']"

@@ -1,9 +1,16 @@
 <script lang="ts" setup>
+import { computed } from "vue";
+import { useRoute } from "vue-router";
 import TheHeader from "~/components/TheHeader.vue";
+
+const route = useRoute();
+const graphView = computed(
+	() => route.path === "/" || route.path.startsWith("/graph-sketcher")
+);
 </script>
 
 <template>
-	<div class="site-frame">
+	<div class="site-frame" :class="{ 'site-frame--graph': graphView }">
 		<a class="skip-link" href="#main-content">Skip to content</a>
 
 		<TheHeader />
@@ -21,6 +28,19 @@ import TheHeader from "~/components/TheHeader.vue";
 </template>
 
 <style scoped>
+.site-frame--graph {
+	height: 100dvh;
+	min-height: 0;
+	overflow: hidden;
+}
+.site-frame--graph .site-main {
+	min-height: 0;
+}
+.site-frame--graph .site-footer {
+	padding: 0.15rem 0.5rem;
+	flex: 0 0 auto;
+	font-size: 0.75rem;
+}
 .site-footer {
 	display: flex;
 	justify-content: center;

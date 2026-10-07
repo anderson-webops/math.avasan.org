@@ -22,7 +22,7 @@ function isLinkActive(to: string) {
 </script>
 
 <template>
-	<header class="site-header">
+	<header class="site-header site-header--compact">
 		<div class="site-shell site-shell--wide">
 			<nav class="site-nav" aria-label="Main navigation">
 				<div class="site-nav__inner site-surface site-surface--strong">
@@ -180,6 +180,47 @@ function isLinkActive(to: string) {
 
 	.site-nav__link {
 		width: 100%;
+	}
+}
+.site-header.site-header--compact {
+	padding-top: 0.35rem;
+}
+.site-header--compact .site-nav__inner {
+	padding: 0.25rem 0.5rem;
+	gap: 0.35rem 0.75rem;
+	background: transparent;
+	box-shadow: none;
+	border-radius: 8px;
+}
+.site-header--compact .site-brand {
+	gap: 0.5rem;
+}
+.site-header--compact .site-brand__mark {
+	width: 2rem;
+	height: 2rem;
+	border-radius: 8px;
+}
+.site-header--compact .site-brand__title {
+	font-size: 1.15rem;
+}
+.site-header--compact .site-nav__link {
+	min-height: 2.75rem;
+	padding: 0.35rem 0.6rem;
+	font-size: 0.9rem;
+}
+@media (max-width: 991px) {
+	.site-header--compact .site-nav__content,
+	.site-header--compact .site-nav__links {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.25rem;
+	}
+	.site-header--compact .site-nav__content {
+		padding-top: 0;
+	}
+	.site-header--compact .site-nav__link {
+		width: auto;
 	}
 }
 </style>
