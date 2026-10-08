@@ -19,6 +19,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     ScratchProjectOverlay: typeof import('./components/ScratchProjectOverlay.vue')['default']
     TheHeader: typeof import('./components/TheHeader.vue')['default']
+    WorkspaceDisclosure: typeof import('./components/WorkspaceDisclosure.vue')['default']
     WorkspaceViewToggle: typeof import('./components/WorkspaceViewToggle.vue')['default']
   }
 }

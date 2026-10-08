@@ -74,7 +74,12 @@ context("Graph Sketcher browser workspace", () => {
 
 	it("keeps graph edits and exports off APIs and analytics", () => {
 		cy.visit("/");
-		cy.contains("summary", "Project").click();
+		cy.get(".graph-sketcher-page").should(page => {
+			expect((page[0] as HTMLElement).style.height).to.match(
+				/^\d+(?:\.\d+)?px$/
+			);
+		});
+		cy.get(".graph-project-menu > .workspace-disclosure__trigger").click();
 		cy.contains("button", "Sample").click();
 		cy.contains("button", "Download project").click();
 		cy.contains("button", "CSV").click();
@@ -87,6 +92,11 @@ context("Graph Sketcher browser workspace", () => {
 		});
 
 		cy.visit("/graph-sketcher/");
+		cy.get(".graph-sketcher-page").should(page => {
+			expect((page[0] as HTMLElement).style.height).to.match(
+				/^\d+(?:\.\d+)?px$/
+			);
+		});
 		cy.get("input[aria-label='Open or import a graph project']")
 			.should("be.enabled")
 			.selectFile(
@@ -103,7 +113,7 @@ context("Graph Sketcher browser workspace", () => {
 		).should("be.visible");
 		cy.get("#canvas-title").should("contain.text", "classroom");
 
-		cy.contains("summary", "Project").click();
+		cy.get(".graph-project-menu > .workspace-disclosure__trigger").click();
 		cy.contains("button", "Clear for next student").click();
 		cy.contains("button", "Confirm clear").click();
 		cy.contains(

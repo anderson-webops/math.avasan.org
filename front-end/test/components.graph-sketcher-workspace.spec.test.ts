@@ -75,7 +75,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 			const trigger = wrapper.get("[aria-label='Graph settings']");
 			expect(trigger.attributes("aria-expanded")).toBe("false");
 			expect(wrapper.find(".graph-inspector").exists()).toBe(false);
-			expect(wrapper.find(".graph-project-menu[open]").exists()).toBe(false);
+			expect(wrapper.get(".graph-project-menu > .workspace-disclosure__trigger").attributes("aria-expanded")).toBe("false");
 			await trigger.trigger("click");
 			expect(trigger.attributes("aria-expanded")).toBe("true");
 			expect(document.activeElement).toBe(wrapper.get("#graph-inspector-tab-data").element);
@@ -85,7 +85,7 @@ describe("GraphSketcherWorkspace.vue", () => {
 			Object.defineProperty(wrapper.element, "getBoundingClientRect", { configurable: true, value: () => ({ top: 120 }) });
 			window.dispatchEvent(new Event("resize"));
 			await wrapper.vm.$nextTick();
-			expect((wrapper.element as HTMLElement).style.height).toBe(`${window.innerHeight - 128}px`);
+			expect((wrapper.element as HTMLElement).style.height).toBe(`${window.innerHeight - 160}px`);
 		} finally { wrapper.unmount(); }
 	});
 	beforeEach(() => {
