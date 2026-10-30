@@ -1,8 +1,9 @@
 import { access, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const distDir = path.resolve(
-	path.dirname(new URL(import.meta.url).pathname),
+	path.dirname(fileURLToPath(import.meta.url)),
 	"../dist"
 );
 
