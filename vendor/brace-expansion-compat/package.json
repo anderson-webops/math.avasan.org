@@ -1,6 +1,6 @@
 {
   "name": "brace-expansion",
-  "version": "5.0.12-webops.1",
+  "version": "5.0.12+webops.1",
   "type": "module",
   "license": "ISC",
   "exports": "./index.js",

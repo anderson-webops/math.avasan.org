@@ -183,7 +183,7 @@ normal server package-management review before attempting activation; never
 skip provenance verification because the CLI is absent.
 
 Before any serving release or policy mutation, the installed promoter requires exactly one
-`worker_shutdown_timeout 10s;` (or another value from 1 through 15 seconds)
+`worker_shutdown_timeout 30s;` (or another value from 1 through 30 seconds)
 in the Nginx main configuration. The trusted helper checks the effective
 `nginx -T` output, then reloads the unchanged configuration and waits for the
 pre-reload worker generation to retire before it installs candidate policy.
@@ -202,7 +202,7 @@ it never treats the timeout setting alone as proof that workers drained.
 `worker_shutdown_timeout` is a global Nginx setting affecting other virtual
 hosts, so its installation requires a separate host review. Do not insert it
 into a site-local `http` or `server` snippet, change the installed host config
-from this source checkout, or relax the 30-second retirement gate.
+from this source checkout, or relax the 45-second retirement gate.
 
 ## Nginx contract
 

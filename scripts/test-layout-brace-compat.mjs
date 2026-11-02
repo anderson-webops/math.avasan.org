@@ -12,10 +12,10 @@ test("layout plugin resolves the guarded local compatibility package", async () 
 	assert.equal(lock.packages["node_modules/brace-expansion"].resolved, "vendor/brace-expansion-compat");
 	assert.equal(lock.packages["node_modules/brace-expansion"].link, true);
 	assert.equal(lock.packages["node_modules/brace-expansion-core"].version, "5.0.12");
-	assert.equal(lock.packages["vendor/brace-expansion-compat"].version, "5.0.12-webops.1");
+	assert.equal(lock.packages["vendor/brace-expansion-compat"].version, "5.0.12+webops.1");
 	for (const [name, entry] of Object.entries(lock.packages)) {
 		if (name.endsWith("/brace-expansion") && entry.version) {
-			assert.equal(entry.version, "5.0.12-webops.1");
+			assert.equal(entry.version, "5.0.12+webops.1");
 		}
 	}
 });

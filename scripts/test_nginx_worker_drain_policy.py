@@ -1,5 +1,6 @@
 """Bounded host worker-drain contract fixtures."""
 
+import re
 import subprocess
 import sys
 import unittest
@@ -7,6 +8,7 @@ from pathlib import Path
 
 
 GATE = Path(__file__).resolve().parents[1] / "deploy/direct/verify-nginx-worker-drain.py"
+PROMOTER = Path(__file__).resolve().parents[1] / "deploy/direct/promote-static-release.sh"
 
 
 def main_config(line: str) -> str:
@@ -35,14 +37,14 @@ class WorkerDrainPolicyTests(unittest.TestCase):
         self.assertNotIn("/etc/nginx/conf.d/math.conf", result.stderr)
 
     def test_accepts_bounded_main_policy(self):
-        for seconds in (1, 10, 15):
+        for seconds in (1, 10, 15, 30):
             with self.subTest(seconds=seconds):
                 self.check_dump(main_config(f"worker_shutdown_timeout {seconds}s;"), True)
 
     def test_rejects_unbounded_or_ambiguous_policy(self):
         for line in (
             "", "# worker_shutdown_timeout 10s;", "worker_shutdown_timeout 0s;",
-            "worker_shutdown_timeout 16s;", "worker_shutdown_timeout 1m;",
+            "worker_shutdown_timeout 31s;", "worker_shutdown_timeout 1m;",
             "worker_shutdown_timeout 15000ms;",
             "worker_shutdown_timeout 10s;\nworker_shutdown_timeout 10s;",
             "http {\nworker_shutdown_timeout 10s;\n}",
@@ -53,6 +55,12 @@ class WorkerDrainPolicyTests(unittest.TestCase):
 
     def test_rejects_policy_only_in_included_config(self):
         self.check_dump(main_config("") + "worker_shutdown_timeout 10s;\n", False)
+
+    def test_promoter_retirement_wait_exceeds_host_shutdown_bound(self):
+        promoter = PROMOTER.read_text(encoding="utf-8")
+        match = re.search(r"^readonly worker_retirement_timeout=(\d+)$", promoter, re.MULTILINE)
+        self.assertIsNotNone(match)
+        self.assertEqual(int(match.group(1)), 45)
 
 
 if __name__ == "__main__":

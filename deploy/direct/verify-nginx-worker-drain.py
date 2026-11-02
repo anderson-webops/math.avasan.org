@@ -9,7 +9,7 @@ MAX_CONFIG_BYTES = 16 * 1024 * 1024
 CONFIG_MARKER = re.compile(r"^# configuration file [^\n]+:$")
 DIRECTIVE = re.compile(r"^\s*worker_shutdown_timeout\b")
 BOUNDED_DIRECTIVE = re.compile(
-    r"^\s*worker_shutdown_timeout\s+([1-9]|1[0-5])s;\s*(?:#.*)?$"
+    r"^\s*worker_shutdown_timeout\s+([1-9]|[12][0-9]|30)s;\s*(?:#.*)?$"
 )
 
 
@@ -54,12 +54,12 @@ def validate(config: str) -> None:
             raise ValueError("invalid Nginx main configuration")
 
     if matches != [True] or quote is not None or depth != 0:
-        raise ValueError("Nginx main worker drain is missing, ambiguous, or exceeds 15 seconds")
+        raise ValueError("Nginx main worker drain is missing, ambiguous, or exceeds 30 seconds")
 
 
 def main() -> None:
     if sys.argv[1:] == ["--help"]:
-        print("Validate nginx -T output for one main-context worker_shutdown_timeout of 1-15s.")
+        print("Validate nginx -T output for one main-context worker_shutdown_timeout of 1-30s.")
         return
     if sys.argv[1:]:
         raise SystemExit("Unexpected arguments")

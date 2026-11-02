@@ -220,7 +220,7 @@ cleanup() {
 }
 
 previous_profile="$(legacy_recovery_profile "$previous_target" "$expected_current")"
-export MATH_TEST_WORKER_TIMEOUT=30s
+export MATH_TEST_WORKER_TIMEOUT=31s
 if prepare_worker_drain >"$test_root/preflight.log" 2>&1; then
 	echo "An unbounded host worker-drain policy was accepted." >&2
 	exit 1
@@ -231,7 +231,7 @@ fi
 cmp -s "$test_root/legacy/deploy/nginx/http-maps.conf" "$maps_target"
 [[ ! -e "$test_root/reloads.log" ]]
 grep -Fq 'Host adapter update required' "$test_root/preflight.log"
-export MATH_TEST_WORKER_TIMEOUT=10s
+export MATH_TEST_WORKER_TIMEOUT=30s
 export MATH_TEST_FAIL_RELOAD=1
 if prepare_worker_drain >"$test_root/transient-preflight.log" 2>&1; then
 	echo "A failed no-op reload was accepted." >&2
