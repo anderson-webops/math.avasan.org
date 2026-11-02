@@ -139,7 +139,7 @@ artifact and its exact Nginx policies for rollback.
 
 - Use the pinned npm toolchain and root `package-lock.json`; do not mix package
   managers.
-- Use Node `24.18.1` and npm `12.0.2` for local, CI, and production builds.
+- Use Node `26.13.0` and npm `12.2.1` for local, CI, and production builds.
 - Keep manifests and the lockfile synchronized. Never hand-edit dependency
   resolutions.
 - When dependencies change, require a clean `npm ci` and `npm audit` before

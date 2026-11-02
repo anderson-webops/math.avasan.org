@@ -70,7 +70,9 @@ export function evenlySampleIndexes(length: number, limit: number) {
 	if (boundedLimit >= boundedLength) {
 		return Array.from({ length: boundedLength }, (_, index) => index);
 	}
-	if (boundedLimit === 1) return [Math.floor((boundedLength - 1) / 2)];
+	if (boundedLimit === 1) {
+		return [Math.floor((boundedLength - 1) / 2)];
+	}
 
 	const indexes: number[] = [];
 	for (let index = 0; index < boundedLimit; index++) {

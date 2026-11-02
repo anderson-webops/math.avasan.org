@@ -159,7 +159,11 @@ function conceptContent(spec: SourceLibraryCourseSpec, moduleTitle: string) {
 Core topics in this module:
 
 1. **Vocabulary and model**  
-   Define the important terms in plain language, connect them to a simple example, and include one non-example so the boundary of the idea is clear.${keywords.length ? ` Key terms to watch include ${keywords.join(", ")}.` : ""}
+   Define the important terms in plain language, connect them to a simple example, and include one non-example so the boundary of the idea is clear.${
+		keywords.length
+			? ` Key terms to watch include ${keywords.join(", ")}.`
+			: ""
+   }
 
 2. **Worked example**  
    Break a typical problem, passage, speech outline, business case, or number scenario into smaller pieces. The record includes the known information, the decision point, and the evidence that supports the answer.
@@ -308,7 +312,9 @@ function createSourceLibraryModule(
 			? { estimatedTime: metadata.estimatedTime }
 			: {}),
 		...(metadata?.keyBlocks?.length
-			? { keyBlocks: [...metadata.keyBlocks] }
+			? {
+					keyBlocks: [...metadata.keyBlocks]
+				}
 			: {}),
 		curriculum: [
 			{

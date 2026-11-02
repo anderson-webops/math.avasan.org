@@ -26,15 +26,27 @@ export type MathCoursePatchMap = Readonly<
 function cloneItem(item: RawCourseModuleItem): RawCourseModuleItem {
 	return {
 		...item,
-		...(item.aliases ? { aliases: [...item.aliases] } : {})
+		...(item.aliases
+			? {
+					aliases: [...item.aliases]
+				}
+			: {})
 	};
 }
 
 function cloneModule(module: RawCourseModule): RawCourseModule {
 	return {
 		...module,
-		...(module.aliases ? { aliases: [...module.aliases] } : {}),
-		...(module.keyBlocks ? { keyBlocks: [...module.keyBlocks] } : {}),
+		...(module.aliases
+			? {
+					aliases: [...module.aliases]
+				}
+			: {}),
+		...(module.keyBlocks
+			? {
+					keyBlocks: [...module.keyBlocks]
+				}
+			: {}),
 		curriculum: module.curriculum.map(cloneItem),
 		supplementalProjects: module.supplementalProjects.map(cloneItem)
 	};

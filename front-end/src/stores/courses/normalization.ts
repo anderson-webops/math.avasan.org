@@ -6049,7 +6049,11 @@ function projectSupport(context: CourseTextContext) {
 		`**Focus:** ${capitalizeSentence(focus)}.`,
 		`**Required outcome:**\n${compactGeneratedProjectSupport(context, projectExpectations(context)).join("\n")}`,
 		`**Completion checks:**\n${compactGeneratedProjectSupport(context, completionChecks(context)).join("\n")}`,
-		`**Extension:** ${compactGeneratedProjectSupport(context, [extensionPrompt(context)])[0]}`
+		`**Extension:** ${
+			compactGeneratedProjectSupport(context, [
+				extensionPrompt(context)
+			])[0]
+		}`
 	].join("\n\n");
 }
 
@@ -8087,7 +8091,11 @@ function informationalResourceSupport(context: CourseTextContext) {
 function shortProjectReviewSupport(context: CourseTextContext) {
 	const support = [
 		`**Completion checks:**\n${compactGeneratedProjectSupport(context, completionChecks(context)).join("\n")}`,
-		`**Extension:** ${compactGeneratedProjectSupport(context, [extensionPrompt(context)])[0]}`
+		`**Extension:** ${
+			compactGeneratedProjectSupport(context, [
+				extensionPrompt(context)
+			])[0]
+		}`
 	].join("\n\n");
 
 	return isCheckInContext(context)
@@ -8099,7 +8107,13 @@ function rewritePlaceholderCourseText(course: RawCourse, courseId: string) {
 	for (const module of course.modules) {
 		for (const section of ["curriculum", "supplementalProjects"] as const) {
 			for (const item of module[section]) {
-				const context = { courseId, course, module, item, section };
+				const context = {
+					courseId,
+					course,
+					module,
+					item,
+					section
+				};
 
 				if (placeholderContentPattern.test(item.content)) {
 					item.content = studioSupport(context);
@@ -8184,7 +8198,13 @@ function normalizeCourseTextQuality(course: RawCourse, courseId: string) {
 	for (const module of course.modules) {
 		for (const section of ["curriculum", "supplementalProjects"] as const) {
 			for (const item of module[section]) {
-				const context = { courseId, course, module, item, section };
+				const context = {
+					courseId,
+					course,
+					module,
+					item,
+					section
+				};
 				item.content =
 					contextualizeGenericRepresentationPrompt(context);
 
@@ -8216,7 +8236,13 @@ function normalizeCourseTextQuality(course: RawCourse, courseId: string) {
 	for (const module of course.modules) {
 		for (const section of ["curriculum", "supplementalProjects"] as const) {
 			for (const item of module[section]) {
-				const context = { courseId, course, module, item, section };
+				const context = {
+					courseId,
+					course,
+					module,
+					item,
+					section
+				};
 				if (
 					isScienceContext(context) &&
 					!isInformationalResourceItem(item) &&

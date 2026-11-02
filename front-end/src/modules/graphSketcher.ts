@@ -529,7 +529,12 @@ export function createSampleGraphDocument(): GraphDocument {
 				markerSize: 7,
 				fillArea: false,
 				points: [
-					{ x: 0, y: 82, yError: 2, label: "start" },
+					{
+						x: 0,
+						y: 82,
+						yError: 2,
+						label: "start"
+					},
 					{ x: 2, y: 66, yError: 2.5 },
 					{ x: 4, y: 53, yError: 2 },
 					{ x: 6, y: 43, yError: 1.5 },

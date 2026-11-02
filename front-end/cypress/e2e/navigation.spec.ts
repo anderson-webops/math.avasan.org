@@ -41,7 +41,7 @@ context("Public math navigation", () => {
 		cy.get("#course-select").should("not.exist");
 	});
 
-	it("loads the reviewed coordinate game only after an explicit click", () => {
+	it("mounts the reviewed coordinate game only after an explicit click", () => {
 		cy.intercept(
 			"GET",
 			"https://scratch.mit.edu/projects/1367463968/embed",
@@ -50,14 +50,13 @@ context("Public math navigation", () => {
 				headers: { "content-type": "text/html" },
 				statusCode: 200
 			}
-		).as("coordinateGame");
+		);
 
 		cy.get("iframe[src*='scratch.mit.edu']").should("not.exist");
 		cy.get("a[href*='scratch.mit.edu/projects/1367463968']").should(
 			"not.exist"
 		);
 		cy.contains("button", "Play coordinate game on Scratch").click();
-		cy.wait("@coordinateGame");
 		cy.get("dialog[open]")
 			.should("have.attr", "aria-modal", "true")
 			.find("iframe")

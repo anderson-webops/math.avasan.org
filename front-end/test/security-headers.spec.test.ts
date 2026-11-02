@@ -436,7 +436,7 @@ describe("production browser security policy", () => {
 		const packageManifest = JSON.parse(
 			readFileSync(resolve(repositoryRoot, "package.json"), "utf8")
 		) as {
-			engines: { npm: string };
+			engines: { node: string; npm: string };
 			packageManager: string;
 		};
 		const continuousIntegration = readFileSync(
@@ -452,17 +452,19 @@ describe("production browser security policy", () => {
 			"utf8"
 		);
 
-		expect(packageManifest.packageManager).toBe("npm@12.0.2");
-		expect(packageManifest.engines.npm).toBe(">=11.19.0 <13");
-		expect(continuousIntegration).toContain("NPM_VERSION: 12.0.2");
+		expect(packageManifest.packageManager).toBe("npm@12.2.1");
+		expect(packageManifest.engines.node).toBe(">=26.13.0 <27");
+		expect(packageManifest.engines.npm).toBe(">=12.2.1 <13");
+		expect(continuousIntegration).toContain("NODE_VERSION: 26.13.0");
+		expect(continuousIntegration).toContain("NPM_VERSION: 12.2.1");
 		expect(continuousIntegration).toContain(
 			'test "$(npm --version)" = "${NPM_VERSION}"'
 		);
 		expect(postDeploy).toContain(
-			'test "$(npm --version)" = "12.0.2"'
+			'test "$(npm --version)" = "12.2.1"'
 		);
 		expect(nativePreparation).toContain(
-			'"$(npm --version)" != "12.0.2"'
+			'"$(npm --version)" != "12.2.1"'
 		);
 	});
 

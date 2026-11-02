@@ -8,7 +8,12 @@ const props = withDefaults(
 		embedded?: boolean;
 		triggerClass?: string;
 	}>(),
-	{ label: "", popover: false, embedded: false, triggerClass: "" }
+	{
+		label: "",
+		popover: false,
+		embedded: false,
+		triggerClass: ""
+	}
 );
 const emit = defineEmits<{ toggle: [open: boolean] }>();
 const expanded = defineModel<boolean>("open", { default: false });

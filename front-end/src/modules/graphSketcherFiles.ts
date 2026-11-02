@@ -333,7 +333,11 @@ export function importDelimitedGraphData(
 		}
 		if (!series.points.length)
 			throw new Error("No numeric values were found.");
-		return { series: [series], rowsRead: dataRows.length, issues };
+		return {
+			series: [series],
+			rowsRead: dataRows.length,
+			issues
+		};
 	}
 
 	if (width - 1 > MAX_GRAPH_SERIES) {
@@ -1345,7 +1349,12 @@ export function assertGraphicalExportWithinBudget(document: GraphDocument) {
 		);
 	}
 
-	return { elements, estimatedBytes, points, textCharacters };
+	return {
+		elements,
+		estimatedBytes,
+		points,
+		textCharacters
+	};
 }
 
 export function graphDocumentToSvg(

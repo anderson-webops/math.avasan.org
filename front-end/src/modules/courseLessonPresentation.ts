@@ -86,8 +86,9 @@ export function isLessonLearningItem(
 }
 
 export function lessonContentSections(content: string): LessonContentSection[] {
-	if (/^ {0,3}\[[^\]\n]+\]:/m.test(content))
+	if (/^ {0,3}\[[^\]\n]+\]:/m.test(content)) {
 		return [{ kind: "assignment", label: "Assignment", content }];
+	}
 	const sections: LessonContentSection[] = [];
 	let current: LessonContentSection = {
 		kind: "assignment",
@@ -178,8 +179,12 @@ export function lessonContentSections(content: string): LessonContentSection[] {
 				: section
 		);
 	}
-	if (sections.length && sections.every(section => section.kind === "learn"))
+	if (
+		sections.length &&
+		sections.every(section => section.kind === "learn")
+	) {
 		return [{ kind: "assignment", label: "Assignment", content }];
+	}
 	if (!sections.some(section => section.kind === "assignment")) {
 		return sections.map(section =>
 			section.kind === "learn"

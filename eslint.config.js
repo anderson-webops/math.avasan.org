@@ -5,7 +5,12 @@ export default antfu(
 	{
 		root: true,
 		env: { browser: true, node: true, es2021: true },
-		stylistic: { indent: "tab", quotes: "double", semi: true, linebreak: "unix" },
+		stylistic: {
+			indent: "tab",
+			quotes: "double",
+			semi: true,
+			linebreak: "unix"
+		},
 		formatters: {
 			prettier: {
 				tabWidth: 4,

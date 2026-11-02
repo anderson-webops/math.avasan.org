@@ -93,7 +93,7 @@ the full gate, and produces the same bounded artifact:
 
 ```bash
 EXPECTED_SOURCE_REVISION=<40-character-commit> \
-NODE_BIN_DIR=/opt/node-24.18.1/bin \
+NODE_BIN_DIR=/opt/node-26.13.0/bin \
 deploy/direct/prepare-static-release.sh \
   /path/to/clean/checkout \
   /path/to/unprivileged/artifact-output

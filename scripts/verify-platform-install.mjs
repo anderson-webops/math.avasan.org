@@ -7,7 +7,9 @@ import { fileURLToPath } from "node:url";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const frontendManifest = JSON.parse(await readFile(path.join(repositoryRoot, "front-end/package.json"), "utf8"));
-const npmCommand = process.platform === "win32" ? "npm.cmd" : path.join(path.dirname(process.execPath), "npm");
+const npmCommand = process.platform === "win32"
+	? "npm.cmd"
+	: path.join(path.dirname(process.execPath), "npm");
 
 function run(command, args, cwd, cacheDirectory) {
 	return new Promise((resolveRun, reject) => {
@@ -23,7 +25,9 @@ function run(command, args, cwd, cacheDirectory) {
 		});
 		child.once("error", reject);
 		child.once("exit", code =>
-			code === 0 ? resolveRun() : reject(new Error(`${command} exited with code ${code}.`)));
+			code === 0
+				? resolveRun()
+				: reject(new Error(`${command} exited with code ${code}.`)));
 	});
 }
 
@@ -47,11 +51,19 @@ async function verifyTarget(libc) {
 		await mkdir(path.join(temporaryRoot, "front-end"), {
 			recursive: true
 		});
+		await mkdir(path.join(temporaryRoot, "vendor"), {
+			recursive: true
+		});
 		await Promise.all([
 			cp(path.join(repositoryRoot, "package.json"), path.join(temporaryRoot, "package.json")),
 			cp(path.join(repositoryRoot, "package-lock.json"), path.join(temporaryRoot, "package-lock.json")),
 			cp(path.join(repositoryRoot, ".npmrc"), path.join(temporaryRoot, ".npmrc")),
-			cp(path.join(repositoryRoot, "front-end/package.json"), path.join(temporaryRoot, "front-end/package.json"))
+			cp(path.join(repositoryRoot, "front-end/package.json"), path.join(temporaryRoot, "front-end/package.json")),
+			cp(
+				path.join(repositoryRoot, "vendor/brace-expansion-compat"),
+				path.join(temporaryRoot, "vendor/brace-expansion-compat"),
+				{ recursive: true }
+			)
 		]);
 		await run(
 			npmCommand,
@@ -71,7 +83,9 @@ async function verifyTarget(libc) {
 
 		const expected = Object.keys(frontendManifest.optionalDependencies || {}).filter((dependency) => {
 			if (dependency === "@esbuild/linux-arm64") return true;
-			return dependency.includes("linux-arm64") && dependency.endsWith(libc === "musl" ? "-musl" : "-gnu");
+			return dependency.includes("linux-arm64") && dependency.endsWith(libc === "musl"
+				? "-musl"
+				: "-gnu");
 		});
 		const missing = [];
 		for (const dependency of expected) {

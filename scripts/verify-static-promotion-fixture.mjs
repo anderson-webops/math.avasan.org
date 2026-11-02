@@ -72,11 +72,18 @@ const legacyDenied = new Set([
 
 function respond(request, response) {
 	const identity = release();
-	const family = request.socket.localAddress.includes(":") ? "ipv6" : "ipv4";
+	const family = request.socket.localAddress.includes(":")
+		? "ipv6"
+		: "ipv4";
 	const path = (request.url || "/").split("?", 1)[0];
 	appendFileSync(
 		eventLog,
-		`${JSON.stringify({ family, method: request.method, path, version: identity.version })}\n`
+		`${JSON.stringify({
+			family,
+			method: request.method,
+			path,
+			version: identity.version
+		})}\n`
 	);
 	for (const [name, value] of Object.entries(staticHeaders()))
 		response.setHeader(name, value);
@@ -113,7 +120,9 @@ function respond(request, response) {
 		response.end();
 		return;
 	}
-	const denied = identity.version === "1.0.16" ? legacyDenied : currentDenied;
+	const denied = identity.version === "1.0.16"
+		? legacyDenied
+		: currentDenied;
 	if (
 		denied.has(path)
 		|| path === "/api"

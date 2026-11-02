@@ -17,6 +17,7 @@ export default base
 		languageOptions: { globals: { ...globals.browser, ...auto.globals } },
 		plugins: { prettier },
 		rules: {
+			"antfu/reasonable-newline": "off",
 			"prettier/prettier": "error",
 			"vue/multi-word-component-names": "off",
 			"ts/no-explicit-any": "off",
@@ -67,7 +68,11 @@ export default base
 
 		// build / config scripts
 		{
-			files: ["**/*.{js,cjs,mjs}", "*.config.js", "vite.config.{js,ts,mts}"],
+			files: [
+				"**/*.{js,cjs,mjs}",
+				"*.config.js",
+				"vite.config.{js,ts,mts}"
+			],
 			languageOptions: { sourceType: "module" }
 		}
 	)

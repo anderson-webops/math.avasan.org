@@ -492,7 +492,9 @@ function normalizeCourse(
 					? { estimatedTime: module.estimatedTime }
 					: {}),
 				...(module.keyBlocks?.length
-					? { keyBlocks: [...module.keyBlocks] }
+					? {
+							keyBlocks: [...module.keyBlocks]
+						}
 					: {}),
 				curriculum: mapItems(module.curriculum, "curriculum"),
 				supplementalProjects: mapItems(
