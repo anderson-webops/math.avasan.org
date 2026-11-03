@@ -12,10 +12,15 @@ import Layouts from "vite-plugin-vue-layouts-next";
 import generateSitemap from "vite-ssg-sitemap";
 import { VueRouterAutoImports } from "vue-router/unplugin";
 import VueRouter from "vue-router/vite";
+import { createCriticalCssRenderer } from "./scripts/critical-css.mts";
 import { generateProductionSitemap } from "./scripts/sitemap.mts";
 import { rewriteStaticHead } from "./scripts/static-head.mts";
+import { renderSsgDocumentHead } from "./src/utils/ssgHead.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const renderCriticalCss = createCriticalCssRenderer(
+	path.resolve(__dirname, "dist")
+);
 
 export default defineConfig(({ command }) => ({
 	optimizeDeps: {
@@ -85,11 +90,11 @@ export default defineConfig(({ command }) => ({
 	ssgOptions: {
 		script: "defer",
 		formatting: "minify",
-		beastiesOptions: {
-			reduceInlineStyles: false
-		},
-		onPageRendered(route, html) {
-			return rewriteStaticHead(html, route);
+		beastiesOptions: false,
+		onPageRendered(route, html, context) {
+			return renderCriticalCss(
+				rewriteStaticHead(renderSsgDocumentHead(html, context), route)
+			);
 		},
 		onFinished() {
 			generateProductionSitemap(generateSitemap);

@@ -1,7 +1,7 @@
 {
 	"name": "math-avasan-org",
 	"type": "module",
-	"version": "1.0.23",
+	"version": "1.0.24",
 	"private": true,
 	"packageManager": "npm@12.2.1",
 	"engines": {

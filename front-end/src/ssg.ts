@@ -4,8 +4,7 @@ import type {
 	ViteSSGContext
 } from "vite-ssg";
 import type { Component } from "vue";
-import { createHead as createClientHead } from "@unhead/vue/client";
-import { createHead } from "@unhead/vue/server";
+import type { SsgDocumentHeadContext } from "./utils/ssgHead";
 import {
 	createApp as createClientApp,
 	createSSRApp,
@@ -18,6 +17,7 @@ import {
 	createRouter,
 	createWebHistory
 } from "vue-router";
+import { installSsgHeadBridge } from "./utils/ssgHead";
 
 const ClientOnly = defineComponent({
 	setup(_props, { slots }) {
@@ -75,14 +75,6 @@ export function ViteSSG(
 				? createSSRApp(App)
 				: createClientApp(App);
 
-		const head = useHead
-			? import.meta.env.SSR
-				? createHead()
-				: createClientHead()
-			: undefined;
-
-		if (head) app.use(head);
-
 		const router = createRouter({
 			history: import.meta.env.SSR
 				? createMemoryHistory(routerOptions.base)
@@ -102,11 +94,12 @@ export function ViteSSG(
 			_appCtx?: ViteSSGContext<true>
 		) => Promise.all(appRenderCallbacks.map(callback => callback()));
 
-		const context: ViteSSGContext<true> = {
+		const context: ViteSSGContext<true> & SsgDocumentHeadContext = {
 			app,
-			head: head as ViteSSGContext<true>["head"],
+			head: undefined,
+			renderDocumentHead: (html: string) => html,
 			isClient: !import.meta.env.SSR,
-			router: router as ViteSSGContext<true>["router"],
+			router,
 			routes: routerOptions.routes,
 			onSSRAppRendered,
 			triggerOnSSRAppRendered,
@@ -114,6 +107,8 @@ export function ViteSSG(
 			transformState,
 			routePath
 		};
+
+		if (useHead) installSsgHeadBridge(context);
 
 		if (!import.meta.env.SSR) {
 			await documentReady();

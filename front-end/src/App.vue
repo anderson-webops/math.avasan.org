@@ -4,9 +4,9 @@ import {
 	pageRobotsForPath,
 	pageTitleForPath,
 	SITE_DESCRIPTION,
+	SITE_TITLE,
 	SITE_URL
 } from "@/modules/pageHead";
-import { serializeJsonLd } from "@/modules/serializeJsonLd";
 
 const siteUrl = import.meta.env.VITE_SITE_URL || SITE_URL;
 const route = useRoute();
@@ -18,118 +18,106 @@ const socialImageUrl = computed(() =>
 );
 const pageTitle = computed(() => pageTitleForPath(route.path || "/"));
 const robotsContent = computed(() => pageRobotsForPath(route.path || "/"));
-const structuredData = computed(() => ({
-	"@context": "https://schema.org",
-	"@type": "WebSite",
-	description: SITE_DESCRIPTION,
-	name: "Math with Julio",
-	url: siteUrl
-}));
 
-useHead(
-	() =>
-		({
-			title: pageTitle.value,
-			meta: [
-				{
-					name: "description",
-					content: SITE_DESCRIPTION
-				},
-				{
-					property: "og:title",
-					content: "Math with Julio"
-				},
-				{
-					property: "og:description",
-					content: SITE_DESCRIPTION
-				},
-				{
-					property: "og:type",
-					content: "website"
-				},
-				{
-					property: "og:url",
-					content: canonicalUrl.value
-				},
-				{
-					property: "og:image",
-					content: socialImageUrl.value
-				},
-				{
-					property: "og:image:alt",
-					content:
-						"Math with Julio: Graph Sketcher and math courses from elementary through AP Calculus"
-				},
-				{
-					name: "twitter:card",
-					content: "summary_large_image"
-				},
-				{
-					name: "twitter:title",
-					content: "Math with Julio"
-				},
-				{
-					name: "twitter:description",
-					content: SITE_DESCRIPTION
-				},
-				{
-					name: "twitter:image",
-					content: socialImageUrl.value
-				},
-				{
-					name: "robots",
-					content: robotsContent.value
-				},
-				{
-					name: "theme-color",
-					content: isDark.value ? "#07111f" : "#3158e8"
-				}
-			],
-			link: [
-				{
-					rel: "icon",
-					type: "image/svg+xml",
-					href: "/favicon.svg"
-				},
-				{
-					rel: "icon",
-					type: "image/png",
-					sizes: "32x32",
-					href: "/favicon-32x32.png"
-				},
-				{
-					rel: "icon",
-					type: "image/png",
-					sizes: "16x16",
-					href: "/favicon-16x16.png"
-				},
-				{
-					rel: "apple-touch-icon",
-					sizes: "180x180",
-					href: "/apple-touch-icon.png"
-				},
-				{
-					rel: "manifest",
-					href: "/site.webmanifest"
-				},
-				{
-					rel: "canonical",
-					href: canonicalUrl.value
-				}
-			],
-			script: [
-				{
-					innerHTML: serializeJsonLd(structuredData.value),
-					key: "site-json-ld",
-					type: "application/ld+json"
-				}
-			]
-		}) as any
-);
+useHead(() => ({
+	title: pageTitle.value,
+	meta: [
+		{
+			name: "description",
+			content: SITE_DESCRIPTION
+		},
+		{
+			property: "og:title",
+			content: "Math with Julio"
+		},
+		{
+			property: "og:description",
+			content: SITE_DESCRIPTION
+		},
+		{
+			property: "og:type",
+			content: "website"
+		},
+		{
+			property: "og:url",
+			content: canonicalUrl.value
+		},
+		{
+			property: "og:image",
+			content: socialImageUrl.value
+		},
+		{
+			property: "og:image:alt",
+			content:
+				"Math with Julio: Graph Sketcher and math courses from elementary through AP Calculus"
+		},
+		{
+			name: "twitter:card",
+			content: "summary_large_image"
+		},
+		{
+			name: "twitter:title",
+			content: "Math with Julio"
+		},
+		{
+			name: "twitter:description",
+			content: SITE_DESCRIPTION
+		},
+		{
+			name: "twitter:image",
+			content: socialImageUrl.value
+		},
+		{
+			name: "robots",
+			content: robotsContent.value
+		},
+		{
+			name: "theme-color",
+			content: isDark.value ? "#07111f" : "#3158e8"
+		}
+	],
+	link: [
+		{
+			rel: "icon",
+			type: "image/svg+xml",
+			href: "/favicon.svg"
+		},
+		{
+			rel: "icon",
+			type: "image/png",
+			sizes: "32x32",
+			href: "/favicon-32x32.png"
+		},
+		{
+			rel: "icon",
+			type: "image/png",
+			sizes: "16x16",
+			href: "/favicon-16x16.png"
+		},
+		{
+			rel: "apple-touch-icon",
+			sizes: "180x180",
+			href: "/apple-touch-icon.png"
+		},
+		{
+			rel: "manifest",
+			href: "/site.webmanifest"
+		},
+		{
+			rel: "canonical",
+			href: canonicalUrl.value
+		}
+	]
+}));
 </script>
 
 <template>
 	<RouterView />
+	<div hidden itemscope itemtype="https://schema.org/WebSite">
+		<meta itemprop="name" :content="SITE_TITLE" />
+		<meta itemprop="description" :content="SITE_DESCRIPTION" />
+		<link itemprop="url" :href="siteUrl" />
+	</div>
 </template>
 
 <style></style>
