@@ -1,7 +1,7 @@
 {
 	"name": "math-avasan-org",
 	"type": "module",
-	"version": "1.0.23",
+	"version": "1.0.24",
 	"private": true,
 	"packageManager": "npm@12.2.1",
 	"engines": {
@@ -43,54 +43,6 @@
 		"verify:platform-install": "node scripts/verify-platform-install.mjs",
 		"verify:production": "node scripts/post-deploy-smoke.mjs"
 	},
-	"overrides": {
-		"defu": "6.1.6",
-		"minimatch": "11.0.3",
-		"brace-expansion": "$brace-expansion",
-		"fast-uri": "3.1.8",
-		"glob": "14.0.3",
-		"js-yaml": "4.3.2",
-		"linkify-it": "6.1.0",
-		"nanoid": "3.3.18",
-		"postcss": "8.5.28",
-		"shell-quote": "1.10.0",
-		"svgo": "4.1.0",
-		"systeminformation": "5.33.18",
-		"tar": "7.5.22",
-		"valibot": "1.4.2",
-		"path-to-regexp": "8.4.2",
-		"serialize-javascript": "7.0.5",
-		"picomatch": "4.0.5",
-		"anymatch": {
-			"picomatch": "2.3.2"
-		},
-		"micromatch": {
-			"picomatch": "2.3.2"
-		},
-		"readdirp": {
-			"picomatch": "2.3.2"
-		},
-		"@rollup/plugin-babel": {
-			"@rollup/pluginutils": {
-				"picomatch": "2.3.2"
-			}
-		},
-		"@rollup/plugin-replace": {
-			"@rollup/pluginutils": {
-				"picomatch": "2.3.2"
-			}
-		},
-		"vite": "^8.3.0",
-		"vue-router": "^5.3.1",
-		"undici": "7.30.1",
-		"source-map-js": "1.2.2",
-		"tinypool": "2.2.0",
-		"katex": "0.18.2",
-		"@cypress/request": {
-			"uuid": "14.0.0",
-			"qs": "6.17.1"
-		}
-	},
 	"allowScripts": {
 		"cypress@16.2.1": true,
 		"esbuild@0.28.1": true,
@@ -110,10 +62,20 @@
 		"eslint-plugin-prettier": "^5.5.7",
 		"eslint-plugin-vue": "^10.12.0",
 		"globals": "^17.14.0",
+		"katex": "^0.19.1",
 		"prettier": "^3.9.10",
 		"puppeteer": "^25.11.0",
 		"taze": "^21.3.0",
 		"tsx": "^4.23.15",
 		"typescript": "^6.0.3"
+	},
+	"overrides": {
+		"brace-expansion": "$brace-expansion",
+		"minimatch": "11.0.4",
+		"glob": "14.0.3",
+		"oxfmt": {
+			"tinypool": "2.2.0"
+		},
+		"katex": "$katex"
 	}
 }

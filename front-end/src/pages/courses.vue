@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { defineAsyncComponent } from "vue";
-import { serializeJsonLd } from "@/modules/serializeJsonLd";
 
 defineOptions({ name: "MathCoursesPage" });
 
@@ -27,27 +26,7 @@ const courseNames = [
 ];
 
 useHead({
-	link: [{ href: `${siteUrl}/courses/`, rel: "canonical" }],
-	script: [
-		{
-			innerHTML: serializeJsonLd({
-				"@context": "https://schema.org",
-				"@type": "ItemList",
-				itemListElement: courseNames.map((name, index) => ({
-					"@type": "Course",
-					name,
-					position: index + 1,
-					provider: {
-						"@type": "Person",
-						name: "Julio",
-						jobTitle: "Grade-school teacher"
-					}
-				}))
-			}),
-			key: "math-with-julio-courses",
-			type: "application/ld+json"
-		}
-	]
+	link: [{ href: `${siteUrl}/courses/`, rel: "canonical" }]
 });
 </script>
 
@@ -58,6 +37,26 @@ useHead({
 		</header>
 
 		<CourseExplorer />
+		<div hidden itemscope itemtype="https://schema.org/ItemList">
+			<div
+				v-for="(name, index) in courseNames"
+				:key="name"
+				itemprop="itemListElement"
+				itemscope
+				itemtype="https://schema.org/Course"
+			>
+				<meta itemprop="name" :content="name" />
+				<meta itemprop="position" :content="String(index + 1)" />
+				<div
+					itemprop="provider"
+					itemscope
+					itemtype="https://schema.org/Person"
+				>
+					<meta itemprop="name" content="Julio" />
+					<meta itemprop="jobTitle" content="Grade-school teacher" />
+				</div>
+			</div>
+		</div>
 	</section>
 </template>
 

@@ -171,8 +171,11 @@ describe("static route normalization", () => {
 			"utf8"
 		);
 
-		expect(configSource).toContain("onPageRendered(route, html)");
-		expect(configSource).toContain("rewriteStaticHead(html, route)");
+		expect(configSource).toContain("onPageRendered(route, html, context)");
+		expect(configSource).toContain("renderSsgDocumentHead(html, context)");
+		expect(configSource).toContain("rewriteStaticHead(");
+		expect(configSource).toContain("renderCriticalCss(");
+		expect(configSource).toContain("beastiesOptions: false");
 	});
 
 	it("configures the production sitemap without localhost or private routes", () => {

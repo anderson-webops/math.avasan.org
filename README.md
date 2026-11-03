@@ -77,6 +77,28 @@ npm run build
 npm run a11y
 ```
 
+The SSG wrapper installs Unhead 3 separately from ViteSSG's legacy renderer.
+Each route gets its own server head; the page-render callback serializes that
+head and runs the independently named `beasties-renderer` alias for Beasties
+0.5.5. This preserves the upstream peer contracts without forcing incompatible
+versions. The CSS processor retains complete source stylesheets, needs no
+inline loader script or event handler, and fails on processing errors.
+
+Site and course structured metadata use Schema.org microdata, preserving the
+website identity and all 15 course/provider records without inline scripts.
+The existing strict script CSP and browser-local graph boundary remain intact.
+
+TypeScript stays on 6.0.3 while the stable `typescript-eslint` 8.72.1 peer range
+requires `>=4.8.4 <6.1.0`. Reassess TypeScript 7 with a supported parser release.
+Deploy-target native packages follow their resolved loaders' exact versions,
+not independent latest-version substitutions.
+
+Security overrides retain patched Glob and Minimatch, the Oxfmt worker's
+Tinypool fix, and the current KaTeX API covered by math/trust regressions.
+The layout plugin's reviewed brace-expansion adapter remains in place. Other
+obsolete global pins are removed so callers resolve current releases within
+their supported dependency ranges instead of being held on older versions.
+
 `npm run audit:static-media` checks every referenced course asset against the
 live static host. On the deployment host, the same read-only check can avoid
 NAT-hairpin routing by setting `STATIC_COURSE_MEDIA_MIRROR` to the absolute
