@@ -1,14 +1,17 @@
 """Bounded host worker-drain contract fixtures."""
 
+import importlib.util
 import re
 import subprocess
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 GATE = Path(__file__).resolve().parents[1] / "deploy/direct/verify-nginx-worker-drain.py"
 PROMOTER = Path(__file__).resolve().parents[1] / "deploy/direct/promote-static-release.sh"
+WORKER_GATE = PROMOTER.with_name("nginx-worker-generation.py")
 
 
 def main_config(line: str) -> str:
@@ -61,6 +64,13 @@ class WorkerDrainPolicyTests(unittest.TestCase):
         match = re.search(r"^readonly worker_retirement_timeout=(\d+)$", promoter, re.MULTILINE)
         self.assertIsNotNone(match)
         self.assertEqual(int(match.group(1)), 45)
+        specification = importlib.util.spec_from_file_location("worker_generation", WORKER_GATE)
+        worker_generation = importlib.util.module_from_spec(specification)
+        specification.loader.exec_module(worker_generation)
+        with patch.object(worker_generation, "wait_for_retirement") as wait:
+            with patch.object(sys, "argv", [str(WORKER_GATE), "wait", "fixture-state"]):
+                worker_generation.main()
+        wait.assert_called_once_with(Path("fixture-state"), float(match.group(1)))
 
 
 if __name__ == "__main__":
