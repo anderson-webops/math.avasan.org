@@ -119,7 +119,7 @@ def main():
     capture_parser.add_argument("state", type=Path)
     wait_parser = subparsers.add_parser("wait")
     wait_parser.add_argument("state", type=Path)
-    wait_parser.add_argument("--timeout", type=float, default=30.0)
+    wait_parser.add_argument("--timeout", type=float, default=45.0)
     args = parser.parse_args()
     if args.command == "capture":
         if args.master_pid <= 1:
