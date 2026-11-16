@@ -33,6 +33,11 @@ Algebra 1B and original-domain distinctions for rational-function roots, holes
 and asymptotes in Pre-Calculus A. Public-store regressions retain those conditions
 through the lesson-processing pipeline.
 
+The shared upstream Markdown-prose formatter preserves inline and fenced code,
+and expands only labeled, sequential compact steps. The renderer uses that same
+formatter, preserving mathematical sentence values and the authored answer count
+instead of treating a value such as `13.` as another numbered instruction.
+
 Other cohort changes concern AI, Java, JavaScript, grammar, finance, Network,
 Python, Machine Learning, backend/IDE infrastructure or their test fixtures.
 The shared implementation-artifact edit changes Network policy only. Those

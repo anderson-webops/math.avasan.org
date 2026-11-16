@@ -1,6 +1,7 @@
 import { flushPromises, mount } from "@vue/test-utils";
 import { describe, expect, it, vi } from "vitest";
 import LazyMarkdownContent from "@/components/LazyMarkdownContent.vue";
+import CourseAssetReader from "@/components/CourseAssetReader.vue";
 
 describe("LazyMarkdownContent.vue", () => {
 	it("renders markdown tables as structured table elements", async () => {
@@ -129,7 +130,7 @@ describe("LazyMarkdownContent.vue", () => {
 		);
 	});
 
-	it("does not rewrite fenced code blocks while formatting compact course text", async () => {
+	it("does not rewrite code literals while formatting compact course text", async () => {
 		const wrapper = mount(LazyMarkdownContent, {
 			props: {
 				content: [
@@ -147,7 +148,8 @@ describe("LazyMarkdownContent.vue", () => {
 					"# Continuous game logic",
 					"while True:",
 					"    draw_border()",
-					"```"
+					"```",
+					"Use `1. Keep literal. 2. Keep second literal.` unchanged."
 				].join("\n")
 			}
 		});
@@ -165,5 +167,27 @@ describe("LazyMarkdownContent.vue", () => {
 		expect(codeText).toContain("# Continuous game logic");
 		expect(codeText).toContain("while True:");
 		expect(wrapper.findAll("pre code")).toHaveLength(1);
+		expect(wrapper.findAll("code").at(-1)?.text()).toBe(
+			"1. Keep literal. 2. Keep second literal."
+		);
+	});
+
+	it("renders complete numbered self-check answers without consuming mathematical values as list markers", async () => {
+		const wrapper = mount(CourseAssetReader, {
+			props: {
+				asset: "/course-assets/algebra-1a/practice-checks-v1.md#properties-practice",
+				course: "algebra-1a"
+			},
+			global: { stubs: { RouterLink: true } }
+		});
+		await flushPromises();
+		await vi.waitFor(() => {
+			expect(wrapper.findAll("ol li")).toHaveLength(3);
+		});
+		expect(wrapper.findAll("ol li").map(item => item.text())).toEqual([
+			"4x-12: the factor 4 multiplies both x and -3.",
+			"5x+3. At x=-1 the original is -2+5-3-2=-2, matching -5+3=-2.",
+			"It does not: 3(2)+4=10, while the right side is 13. The actual solution is x=3."
+		]);
 	});
 });
