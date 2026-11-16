@@ -2,9 +2,9 @@
 set -euo pipefail
 
 system_path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-node_bin_dir="${NODE_BIN_DIR:-/opt/node-26.13.0/bin}"
-if [[ "$node_bin_dir" != /* || ! -x "$node_bin_dir/node" || ! -x "$node_bin_dir/npm" ]]; then
-	echo "NODE_BIN_DIR must be an absolute directory containing executable node and npm binaries." >&2
+node_bin_dir="${NODE_BIN_DIR:-/opt/node-26.13.1/bin}"
+if [[ "$node_bin_dir" != /* || ! -x "$node_bin_dir/node" ]]; then
+	echo "NODE_BIN_DIR must be an absolute directory containing the executable Node binary." >&2
 	exit 1
 fi
 node_bin_dir_real="$(cd -- "$node_bin_dir" && pwd -P)"
@@ -36,8 +36,8 @@ if [[ -n "$(/usr/bin/git -C "$candidate" status --porcelain --untracked-files=no
 	echo "Candidate tracked source must be clean before preparation." >&2
 	exit 1
 fi
-if [[ "$(node --version)" != "v26.13.0" || "$(npm --version)" != "12.2.1" ]]; then
-	echo "Preparation requires Node 26.13.0 and npm 12.2.1." >&2
+if [[ "$(node --version)" != "v26.13.1" ]]; then
+	echo "Preparation requires Node 26.13.1 and the source-verified build profile." >&2
 	exit 1
 fi
 
@@ -84,6 +84,10 @@ export VITE_SITE_URL=https://math.avasan.org
 export NODE_ENV=production
 
 cd -- "$build_root"
+toolchain_bin="$(node scripts/build-toolchain.mjs --print-bin)"
+PATH="$toolchain_bin:$PATH"
+export PATH
+npm run verify:toolchain
 npm ci --include=dev --include=optional --strict-allow-scripts
 npm run audit
 npm run audit:production

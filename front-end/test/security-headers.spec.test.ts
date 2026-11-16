@@ -15,8 +15,7 @@ function securityResponse(contentSecurityPolicy = requiredPolicy) {
 			"Cross-Origin-Opener-Policy": "same-origin",
 			"Cross-Origin-Resource-Policy": "same-origin",
 			"Permissions-Policy": requiredPermissionsPolicy,
-			"Strict-Transport-Security":
-				"max-age=31536000; includeSubDomains",
+			"Strict-Transport-Security": "max-age=31536000; includeSubDomains",
 			"X-Content-Type-Options": "nosniff"
 		}
 	});
@@ -96,8 +95,9 @@ describe("production browser security policy", () => {
 			),
 			`${requiredPolicy}; frame-src https://scratch.mit.edu`
 		]) {
-			expect(() => verifySecurityHeaders(securityResponse(relaxedPolicy)))
-				.toThrow();
+			expect(() =>
+				verifySecurityHeaders(securityResponse(relaxedPolicy))
+			).toThrow();
 		}
 	});
 
@@ -146,9 +146,7 @@ describe("production browser security policy", () => {
 			"utf8"
 		);
 
-		expect(deploymentGuide).toContain(
-			"one reviewed static runtime"
-		);
+		expect(deploymentGuide).toContain("one reviewed static runtime");
 		expect(deploymentGuide).toContain("exact `front-end/dist`");
 		expect(deploymentGuide).toMatch(
 			/The native host is\s+the only supported production\s+serving path/
@@ -162,9 +160,7 @@ describe("production browser security policy", () => {
 			"The container is the only supported production artifact"
 		);
 		expect(postDeploySmoke).toContain("/__math-deployment-probe-missing/");
-		expect(postDeploySmoke).toContain(
-			"expectedContentSecurityPolicy"
-		);
+		expect(postDeploySmoke).toContain("expectedContentSecurityPolicy");
 		expect(postDeploySmoke).toContain(
 			"The homepage has an unexpected Permissions-Policy."
 		);
@@ -362,15 +358,13 @@ describe("production browser security policy", () => {
 
 		expect(prepareRelease).toContain("verify-release-source.sh");
 		expect(prepareRelease).toContain("EXPECTED_SOURCE_REVISION");
-		expect(prepareRelease).toContain("git -C \"$candidate\" archive");
+		expect(prepareRelease).toContain('git -C "$candidate" archive');
 		expect(sourceGate).toContain("refs/remotes/origin/main");
 		expect(sourceGate).toContain('tag_type" != "tag"');
 		expect(sourceGate).toContain("anderson-webops/math\\.avasan\\.org");
 		expect(promoteRelease).toContain("/usr/bin/gh attestation verify");
-		expect(promoteRelease).toContain("--source-digest \"$commit\"");
-		expect(promoteRelease).toContain(
-			'--source-ref "refs/tags/v$version"'
-		);
+		expect(promoteRelease).toContain('--source-digest "$commit"');
+		expect(promoteRelease).toContain('--source-ref "refs/tags/v$version"');
 		expect(promoteRelease).toContain("--deny-self-hosted-runners");
 		expect(promoteRelease).toContain('--version "$version"');
 		expect(promoteRelease).not.toContain("verify-release-source.sh");
@@ -417,7 +411,13 @@ describe("production browser security policy", () => {
 			'git cat-file -t "refs/tags/${tag}"'
 		);
 		expect(continuousIntegration).toContain(
-			"refs/remotes/origin/main^{commit}"
+			'gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq .object.sha'
+		);
+		expect(continuousIntegration).toContain(
+			'test "$main_commit" = "$source_commit"'
+		);
+		expect(continuousIntegration).toContain(
+			"GH_TOKEN: ${{ github.token }}"
 		);
 		expect(continuousIntegration).not.toContain(
 			"MATH_RELEASE_VERSION=1.0.0"
@@ -452,20 +452,28 @@ describe("production browser security policy", () => {
 			"utf8"
 		);
 
-		expect(packageManifest.packageManager).toBe("npm@12.2.1");
-		expect(packageManifest.engines.node).toBe(">=26.13.0 <27");
-		expect(packageManifest.engines.npm).toBe(">=12.2.1 <13");
-		expect(continuousIntegration).toContain("NODE_VERSION: 26.13.0");
-		expect(continuousIntegration).toContain("NPM_VERSION: 12.2.1");
+		expect(packageManifest.packageManager).toBe("npm@12.2.2");
+		expect(packageManifest.engines.node).toBe(">=26.13.1 <27");
+		expect(packageManifest.engines.npm).toBe(">=12.2.2 <13");
+		expect(continuousIntegration).toContain("NODE_VERSION: 26.13.1");
+		expect(continuousIntegration).toContain("NPM_VERSION: 12.2.2");
 		expect(continuousIntegration).toContain(
 			'test "$(npm --version)" = "${NPM_VERSION}"'
 		);
-		expect(postDeploy).toContain(
-			'test "$(npm --version)" = "12.2.1"'
+		expect(postDeploy).toContain('test "$(node --version)" = "v26.13.1"');
+		expect(postDeploy).toContain("node scripts/post-deploy-smoke.mjs");
+		expect(continuousIntegration).toContain(
+			"node scripts/build-toolchain.mjs --print-bin"
+		);
+		expect(continuousIntegration).not.toContain("npm install --global");
+		expect(continuousIntegration).not.toContain("cache: npm");
+		expect(nativePreparation).toContain(
+			'"$(node --version)" != "v26.13.1"'
 		);
 		expect(nativePreparation).toContain(
-			'"$(npm --version)" != "12.2.1"'
+			"node scripts/build-toolchain.mjs --print-bin"
 		);
+		expect(nativePreparation).toContain("npm run verify:toolchain");
 	});
 
 	it("marks the Admin handoff noindex in the redirect response", () => {

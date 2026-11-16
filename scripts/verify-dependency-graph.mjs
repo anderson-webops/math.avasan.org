@@ -1,12 +1,11 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import path from "node:path";
 import process from "node:process";
+import { selectedNpmCli, verifyBuildToolchain } from "./build-toolchain-state.mjs";
 
-const npmCommand = process.platform === "win32"
-	? "npm.cmd"
-	: path.join(path.dirname(process.execPath), "npm");
-const result = spawnSync(npmCommand, ["ls", "--all", "--json"], {
+const npmCli = selectedNpmCli();
+verifyBuildToolchain(npmCli);
+const result = spawnSync(process.execPath, [npmCli, "ls", "--all", "--json"], {
 	encoding: "utf8",
 	maxBuffer: 128 * 1024 * 1024
 });

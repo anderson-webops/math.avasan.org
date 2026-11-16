@@ -1,12 +1,12 @@
 {
 	"name": "math-avasan-org",
 	"type": "module",
-	"version": "1.0.24",
+	"version": "1.0.25",
 	"private": true,
-	"packageManager": "npm@12.2.1",
+	"packageManager": "npm@12.2.2",
 	"engines": {
-		"node": ">=26.13.0 <27",
-		"npm": ">=12.2.1 <13"
+		"node": ">=26.13.1 <27",
+		"npm": ">=12.2.2 <13"
 	},
 	"description": "Public math courses and browser-based graphing for Julio's students",
 	"author": "Math with Julio",
@@ -16,8 +16,10 @@
 		"front-end"
 	],
 	"scripts": {
-		"audit": "npm audit --workspaces --audit-level=low",
-		"audit:production": "npm audit --workspaces --omit=dev --audit-level=low",
+		"audit": "npm audit --workspaces --include-workspace-root --audit-level=low && npm run audit:toolchain",
+		"audit:production": "npm audit --workspaces --include-workspace-root --omit=dev --audit-level=low && npm run audit:toolchain -- --omit=dev",
+		"audit:toolchain": "node scripts/audit-build-toolchain.mjs",
+		"verify:toolchain": "node scripts/check-build-toolchain.mjs",
 		"audit:signatures": "npm audit signatures",
 		"audit:static-media": "node scripts/audit-static-course-media.mjs",
 		"audit-fix": "npm audit fix --workspaces",
@@ -27,9 +29,9 @@
 		"a11y": "node scripts/a11y-smoke.mjs",
 		"lint-serve": "npm run -w front-end lint-fix && npm run -w front-end serve",
 		"lint": "npm run lint:root && npm run -w front-end lint",
-		"lint:root": "eslint \"scripts/{audit-static-course-media,static-media-request,test-layout-brace-compat,verify-*}.mjs\" eslint.config.js",
+		"lint:root": "eslint \"scripts/{audit-*,build-toolchain*,check-build-toolchain,static-media-request,test-layout-brace-compat,test-native-lock,verify-*}.mjs\" eslint.config.js",
 		"lint-fix": "npm run -w front-end lint-fix",
-		"test": "npm run test:layout-brace-compat && npm run -w front-end test:unit",
+		"test": "npm run test:layout-brace-compat && node --test scripts/test-native-lock.mjs && npm run -w front-end test:unit",
 		"test:layout-brace-compat": "node --test scripts/test-layout-brace-compat.mjs",
 		"test:artifact": "python3 -B -m unittest scripts/test_static_artifact.py",
 		"test:captured-headers": "python3 -B -m unittest scripts/test_captured_response_headers.py",
@@ -44,35 +46,34 @@
 		"verify:production": "node scripts/post-deploy-smoke.mjs"
 	},
 	"allowScripts": {
-		"cypress@16.2.1": true,
-		"esbuild@0.28.1": true,
+		"cypress@16.3.0": true,
 		"esbuild@0.28.2": true,
 		"fsevents@2.3.3": true,
-		"puppeteer@25.16.0": false,
+		"puppeteer@25.17.0": false,
 		"simple-git-hooks@2.14.0": true
 	},
 	"devDependencies": {
 		"@antfu/eslint-config": "^10.0.0",
-		"@typescript-eslint/eslint-plugin": "^8.72.2",
-		"@typescript-eslint/parser": "^8.72.2",
-		"axe-core": "^4.14.0",
+		"@typescript-eslint/eslint-plugin": "^8.73.0",
+		"@typescript-eslint/parser": "^8.73.0",
+		"axe-core": "^4.14.1",
 		"brace-expansion": "file:vendor/brace-expansion-compat",
-		"eslint": "^10.14.0",
+		"eslint": "^10.15.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-prettier": "^5.5.7",
-		"eslint-plugin-vue": "^10.12.0",
+		"eslint-plugin-vue": "^10.12.1",
 		"globals": "^17.14.0",
 		"katex": "^0.19.1",
-		"prettier": "^3.9.10",
-		"puppeteer": "^25.11.0",
+		"prettier": "^3.10.1",
+		"puppeteer": "^25.17.0",
 		"taze": "^21.3.0",
 		"tsx": "^4.23.15",
 		"typescript": "^6.0.3"
 	},
 	"overrides": {
 		"brace-expansion": "$brace-expansion",
-		"minimatch": "11.0.4",
-		"glob": "14.0.3",
+		"minimatch": "11.0.8",
+		"glob": "14.0.6",
 		"oxfmt": {
 			"tinypool": "2.2.0"
 		},

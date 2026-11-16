@@ -942,8 +942,7 @@ function writeStoredValue(key: string, value: string) {
 													staticAssetName(
 														item.mediaLink
 													)
-												}}</strong
-											>.
+												}}</strong>.
 										</p>
 										<p>
 											This classroom preview will appear

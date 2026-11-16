@@ -139,11 +139,16 @@ artifact and its exact Nginx policies for rollback.
 
 - Use the pinned npm toolchain and root `package-lock.json`; do not mix package
   managers.
-- Use Node `26.13.0` and npm `12.2.1` for local, CI, and production builds.
+- Use Node `26.13.1` and the verified, independently locked npm `12.2.2`
+  build profile for local and CI builds. Production serves static files without
+  an application Node process.
 - Keep manifests and the lockfile synchronized. Never hand-edit dependency
   resolutions.
-- When dependencies change, require a clean `npm ci` and `npm audit` before
-  committing.
+- Validate dependency changes with a clean locked installation, full and
+  production audits, and the required checks before default-branch integration
+  or release. Existing CI may qualify proposed commits on a temporary validation
+  branch. Preserve the build profile's separate lock, payload verification and
+  lifecycle approvals.
 
 ## Required Validation
 

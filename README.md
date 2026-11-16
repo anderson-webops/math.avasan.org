@@ -65,10 +65,14 @@ upstream tags.
 
 ## Development
 
-Use the pinned npm toolchain:
+Use Node 26.13.1 with the independently locked npm 12.2.2 build profile:
 
 ```bash
-npm ci
+export PATH="$(node scripts/build-toolchain.mjs --print-bin):$PATH"
+npm run verify:toolchain
+npm ci --include=optional --strict-allow-scripts
+npm run audit
+npm run audit:production
 npm run dev
 npm run lint
 npm run typecheck
@@ -88,7 +92,12 @@ Site and course structured metadata use Schema.org microdata, preserving the
 website identity and all 15 course/provider records without inline scripts.
 The existing strict script CSP and browser-local graph boundary remain intact.
 
-TypeScript stays on 6.0.3 while the stable `typescript-eslint` 8.72.1 peer range
+The build profile verifies reviewed npm source bytes, its complete locked payload
+and paired Node executable before reuse. Its full and production audits include
+the original compatibility-library graphs as well as the application workspace
+and root tools. The profile is build-only and is omitted from the static artifact.
+
+TypeScript stays on 6.0.3 while the stable `typescript-eslint` 8.73.0 peer range
 requires `>=4.8.4 <6.1.0`. Reassess TypeScript 7 with a supported parser release.
 Deploy-target native packages follow their resolved loaders' exact versions,
 not independent latest-version substitutions.
