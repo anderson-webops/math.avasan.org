@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    CourseAssetReader: typeof import('./components/CourseAssetReader.vue')['default']
     CourseAssignmentContent: typeof import('./components/CourseAssignmentContent.vue')['default']
     CourseExplorer: typeof import('./components/CourseExplorer.vue')['default']
     GraphSketcherWorkspace: typeof import('./components/GraphSketcherWorkspace.vue')['default']

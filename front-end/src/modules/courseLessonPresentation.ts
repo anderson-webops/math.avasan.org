@@ -74,8 +74,12 @@ const learningTitle =
 export function isLessonLearningItem(
 	item: Pick<CourseModuleItem, "title" | "content" | "projectLink"> & {
 		ideImport?: unknown;
+		contentKind?: CourseModuleItem["contentKind"];
+		preserveAssignment?: boolean;
 	}
 ) {
+	if (item.preserveAssignment) return false;
+	if (item.contentKind) return item.contentKind === "reading";
 	return (
 		!item.projectLink &&
 		!item.ideImport &&

@@ -192,7 +192,9 @@ watch([selectedCourse, isStorageReady], ([course, storageReady]) => {
 	void reportMathClassroomUsage("course-open", course.id);
 });
 
-const courseModules = computed(() => selectedCourse.value?.modules ?? []);
+const courseModules = computed(
+	() => selectedCourse.value?.modules.filter(module => !module.internal) ?? []
+);
 const coreCourseModules = computed(() =>
 	courseModules.value.filter(isCoreModule)
 );
@@ -857,7 +859,9 @@ function writeStoredValue(key: string, value: string) {
 									<LazyMarkdownContent
 										v-if="
 											item.content &&
-											lessonView === 'learn'
+											(lessonView === 'learn' ||
+												item.preserveInstructions ||
+												item.preserveAssignment)
 										"
 										:content="item.content"
 									/>

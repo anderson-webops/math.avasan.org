@@ -1,11 +1,29 @@
 <script lang="ts" setup>
-import { defineAsyncComponent } from "vue";
+import { computed, defineAsyncComponent, onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 
 defineOptions({ name: "MathCoursesPage" });
 
 const siteUrl = import.meta.env.VITE_SITE_URL || "https://math.avasan.org";
 const CourseExplorer = defineAsyncComponent(
 	() => import("@/components/CourseExplorer.vue")
+);
+const CourseAssetReader = defineAsyncComponent(
+	() => import("@/components/CourseAssetReader.vue")
+);
+const route = useRoute();
+const mounted = ref(false);
+onMounted(() => {
+	mounted.value = true;
+});
+const asset = computed(() =>
+	typeof route.query.asset === "string" ? route.query.asset : ""
+);
+const showAsset = computed(
+	() => mounted.value && typeof route.query.asset === "string"
+);
+const assetCourse = computed(() =>
+	route.query.course === "algebra-1b" ? "algebra-1b" : "algebra-1a"
 );
 const courseNames = [
 	"Early Elementary A: Numbers, Operations, and Measurement",
@@ -32,11 +50,16 @@ useHead({
 
 <template>
 	<section class="page-shell page-shell--wide courses-page">
-		<header class="courses-header">
+		<header v-if="!showAsset" class="courses-header">
 			<h1 class="page-title">Math courses</h1>
 		</header>
 
-		<CourseExplorer />
+		<CourseAssetReader
+			v-if="showAsset"
+			:asset="asset"
+			:course="assetCourse"
+		/>
+		<CourseExplorer v-else />
 		<div hidden itemscope itemtype="https://schema.org/ItemList">
 			<div
 				v-for="(name, index) in courseNames"

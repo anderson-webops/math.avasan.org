@@ -351,6 +351,12 @@ function mergeAdjacentSupportItems(items: CourseModuleItemDraft[]) {
 
 		if (
 			previousItem &&
+			!previousItem.preserveInstructions &&
+			!previousItem.preserveAssignment &&
+			!item.preserveInstructions &&
+			!item.preserveAssignment &&
+			previousItem.contentKind !== "reading" &&
+			item.contentKind !== "reading" &&
 			(MERGE_INTO_PREVIOUS_TITLE_RE.test(item.title) ||
 				(PRESENTATION_TITLE_RE.test(item.title) &&
 					PROJECT_TITLE_RE.test(previousItem.title)))
@@ -391,13 +397,19 @@ function normalizeCourse(
 					items
 						.filter(item => !shouldHideItem(item.title))
 						.map(item => {
+							const preserveContent =
+								item.preserveInstructions ||
+								item.preserveAssignment ||
+								item.contentKind === "reading";
 							const explicitProjectLink = canonicalizeResourceUrl(
 								item.projectLink
 							);
-							const extractedLink = extractLeadingResourceLink(
-								item.title,
-								item.content
-							);
+							const extractedLink = preserveContent
+								? null
+								: extractLeadingResourceLink(
+										item.title,
+										item.content
+									);
 							const normalizedSolutionLink =
 								canonicalizeResourceUrl(item.solutionLink);
 							const projectLinkIsSolution =
@@ -422,8 +434,12 @@ function normalizeCourse(
 								stableAliases: item.aliases,
 								stableId: item.id,
 								title: item.title,
-								content:
-									displayCourseContent(normalizedContent),
+								content: preserveContent
+									? item.content
+									: displayCourseContent(normalizedContent),
+								contentKind: item.contentKind,
+								preserveInstructions: item.preserveInstructions,
+								preserveAssignment: item.preserveAssignment,
 								learningPath: item.learningPath,
 								projectLink: (() => {
 									if (
@@ -485,6 +501,7 @@ function normalizeCourse(
 
 			return {
 				id: moduleId,
+				...(module.internal ? { internal: true } : {}),
 				...(moduleAliases.length ? { aliases: moduleAliases } : {}),
 				...(module.kind ? { kind: module.kind } : {}),
 				title: module.title,

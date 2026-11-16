@@ -1,5 +1,6 @@
 import { flushPromises, mount } from "@vue/test-utils";
 import { describe, expect, it, vi } from "vitest";
+import { createMemoryHistory, createRouter } from "vue-router";
 import TeacherAdminRedirectPage from "@/pages/admin.vue";
 import HomePage from "@/pages/index.vue";
 import MathCoursesPage from "@/pages/courses.vue";
@@ -34,9 +35,21 @@ describe("public home page", () => {
 	});
 
 	it("keeps the math catalog on its secondary page", async () => {
+		const router = createRouter({
+			history: createMemoryHistory(),
+			routes: [{ path: "/courses/", component: MathCoursesPage }]
+		});
+		await router.push("/courses/");
+		await router.isReady();
 		const wrapper = mount(MathCoursesPage, {
 			global: {
+				plugins: [router],
 				stubs: {
+					CourseAssetReader: {
+						props: ["asset", "course"],
+						template:
+							'<section data-testid="course-self-check" :data-asset="asset" :data-course="course"></section>'
+					},
 					CourseExplorer: {
 						template:
 							'<div data-testid="course-explorer">Course explorer</div>'
@@ -81,6 +94,32 @@ describe("public home page", () => {
 			).toBe("Grade-school teacher");
 		});
 		expect(wrapper.find("script").exists()).toBe(false);
+		const asset =
+			"/course-assets/algebra-1/practice-checks-v1.md#checking-both-inverse-directions";
+		await router.push({
+			path: "/courses/",
+			query: { asset, course: "algebra-1b" }
+		});
+		await flushPromises();
+		expect(
+			wrapper
+				.get('[data-testid="course-self-check"]')
+				.attributes("data-asset")
+		).toBe(asset);
+		expect(
+			wrapper
+				.get('[data-testid="course-self-check"]')
+				.attributes("data-course")
+		).toBe("algebra-1b");
+		expect(wrapper.find('[data-testid="course-explorer"]').exists()).toBe(
+			false
+		);
+		await router.push("/courses/");
+		await flushPromises();
+		expect(wrapper.get('[data-testid="course-explorer"]').exists()).toBe(
+			true
+		);
+		wrapper.unmount();
 	});
 
 	it("hands /admin to the existing protected classroom Admin", () => {

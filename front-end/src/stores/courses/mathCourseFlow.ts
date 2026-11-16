@@ -29,7 +29,7 @@ const NON_ALPHANUMERIC_RE = /[^a-z0-9]+/g;
 const LEADING_HYPHENS_RE = /^-+/;
 const TRAILING_HYPHENS_RE = /-+$/;
 
-function mathCourseSlugify(value: string) {
+export function mathCourseSlugify(value: string) {
 	return value
 		.toLowerCase()
 		.normalize("NFKD")
@@ -251,4 +251,5 @@ export function configureMathCourseFlow(
 	}
 
 	course.modules = [...orderedModules, ...appendices];
+	course.preserveModuleOrder = true;
 }

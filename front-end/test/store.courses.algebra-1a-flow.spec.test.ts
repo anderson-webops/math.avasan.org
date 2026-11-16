@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { createPinia, setActivePinia } from "pinia";
+import { useCoursesStore } from "@/stores/courses";
 import { algebra1ACourse } from "@/stores/courses/algebra-1a";
+import { applyAlgebra1APractice } from "@/stores/courses/algebra1APractice";
+import practice from "@/stores/courses/algebra1APracticeData.json";
+import readings from "@/stores/courses/algebra1ACourseReadingsData.json";
+import { mathCourseSlugify } from "@/stores/courses/mathCourseFlow";
+import { loadRawCourse } from "@/stores/courses/index";
 
 const EXPECTED_MODULE_SEQUENCE = [
 	"Algebra 1A Kick-Off and Placement",
@@ -52,9 +59,10 @@ describe("Algebra 1A learner flow", () => {
 			candidate => candidate.kind !== "appendix"
 		)) {
 			expect(module.estimatedTime, module.title).toMatch(/session/);
-			expect(module.keyBlocks?.length, module.title).toBeGreaterThanOrEqual(
-				5
-			);
+			expect(
+				module.keyBlocks?.length,
+				module.title
+			).toBeGreaterThanOrEqual(5);
 			expect(
 				module.curriculum.every(item => item.learningPath === "core"),
 				module.title
@@ -102,5 +110,77 @@ describe("Algebra 1A learner flow", () => {
 			requireModule("AA17 Master Project: Algebra 1A").curriculum[0]
 				?.content
 		).toContain("Begin only after the systems checkpoint");
+	});
+	it("publishes every authored reading and complete practice task without losing prior identities", async () => {
+		setActivePinia(createPinia());
+		const course = await useCoursesStore().loadCourseById("algebra-1a");
+		if (!course) throw new Error("Expected public Algebra 1A.");
+		expect(readings).toHaveLength(26);
+		for (const entry of readings) {
+			const module = course.modules.find(
+				module =>
+					module.title === entry.module ||
+					module.id ===
+						mathCourseSlugify(`algebra-1a-${entry.module}`)
+			);
+			const item =
+				module &&
+				[...module.curriculum, ...module.supplementalProjects].find(
+					item => item.title === (entry.displayTitle ?? entry.title)
+				);
+			const expectedContent = entry.content
+				.split(/\n\n\*\*(?:Concept path|Quick check|Goal):\*\*/, 1)[0]
+				.trim();
+			expect(item?.content, entry.title).toBe(expectedContent);
+			expect(item?.preserveInstructions, entry.title).toBe(true);
+			if (entry.displayTitle) {
+				expect(item?.contentKind).toBe("reading");
+				expect(item?.id).toBe(
+					mathCourseSlugify(
+						`${module?.id}-${module?.curriculum.includes(item!) ? "curriculum" : "supplemental"}-${entry.title}`
+					)
+				);
+			}
+		}
+		for (const entry of practice) {
+			const module = course.modules.find(
+				module => module.title === entry.module
+			);
+			const item = module?.supplementalProjects.find(item =>
+				item.title.includes(
+					entry.kind === "practice"
+						? "Standards Practice Set"
+						: "Modeling or Error Analysis"
+				)
+			);
+			expect(item?.contentKind).toBe("assignment");
+			expect(item?.preserveAssignment).toBe(true);
+			for (const question of entry.questions)
+				expect(item?.content, entry.heading).toContain(question);
+			expect(item?.content).toContain(
+				"[Project self-check](/courses/?asset="
+			);
+		}
+		expect(
+			course.modules
+				.flatMap(module => [
+					...module.curriculum,
+					...module.supplementalProjects
+				])
+				.filter(item => item.preserveInstructions)
+		).toHaveLength(61);
+		const raw = await loadRawCourse("algebra-1a");
+		if (!raw) throw new Error("Expected Algebra practice fixture.");
+		const altered = structuredClone(raw);
+		const target = altered.modules.find(
+			module =>
+				module.title === "AA2 Solving Single-Step Linear Equations"
+		)!;
+		target.supplementalProjects = target.supplementalProjects.filter(
+			item => !item.title.includes("Standards Practice Set")
+		);
+		expect(() => applyAlgebra1APractice(altered)).toThrow(
+			"Missing Algebra 1A practice task"
+		);
 	});
 });

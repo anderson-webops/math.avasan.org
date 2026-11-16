@@ -9,7 +9,8 @@ const frontendPort = Number(process.env.A11Y_FRONTEND_PORT || 3334);
 const baseUrl = `http://127.0.0.1:${frontendPort}`;
 const isCi = process.env.CI === "true";
 const runFullMatrix = process.env.A11Y_FULL === "true" || !isCi;
-const routes = runFullMatrix ? ["/", "/graph-sketcher/", "/courses/", "/admin"] : ["/", "/courses/"];
+const selfCheckRoute = "/courses/?asset=%2Fcourse-assets%2Falgebra-1a%2Fpractice-checks-v1.md%23properties-practice";
+const routes = runFullMatrix ? ["/", "/graph-sketcher/", "/courses/", "/admin", selfCheckRoute] : ["/", "/courses/", selfCheckRoute];
 const viewports = runFullMatrix
 	? [
 			{ height: 900, name: "mobile", width: 390 },
@@ -144,6 +145,11 @@ async function runAxeAudit(page, url) {
 			await page.waitForFunction(() => document.querySelector("#app")?.hasAttribute("data-v-app"), {
 				timeout: 10_000
 			});
+			if (new URL(url).searchParams.has("asset")) {
+				await page.waitForFunction(() => document.querySelector(".resource-content .item-content-markdown")?.textContent?.includes("4x-12"), { timeout: 10_000 });
+				const content = await page.$eval(".resource-content", element => element.textContent);
+				if (!content.includes("x=3")) throw new Error("Self-check answer content was not rendered completely.");
+			}
 			await new Promise(resolve => setTimeout(resolve, 250));
 			await page.addScriptTag({ path: axeSourcePath });
 			return await page.evaluate(async () => {

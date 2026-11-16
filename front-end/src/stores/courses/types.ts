@@ -5,6 +5,9 @@ export interface RawCourseModuleItem {
 	aliases?: string[];
 	title: string;
 	content: string;
+	contentKind?: "reading" | "assignment";
+	preserveInstructions?: boolean;
+	preserveAssignment?: boolean;
 	learningPath?: CourseItemLearningPath;
 	projectLink?: string;
 	solutionLink?: string;
@@ -13,6 +16,7 @@ export interface RawCourseModuleItem {
 }
 
 export interface RawCourseModule {
+	internal?: boolean;
 	id?: string;
 	aliases?: string[];
 	kind?: "module" | "transition" | "appendix";
@@ -36,6 +40,7 @@ export interface CourseDevelopmentMetadata {
 }
 
 export interface RawCourse {
+	preserveModuleOrder?: boolean;
 	name: string;
 	modules: RawCourseModule[];
 	developmentMetadata?: CourseDevelopmentMetadata;
@@ -52,6 +57,7 @@ export interface CourseModuleItem extends RawCourseModuleItem {
 }
 
 export interface CourseModule {
+	internal?: boolean;
 	id: string;
 	aliases?: string[];
 	kind?: "module" | "transition" | "appendix";

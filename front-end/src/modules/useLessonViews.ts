@@ -35,6 +35,9 @@ export function useLessonViews(
 	);
 	const learningTopics = computed(() =>
 		[...itemsByView.value.projects, ...itemsByView.value.supplemental]
+			.filter(
+				item => !item.preserveInstructions && !item.preserveAssignment
+			)
 			.map(item => ({
 				item,
 				sections: lessonContentSections(item.content).filter(
@@ -63,7 +66,7 @@ export function useLessonViews(
 				);
 				if (matchingView) lessonView.value = matchingView.id;
 			}
-			if (currentQuery && !activeLessonItems.value.length) {
+			if ((currentQuery || changed) && !activeLessonItems.value.length) {
 				const matchingView = lessonViews.find(
 					view => itemsByView.value[view.id].length
 				);

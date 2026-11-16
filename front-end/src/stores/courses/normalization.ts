@@ -1,6 +1,10 @@
 import type { RawCourse, RawCourseModule, RawCourseModuleItem } from "./types";
+import { applyAlgebra1ACourseReadings } from "./algebra1ACourseReadings";
+import { applyAlgebra1APractice } from "./algebra1APractice";
+import { applyAlgebraErrorAnalysisCases } from "./algebraErrorAnalysisCases";
 import { applyMathCourseImplementationArtifacts } from "./math-course-implementation-artifacts";
 import { applyMathResearchBackedExpansions } from "./math-research-expansions";
+import { mathCourseSlugify } from "./mathCourseFlow";
 import { buildProjectGuidance } from "./projectGuidance";
 import {
 	canonicalStaticMediaUrl,
@@ -1133,7 +1137,11 @@ function isProjectLikeItem(item: RawCourseModuleItem) {
 }
 
 function isConceptLessonItem(item: RawCourseModuleItem) {
-	return !isProjectLikeItem(item) && !isInformationalResourceItem(item);
+	return (
+		!(item.contentKind === "reading" && item.preserveAssignment) &&
+		!isProjectLikeItem(item) &&
+		!isInformationalResourceItem(item)
+	);
 }
 
 const genericSupportItemTitlePattern =
@@ -9434,6 +9442,9 @@ const normalizers: Record<string, (course: RawCourse) => void> = {
 
 export function normalizeRawCourse(id: string, rawCourse: RawCourse) {
 	const course = cloneCourse(rawCourse);
+	const configuredOrder = course.preserveModuleOrder
+		? new Map(course.modules.map((module, index) => [module, index]))
+		: null;
 	normalizers[id]?.(course);
 	normalizeDisplayTitles(course);
 	rewritePlaceholderCourseText(course, id);
@@ -9463,5 +9474,16 @@ export function normalizeRawCourse(id: string, rawCourse: RawCourse) {
 	if (id === "python-level-1" || CLASSROOM_BASE_COURSE_IDS[id]) {
 		applyCourseLearningPaths(course);
 	}
+	if (configuredOrder) {
+		course.modules.sort(
+			(left, right) =>
+				(configuredOrder.get(left) ?? configuredOrder.size) -
+				(configuredOrder.get(right) ?? configuredOrder.size)
+		);
+	}
+	if (id === "algebra-1a") applyAlgebra1APractice(course);
+	applyAlgebraErrorAnalysisCases(id, course);
+	if (id === "algebra-1a")
+		applyAlgebra1ACourseReadings(course, mathCourseSlugify);
 	return course;
 }

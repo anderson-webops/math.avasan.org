@@ -1,6 +1,8 @@
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it } from "vitest";
 import { useCoursesStore } from "@/stores/courses";
+import { courseCatalog, loadRawCourse } from "@/stores/courses/index";
+import { mathCourseSlugify } from "@/stores/courses/mathCourseFlow";
 
 interface MovedItemExpectation {
 	courseId: string;
@@ -206,5 +208,36 @@ describe("math course progress compatibility", () => {
 		expect(warmup?.aliases).toContain(
 			"algebra-1b-ab3-fractions-with-polynomials-curriculum-fractions-with-polynomials-core-concepts"
 		);
+	});
+	it("keeps every configured Math sequence through public-store normalization", async () => {
+		const store = useCoursesStore();
+		for (const entry of courseCatalog) {
+			const configured = await entry.load();
+			const normalized = await loadRawCourse(entry.id);
+			const published = await store.loadCourseById(entry.id);
+			const coreKeys = configured.modules
+				.filter(module => module.kind !== "appendix")
+				.map(
+					module =>
+						module.id ??
+						mathCourseSlugify(`${entry.id}-${module.title}`)
+				);
+			expect(
+				normalized?.modules
+					.filter(module => module.kind !== "appendix")
+					.map(
+						module =>
+							module.id ??
+							mathCourseSlugify(`${entry.id}-${module.title}`)
+					),
+				entry.id
+			).toEqual(coreKeys);
+			expect(
+				published?.modules
+					.filter(module => module.kind !== "appendix")
+					.map(module => module.id),
+				entry.id
+			).toEqual(coreKeys);
+		}
 	});
 });

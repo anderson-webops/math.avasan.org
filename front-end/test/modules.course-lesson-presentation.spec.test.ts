@@ -128,6 +128,23 @@ describe("lesson content presentation", () => {
 		expect(
 			isLessonLearningItem({
 				...item,
+				title: "Equations and domains",
+				contentKind: "reading"
+			})
+		).toBe(true);
+		expect(
+			isLessonLearningItem({ ...item, contentKind: "assignment" })
+		).toBe(false);
+		expect(
+			isLessonLearningItem({
+				...item,
+				contentKind: "reading",
+				preserveAssignment: true
+			})
+		).toBe(false);
+		expect(
+			isLessonLearningItem({
+				...item,
 				title: "Verification Review: Starting in Scratch"
 			})
 		).toBe(true);
