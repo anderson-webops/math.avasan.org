@@ -426,7 +426,7 @@ This project applies polynomial modeling to event-planning revenue, cost, and co
 - Doubled-price version vs. competitor:
   - \`T_d(x) = (-0.10x^2 + 100x - 1500) / (-0.055x^2 + 51x - 600)\`
 
-Use the ratio definitions above so that \`T(x) > 1\` means Amy is doing better than the competitor.
+When the competitor's profit \`P_2(x)\` is positive, \`T(x) > 1\` means Amy's profit is greater. If \`P_2(x) = 0\`, the ratio is undefined. If \`P_2(x) < 0\`, multiplying the ratio inequality by that negative denominator reverses its direction, so \`T(x) > 1\` means Amy's profit is smaller. For example, at \`x = 0\`, the profits are \`-750\` and \`-600\`: the ratio is \`1.25\`, but Amy has the larger loss. Compare the two profit values directly whenever the denominator is nonpositive.
 				`.trim()
 			)
 		]),

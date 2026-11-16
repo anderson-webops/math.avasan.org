@@ -15,29 +15,36 @@ import practice from "@/stores/courses/algebra1APracticeData.json";
 describe("local Math self-check resources", () => {
 	beforeEach(resetCourseAssetPreviewCache);
 	afterEach(() => {
-		vi.useRealTimers();
+		vi.restoreAllMocks();
 	});
 
-	it("resolves all authored self-checks with their complete answers", async () => {
-		const fetcher = vi.fn<typeof fetch>(
-			async value =>
-				new Response(
-					readFileSync(
-						resolve(
-							process.cwd(),
-							"public",
-							String(value).slice(1)
-						),
-						"utf8"
-					)
-				)
-		);
+	it("bundles all authored self-checks with complete, byte-matching answer sections", async () => {
+		const network = vi
+			.spyOn(globalThis, "fetch")
+			.mockRejectedValue(
+				new Error("Self-check data must use the compiled application.")
+			);
+		const paths = [
+			"/course-assets/algebra-1/practice-checks-v1.md",
+			"/course-assets/algebra-1a/practice-checks-v1.md"
+		];
+		for (const path of paths) {
+			const source = readFileSync(
+				resolve(process.cwd(), "src", path.slice(1))
+			);
+			expect(source.byteLength).toBeLessThanOrEqual(64 * 1024);
+			expect((await loadCourseAssetSection(path)).content).toBe(
+				source.toString("utf8").trim()
+			);
+		}
 		expect(practice).toHaveLength(28);
 		for (const entry of practice) {
 			expect(entry.questions).toHaveLength(3);
 			expect(entry.answers).toHaveLength(3);
-			const asset = `/course-assets/algebra-1a/practice-checks-v1.md#${slugMarkdownHeading(entry.heading)}`;
-			const section = await loadCourseAssetSection(asset, fetcher);
+			const asset =
+				"/course-assets/algebra-1a/practice-checks-v1.md#" +
+				slugMarkdownHeading(entry.heading);
+			const section = await loadCourseAssetSection(asset);
 			expect(section.title).toBe(entry.heading);
 			for (const answer of entry.answers)
 				expect(section.content).toContain(answer);
@@ -49,8 +56,10 @@ describe("local Math self-check resources", () => {
 			expect(target.searchParams.get("asset")).toBe(asset);
 		}
 		for (const entry of algebraErrorAnalysisCases) {
-			const asset = `/course-assets/algebra-1/practice-checks-v1.md#${slugMarkdownHeading(entry.heading)}`;
-			const section = await loadCourseAssetSection(asset, fetcher);
+			const asset =
+				"/course-assets/algebra-1/practice-checks-v1.md#" +
+				slugMarkdownHeading(entry.heading);
+			const section = await loadCourseAssetSection(asset);
 			expect(section.title).toBe(entry.heading);
 			expect(section.content.length).toBeGreaterThan(100);
 			expect(
@@ -60,18 +69,14 @@ describe("local Math self-check resources", () => {
 				).searchParams.get("course")
 			).toBe(entry.course);
 		}
-		expect(fetcher).toHaveBeenCalledTimes(2);
-		expect(fetcher).toHaveBeenCalledWith(
-			"/course-assets/algebra-1a/practice-checks-v1.md",
-			expect.objectContaining({ credentials: "omit", redirect: "error" })
-		);
+		expect(network).not.toHaveBeenCalled();
 		expect(() =>
 			extractMarkdownSection("# Resource", "missing-section")
 		).toThrow("could not be found");
 	});
 
-	it("rejects unapproved paths before any request", async () => {
-		const fetcher = vi.fn<typeof fetch>();
+	it("rejects unapproved resource identities without a file or network request", async () => {
+		const network = vi.spyOn(globalThis, "fetch");
 		for (const value of [
 			"https://example.invalid/file.md",
 			"//example.invalid/file.md",
@@ -84,47 +89,10 @@ describe("local Math self-check resources", () => {
 			"a".repeat(513)
 		]) {
 			expect(parseCourseAssetUrl(value)).toBeNull();
-			await expect(
-				loadCourseAssetSection(value, fetcher)
-			).rejects.toThrow("unavailable");
+			await expect(loadCourseAssetSection(value)).rejects.toThrow(
+				"unavailable"
+			);
 		}
-		expect(fetcher).not.toHaveBeenCalled();
-	});
-
-	it("bounds streamed responses and permits a failed resource to recover", async () => {
-		const fetcher = vi
-			.fn<typeof fetch>()
-			.mockResolvedValueOnce(new Response("x".repeat(65 * 1024)))
-			.mockResolvedValueOnce(new Response("# Recovered\n\nAnswer"));
-		const asset = "/course-assets/algebra-1a/practice-checks-v1.md";
-		await expect(loadCourseAssetSection(asset, fetcher)).rejects.toThrow(
-			"supported size"
-		);
-		await expect(
-			loadCourseAssetSection(asset, fetcher)
-		).resolves.toMatchObject({ title: "Recovered" });
-		expect(fetcher).toHaveBeenCalledTimes(2);
-	});
-
-	it("aborts a stalled resource request", async () => {
-		vi.useFakeTimers();
-		const fetcher = vi.fn<typeof fetch>(
-			(_value, options) =>
-				new Promise((_resolve, reject) => {
-					options?.signal?.addEventListener(
-						"abort",
-						() => reject(new Error("Request aborted")),
-						{ once: true }
-					);
-				})
-		);
-		const assertion = expect(
-			loadCourseAssetSection(
-				"/course-assets/algebra-1a/practice-checks-v1.md",
-				fetcher
-			)
-		).rejects.toThrow("Request aborted");
-		await vi.advanceTimersByTimeAsync(10_001);
-		await assertion;
+		expect(network).not.toHaveBeenCalled();
 	});
 });

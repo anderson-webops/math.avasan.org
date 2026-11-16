@@ -1,7 +1,6 @@
 import { access, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import courseAssets from "../src/config/course-assets.json" with { type: "json" };
 
 const distDir = path.resolve(
 	path.dirname(fileURLToPath(import.meta.url)),
@@ -63,7 +62,6 @@ if (failures.length > 0) {
 }
 
 const requiredFiles = [
-	...courseAssets.map(asset => asset.slice(1)),
 	"404.html",
 	"admin/index.html",
 	"courses/index.html",
@@ -108,14 +106,6 @@ for (const relativePath of requiredFiles) {
 	if (!(await pathExists(path.join(distDir, relativePath)))) {
 		failures.push(`missing required static route artifact ${relativePath}`);
 	}
-}
-for (const asset of courseAssets) {
-	const relativePath = asset.slice(1);
-	const [source, built] = await Promise.all([
-		readFile(path.resolve(distDir, "../public", relativePath)),
-		readFile(path.join(distDir, relativePath))
-	]);
-	if (!source.equals(built)) failures.push(`changed declared course resource ${relativePath}`);
 }
 for (const relativePath of forbiddenArtifacts) {
 	if (await pathExists(path.join(distDir, relativePath))) {

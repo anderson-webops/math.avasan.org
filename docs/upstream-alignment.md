@@ -19,13 +19,19 @@ supplies seven Algebra 1A and three Algebra 1B cases. The owned JSON and Markdow
 content retain their upstream bytes; the helper adapters preserve Math's pacing,
 optional placement work, existing identifiers and aliases.
 
-Self-checks use the existing `/courses/` page with a finite two-file resource
-allowlist, omitted request credentials, rejected redirects, bounded reads and a
-request deadline. The build requires those exact files and verifies their
-source/output byte equality. The static host contract and canonical routes
-remain unchanged. Authored instructions remain complete through store and
-reader processing; internal maintenance appendices remain in the source data
-without appearing in the learner outline.
+Self-checks use the existing `/courses/` page with a finite two-document
+source allowlist and a 64 KiB content limit. Vite compiles those exact Markdown
+sources into normal code-split application data; resource selection never
+fetches an arbitrary file or contacts another origin. Source imports make a
+missing document a build failure. The existing raw-file rejection, static host
+contract and canonical routes remain unchanged. Authored instructions remain
+complete through store and reader processing; internal maintenance appendices
+remain in the source data without appearing in the learner outline.
+
+The same upstream supplies the corrected profit-ratio denominator conditions in
+Algebra 1B and original-domain distinctions for rational-function roots, holes
+and asymptotes in Pre-Calculus A. Public-store regressions retain those conditions
+through the lesson-processing pipeline.
 
 Other cohort changes concern AI, Java, JavaScript, grammar, finance, Network,
 Python, Machine Learning, backend/IDE infrastructure or their test fixtures.

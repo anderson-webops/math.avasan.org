@@ -694,9 +694,9 @@ export const preCalculusACourse: RawCourse = {
 						title: "Rational functions are ratios of polynomials, so domain restrictions and asymptotes guide the graph.",
 						concepts: [
 							"Zeros of the denominator create excluded x-values before any cancellation is considered.",
-							"Vertical asymptotes occur at non-canceled denominator zeros; holes occur when a common factor cancels.",
+							"After full cancellation, remaining denominator zeros give vertical asymptotes. An originally excluded input is a hole only if the simplified denominator is nonzero there.",
 							"Horizontal or slant asymptotes depend on polynomial degree comparison or division.",
-							"Roots of rational functions come from numerator zeros that remain in the simplified expression."
+							"Roots are numerator zeros that belong to the original domain, even when a simplified numerator vanishes at an excluded input."
 						],
 						practice:
 							"Factor numerator and denominator, identify restrictions, simplify carefully, then map zeros, holes, and asymptotes before graphing.",

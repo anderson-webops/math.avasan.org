@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { createPinia, setActivePinia } from "pinia";
+import { useCoursesStore } from "@/stores/courses";
 import { preCalculusACourse } from "@/stores/courses/pre-calculus-a";
 
 const EXPECTED_MODULE_SEQUENCE = [
@@ -50,9 +52,10 @@ describe("Pre-Calculus A learner flow", () => {
 			candidate => candidate.kind !== "appendix"
 		)) {
 			expect(module.estimatedTime, module.title).toMatch(/session/);
-			expect(module.keyBlocks?.length, module.title).toBeGreaterThanOrEqual(
-				5
-			);
+			expect(
+				module.keyBlocks?.length,
+				module.title
+			).toBeGreaterThanOrEqual(5);
 			expect(
 				module.curriculum.every(item => item.learningPath === "core"),
 				module.title
@@ -98,5 +101,21 @@ describe("Pre-Calculus A learner flow", () => {
 			requireModule("PCTA14 Parabolas and Hyperbolas")
 				.supplementalProjects[0]?.learningPath
 		).toBe("challenge");
+	});
+
+	it("retains the original domain when distinguishing roots, holes, and asymptotes", async () => {
+		setActivePinia(createPinia());
+		const course = await useCoursesStore().loadCourseById("pre-calculus-a");
+		const lesson = course?.modules
+			.find(module => module.title === "PCTA9 Rational Functions")
+			?.curriculum.find(
+				item => item.title === "Concept: Graphing Rational Functions"
+			);
+		for (const condition of [
+			"remaining denominator zeros give vertical asymptotes",
+			"a hole only if the simplified denominator is nonzero there",
+			"Roots are numerator zeros that belong to the original domain"
+		])
+			expect(lesson?.content).toContain(condition);
 	});
 });

@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { createPinia, setActivePinia } from "pinia";
+import { useCoursesStore } from "@/stores/courses";
 import { algebra1BCourse } from "@/stores/courses/algebra-1b";
 
 const EXPECTED_MODULE_SEQUENCE = [
@@ -56,9 +58,10 @@ describe("Algebra 1B learner flow", () => {
 			candidate => candidate.kind !== "appendix"
 		)) {
 			expect(module.estimatedTime, module.title).toMatch(/session/);
-			expect(module.keyBlocks?.length, module.title).toBeGreaterThanOrEqual(
-				5
-			);
+			expect(
+				module.keyBlocks?.length,
+				module.title
+			).toBeGreaterThanOrEqual(5);
 			expect(
 				module.curriculum.every(item => item.learningPath === "core"),
 				module.title
@@ -88,7 +91,7 @@ describe("Algebra 1B learner flow", () => {
 		);
 	});
 
-	it("keeps advanced and answer material optional", () => {
+	it("keeps advanced and answer material optional", async () => {
 		expect(
 			requireModule("AB3 Fractions with Polynomials")
 				.supplementalProjects[0]
@@ -112,5 +115,19 @@ describe("Algebra 1B learner flow", () => {
 			requireModule("AB22 Master Project: Algebra 1B").curriculum[0]
 				?.content
 		).toContain("Begin after the comprehensive checkpoint");
+		setActivePinia(createPinia());
+		const course = await useCoursesStore().loadCourseById("algebra-1b");
+		const answer = course?.modules
+			.flatMap(module => module.supplementalProjects)
+			.find(item => item.title === "Answer Key and Profit Models");
+		for (const condition of [
+			"When the competitor's profit `P_2(x)` is positive",
+			"If `P_2(x) = 0`, the ratio is undefined",
+			"If `P_2(x) < 0`",
+			"reverses its direction",
+			"the ratio is `1.25`, but Amy has the larger loss",
+			"Compare the two profit values directly"
+		])
+			expect(answer?.content).toContain(condition);
 	});
 });

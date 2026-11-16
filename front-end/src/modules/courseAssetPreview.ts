@@ -1,11 +1,18 @@
-import courseAssets from "@/config/course-assets.json";
-
 export interface ParsedCourseAssetUrl {
 	hash: string;
 	path: string;
 }
 
-const COURSE_ASSETS = new Set(courseAssets);
+const ASSET_LOADERS: Record<string, () => Promise<string>> = {
+	"/course-assets/algebra-1/practice-checks-v1.md": () =>
+		import("../course-assets/algebra-1/practice-checks-v1.md?raw").then(
+			module => module.default
+		),
+	"/course-assets/algebra-1a/practice-checks-v1.md": () =>
+		import("../course-assets/algebra-1a/practice-checks-v1.md?raw").then(
+			module => module.default
+		)
+};
 const MAX_ASSET_BYTES = 64 * 1024;
 const assetCache = new Map<string, Promise<string>>();
 
@@ -30,7 +37,8 @@ export function parseCourseAssetUrl(
 ): ParsedCourseAssetUrl | null {
 	if (value.length > 512) return null;
 	const parts = value.split("#");
-	if (parts.length > 2 || !COURSE_ASSETS.has(parts[0])) return null;
+	if (parts.length > 2 || !Object.hasOwn(ASSET_LOADERS, parts[0]))
+		return null;
 	const hash = parts[1] ?? "";
 	if (!/^[a-z0-9-]*$/.test(hash)) return null;
 	return { path: parts[0], hash };
@@ -87,55 +95,27 @@ export function extractMarkdownSection(markdown: string, hash: string) {
 	return lines.slice(start, end).join("\n").trim();
 }
 
-async function fetchAsset(path: string, fetcher: typeof fetch) {
-	const controller = new AbortController();
-	const timeout = setTimeout(() => controller.abort(), 10_000);
-	try {
-		const response = await fetcher(path, {
-			credentials: "omit",
-			redirect: "error",
-			signal: controller.signal
-		});
-		if (!response.ok || !response.body)
-			throw new Error("This self-check could not be loaded.");
-		const reader = response.body.getReader();
-		const decoder = new TextDecoder();
-		let content = "";
-		let bytes = 0;
-		try {
-			while (true) {
-				const { done, value } = await reader.read();
-				if (done) break;
-				bytes += value.byteLength;
-				if (bytes > MAX_ASSET_BYTES) {
-					await reader.cancel();
-					throw new Error(
-						"This self-check exceeds the supported size."
-					);
-				}
-				content += decoder.decode(value, { stream: true });
-			}
-			return content + decoder.decode();
-		} finally {
-			reader.releaseLock();
-		}
-	} finally {
-		clearTimeout(timeout);
-	}
-}
-
-export async function loadCourseAssetSection(
-	value: string,
-	fetcher: typeof fetch = fetch
-) {
+export async function loadCourseAssetSection(value: string) {
 	const asset = parseCourseAssetUrl(value);
 	if (!asset) throw new Error("This course resource is unavailable.");
 	let pending = assetCache.get(asset.path);
 	if (!pending) {
-		pending = fetchAsset(asset.path, fetcher).catch(error => {
-			assetCache.delete(asset.path);
-			throw error;
-		});
+		pending = ASSET_LOADERS[asset.path]()
+			.then(markdown => {
+				if (
+					new TextEncoder().encode(markdown).byteLength >
+					MAX_ASSET_BYTES
+				) {
+					throw new Error(
+						"This self-check exceeds the supported size."
+					);
+				}
+				return markdown;
+			})
+			.catch(error => {
+				assetCache.delete(asset.path);
+				throw error;
+			});
 		assetCache.set(asset.path, pending);
 	}
 	const content = extractMarkdownSection(await pending, asset.hash);
