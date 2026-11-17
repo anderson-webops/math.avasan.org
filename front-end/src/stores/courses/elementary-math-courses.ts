@@ -14,6 +14,8 @@ interface SourceLibraryCourseSpec {
 }
 
 interface SourceActivityAnchor {
+	preserveAssignment?: boolean;
+	preserveInstructions?: boolean;
 	aliases?: string[];
 	id?: string;
 	learningPath?: CourseItemLearningPath;
@@ -246,6 +248,11 @@ function createSourceActivityAnchorItems(
 				...(anchor.id ? { id: anchor.id } : {}),
 				...(anchor.aliases?.length ? { aliases: anchor.aliases } : {}),
 				title: anchor.title,
+				preserveAssignment: anchor.preserveAssignment,
+				preserveInstructions: anchor.preserveInstructions,
+				...(anchor.preserveAssignment
+					? { contentKind: "assignment" as const }
+					: {}),
 				content: [
 					`**Project goal:** ${anchor.prompt}`,
 					"**Completion evidence:**",
@@ -288,6 +295,11 @@ function createSourceActivityPracticeItems(
 			...(anchor.id ? { id: anchor.id } : {}),
 			...(anchor.aliases?.length ? { aliases: anchor.aliases } : {}),
 			title: anchor.title,
+			preserveAssignment: anchor.preserveAssignment,
+			preserveInstructions: anchor.preserveInstructions,
+			...(anchor.preserveAssignment
+				? { contentKind: "assignment" as const }
+				: {}),
 			content: [
 				`**Project goal:** ${anchor.prompt}`,
 				"**Completion evidence:**",
@@ -401,8 +413,29 @@ const earlyElementaryAMathSourceAnchors: Record<
 	],
 	"EEA4 Module Project: Escape the Game": [
 		{
+			id: "early-elementary-a-math-eea4-module-project-escape-the-game-curriculum-escape-the-game-character-budget",
 			title: "Escape the Game Character Budget",
-			prompt: "Design a video-game character with a 100-point budget. Choose hair, suit, and extra features from the original point table, then calculate points used and points left.",
+			preserveAssignment: true,
+			preserveInstructions: true,
+			prompt: `Design a video-game character with a 100-point budget. Choose exactly one option from each category in this classroom point table:
+
+| Category | Option | Points |
+| --- | --- | ---: |
+| Hair | None | 0 |
+| Hair | Short | 10 |
+| Hair | Spiky | 20 |
+| Suit | Plain | 0 |
+| Suit | Armor | 35 |
+| Suit | Rocket | 45 |
+| Extra | None | 0 |
+| Extra | Map | 15 |
+| Extra | Shield | 25 |
+
+Draw and name the character. Add the three chosen prices, then subtract the total from 100. Change one choice and compare the new total and remaining points with the first design.
+
+For example, short hair and armor with no extra use 10 + 35 + 0 = 45 points. The budget has 100 - 45 = 55 points left. Check by adding 45 + 55 = 100.
+
+[Project self-check](/courses/?asset=%2Fcourse-assets%2Fearly-elementary-a%2Fpractice-checks-v1.md%23character-budget&course=early-elementary-a-math&label=Character+budget+self-check)`,
 			evidence: [
 				"Character name and selected specs from each category.",
 				"Addition equation for total points used.",
@@ -410,8 +443,17 @@ const earlyElementaryAMathSourceAnchors: Record<
 			]
 		},
 		{
+			id: "early-elementary-a-math-eea4-module-project-escape-the-game-curriculum-liang-escape-route-grid",
 			title: "Liang Escape Route Grid",
-			prompt: "Plan a grid route from the bottom-left corner to the top-right corner. The route uses at least 20 right jumps, 15 left jumps, 30 up jumps, and 5 down jumps.",
+			preserveAssignment: true,
+			preserveInstructions: true,
+			prompt: `Draw a rectangular grid five squares across and 25 squares up. Start at the bottom-left corner and finish at the top-right corner. Each jump moves along one grid edge; the route stays inside the rectangle or on its boundary.
+
+The route uses at least 20 right jumps, 15 left jumps, 30 up jumps, and 5 down jumps. Keep a separate tally for each direction. A right jump followed by a left jump returns to the same point; an up jump followed by a down jump does the same.
+
+Find a route with the fewest total jumps that meets all four minimums. Mark the route in groups of jumps, count every group, and check both the final position and each directional total.
+
+[Project self-check](/courses/?asset=%2Fcourse-assets%2Fearly-elementary-a%2Fpractice-checks-v1.md%23escape-route&course=early-elementary-a-math&label=Escape+route+self-check)`,
 			evidence: [
 				"Route sketch or coordinate-step list from start to exit.",
 				"Jump totals for right, left, up, and down directions.",

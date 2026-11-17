@@ -4,6 +4,8 @@ import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import CourseExplorer from "@/components/CourseExplorer.vue";
+import { algebraCourseImageUrls } from "@/modules/courseAssetSourcesAlgebra";
+import { prealgebraCourseImageUrls } from "@/modules/courseAssetSourcesPrealgebra";
 import { useCoursesStore } from "@/stores/courses";
 
 const expectedCourses = [
@@ -238,21 +240,70 @@ describe("CourseExplorer public catalog", () => {
 		expect(wrapper.text()).not.toContain("Use the browser workspace");
 	});
 
-	it("requires an explicit click before contacting an external image host", async () => {
-		const { wrapper } = await mountPublicCatalog((id, name) => {
-			const definition = courseDefinition(id, name);
-			definition.modules[0].curriculum[0].mediaLink =
-				"https://static.classes.jacobdanderson.net/algebra-1a/review.svg";
-			return definition;
-		});
+	it("embeds release-bound diagrams and opens other images only on request", async () => {
+		const embedded = [
+			...Object.values(algebraCourseImageUrls),
+			...Object.values(prealgebraCourseImageUrls)
+		];
+		for (const mediaLink of [
+			...embedded,
+			"https://static.classes.jacobdanderson.net/algebra-1a/review.svg",
+			"/assets/unlisted.svg"
+		]) {
+			const { wrapper } = await mountPublicCatalog((id, name) => {
+				const definition = courseDefinition(id, name);
+				definition.modules[0].curriculum[0].mediaLink = mediaLink;
+				return definition;
+			});
+			if (embedded.includes(mediaLink)) {
+				expect(wrapper.get(".item-media img").attributes("src")).toBe(
+					mediaLink
+				);
+				expect(wrapper.find("a.resource-link").exists()).toBe(false);
+			} else {
+				expect(wrapper.find(".item-media img").exists()).toBe(false);
+				const resource = wrapper.get("a.resource-link");
+				expect(resource.attributes("href")).toBe(mediaLink);
+				expect(resource.text()).toContain("Open course image");
+				expect(resource.attributes("target")).toBe("_blank");
+				expect(resource.attributes("rel")).toContain("noreferrer");
+			}
+			wrapper.unmount();
+		}
+	});
 
-		expect(wrapper.find("img[src^='https://']").exists()).toBe(false);
-		const resource = wrapper.get(
-			"a[href='https://static.classes.jacobdanderson.net/algebra-1a/review.svg']"
-		);
-		expect(resource.text()).toContain("Open course image");
-		expect(resource.attributes("target")).toBe("_blank");
-		expect(resource.attributes("rel")).toContain("noreferrer");
+	it("opens historical module and item bookmarks in the matching reference view", async () => {
+		const courseId = "pre-algebra-a";
+		const oldModuleId = `${courseId}-source-activity-archive`;
+		for (const anchor of [
+			oldModuleId,
+			`${oldModuleId}-${courseId}-reference-item`,
+			`${oldModuleId}-old-reference`,
+			`${courseId}-reference-old-reference`
+		]) {
+			window.localStorage.clear();
+			window.history.replaceState({}, "", `/courses/#${anchor}`);
+			const { wrapper } = await mountPublicCatalog((id, name) => {
+				const definition = courseDefinition(id, name);
+				if (id === courseId) {
+					Object.assign(definition.modules[2], {
+						aliases: [oldModuleId]
+					});
+					Object.assign(definition.modules[2].curriculum[0], {
+						aliases: ["old-reference"]
+					});
+				}
+				return definition;
+			});
+			expect(wrapper.get(".reader-header h3").text(), anchor).toBe(
+				"Reference"
+			);
+			expect(
+				wrapper.get("#lesson-view-content").text(),
+				anchor
+			).toContain("Quick reference");
+			wrapper.unmount();
+		}
 	});
 
 	it("contains no account, API, or Python IDE imports", () => {

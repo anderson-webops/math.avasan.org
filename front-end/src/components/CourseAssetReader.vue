@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import type { CourseAssetCourseId } from "@/modules/courseAssetPreview";
 import { ref, watch } from "vue";
 import { loadCourseAssetSection } from "@/modules/courseAssetPreview";
-import LazyMarkdownContent from "./LazyMarkdownContent.vue";
+import CourseMarkdownContent from "./CourseMarkdownContent.vue";
 
 const props = defineProps<{
 	asset: string;
-	course: "algebra-1a" | "algebra-1b";
+	course: CourseAssetCourseId;
 }>();
 const title = ref("Self-check");
 const content = ref("");
@@ -56,7 +57,7 @@ watch(
 		<div class="site-surface resource-content" aria-live="polite">
 			<p v-if="loading">Loading self-check…</p>
 			<p v-else-if="error" role="alert">{{ error }}</p>
-			<LazyMarkdownContent v-else :content="content" />
+			<CourseMarkdownContent v-else :content="content" />
 		</div>
 	</section>
 </template>

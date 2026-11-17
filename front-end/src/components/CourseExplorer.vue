@@ -15,6 +15,8 @@ import {
 	watch
 } from "vue";
 import { reportMathClassroomUsage } from "@/modules/classroomUsage";
+import { algebraCourseImageUrls } from "@/modules/courseAssetSourcesAlgebra";
+import { prealgebraCourseImageUrls } from "@/modules/courseAssetSourcesPrealgebra";
 import { lessonContentSections } from "@/modules/courseLessonPresentation";
 import { isYouTubeVideoUrl } from "@/modules/resourceUrls";
 import { useLessonViews } from "@/modules/useLessonViews";
@@ -26,7 +28,7 @@ import {
 	staticMediaFilename
 } from "@/stores/courses/staticMedia";
 import CourseAssignmentContent from "./CourseAssignmentContent.vue";
-import LazyMarkdownContent from "./LazyMarkdownContent.vue";
+import CourseMarkdownContent from "./CourseMarkdownContent.vue";
 
 interface VisibleModule extends CourseModule {
 	position: number;
@@ -43,6 +45,10 @@ interface ResourceLink {
 }
 
 const IMAGE_FILE_RE = /\.(?:avif|gif|jpe?g|png|svg|webp)(?:\?|$)/i;
+const EMBEDDED_COURSE_IMAGE_URLS = new Set([
+	...Object.values(algebraCourseImageUrls),
+	...Object.values(prealgebraCourseImageUrls)
+]);
 const WHITESPACE_RE = /\s+/g;
 const WWW_PREFIX_RE = /^www\./;
 const COURSE_SELECTION_STORAGE_KEY = "math:course-explorer:selected-course";
@@ -411,22 +417,29 @@ function moduleIdFromHash(modules: VisibleModule[]) {
 	const anchor = currentHashAnchor.value;
 	if (!anchor) return "";
 
-	for (const module of modules) {
+	const identifiers = modules
+		.flatMap(module =>
+			[module.id, ...(module.aliases ?? [])].map(id => ({ module, id }))
+		)
+		.sort((left, right) => right.id.length - left.id.length);
+	for (const { module, id } of identifiers) {
 		const allItems = [...module.curriculum, ...module.supplementalProjects];
 		if (
-			allItems.some(item => itemAnchorId(module.id, item.id) === anchor)
+			allItems.some(item =>
+				[item.id, ...(item.aliases ?? [])].some(
+					itemId => itemAnchorId(id, itemId) === anchor
+				)
+			)
 		) {
 			return module.id;
 		}
 	}
 
-	const matchingModule = [...modules]
-		.sort((left, right) => right.id.length - left.id.length)
-		.find(
-			module => anchor === module.id || anchor.startsWith(`${module.id}-`)
-		);
+	const matchingModule = identifiers.find(
+		({ id }) => anchor === id || anchor.startsWith(`${id}-`)
+	);
 
-	return matchingModule?.id ?? "";
+	return matchingModule?.module.id ?? "";
 }
 
 function matchesSearch(value: string, query: string) {
@@ -463,7 +476,11 @@ function isImage(link: string) {
 }
 
 function isEmbeddedMedia(link: string) {
-	return link.startsWith("/course-assets/") && isImage(link);
+	return (
+		isImage(link) &&
+		(link.startsWith("/course-assets/") ||
+			EMBEDDED_COURSE_IMAGE_URLS.has(link))
+	);
 }
 
 function staticAssetName(url: string) {
@@ -827,7 +844,7 @@ function writeStoredValue(key: string, value: string) {
 									:key="index"
 								>
 									<h6>{{ section.label }}</h6>
-									<LazyMarkdownContent
+									<CourseMarkdownContent
 										:content="section.content"
 									/>
 								</section>
@@ -856,7 +873,7 @@ function writeStoredValue(key: string, value: string) {
 										</div>
 									</header>
 
-									<LazyMarkdownContent
+									<CourseMarkdownContent
 										v-if="
 											item.content &&
 											(lessonView === 'learn' ||

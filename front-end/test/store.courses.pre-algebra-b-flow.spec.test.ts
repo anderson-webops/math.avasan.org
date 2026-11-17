@@ -1,4 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { createPinia, setActivePinia } from "pinia";
+import { useCoursesStore } from "@/stores/courses";
+import {
+	preAlgebraBCaseData,
+	preAlgebraBReviewData,
+	addPreAlgebraBCases
+} from "@/stores/courses/preAlgebraBCases";
 import { preAlgebraBCourse } from "@/stores/courses/pre-algebra-b";
 
 const EXPECTED_MODULE_SEQUENCE = [
@@ -40,9 +47,10 @@ describe("Pre-Algebra B learner flow", () => {
 			candidate => candidate.kind !== "appendix"
 		)) {
 			expect(module.estimatedTime, module.title).toMatch(/session/);
-			expect(module.keyBlocks?.length, module.title).toBeGreaterThanOrEqual(
-				5
-			);
+			expect(
+				module.keyBlocks?.length,
+				module.title
+			).toBeGreaterThanOrEqual(5);
 			expect(
 				module.curriculum.every(item => item.learningPath === "core"),
 				module.title
@@ -93,5 +101,74 @@ describe("Pre-Algebra B learner flow", () => {
 			requireModule("Check-In #3 and Capstone: Pre-Algebra B")
 				.curriculum[0]?.content
 		).toContain("Algebra 1A or Geometry A");
+	});
+});
+
+describe("complete pre-algebra-b baseline", () => {
+	it("retains every supplied method, worked example, problem and mixed review in the public course", async () => {
+		setActivePinia(createPinia());
+		const course =
+			(await useCoursesStore().loadCourseById("pre-algebra-b"))!;
+		for (const unit of preAlgebraBCaseData) {
+			const module = course.modules.find(
+				module => module.title === unit.moduleTitle
+			)!;
+			const reading = module.curriculum.find(
+				item => item.title === unit.target
+			)!;
+			expect(reading.contentKind).toBe("reading");
+			expect(reading.content).toContain(unit.methods);
+			expect(reading.content).toContain(unit.worked);
+			const practice = module.curriculum.filter(
+				item => item.title === `Practice: ${unit.title}`
+			);
+			expect(practice).toHaveLength(1);
+			for (const problem of unit.problems)
+				expect(practice[0].content).toContain(problem);
+			expect(practice[0].content).toContain(unit.checks);
+			expect(practice[0].learningPath).toBe("core");
+		}
+		for (const review of preAlgebraBReviewData) {
+			const module = course.modules.find(
+				module => module.title === review.moduleTitle
+			)!;
+			const corpus = module.curriculum
+				.map(item => item.content)
+				.join("\n");
+			for (const problem of review.problems)
+				expect(corpus).toContain(problem);
+		}
+
+		const corpus = course.modules
+			.flatMap(module => [
+				...module.curriculum,
+				...module.supplementalProjects
+			])
+			.map(item => item.content)
+			.join("\n");
+		expect(corpus).toContain("Turns are 351, 372 and 365 degrees");
+		expect(corpus).toContain(
+			"Route A joins (0,0), (4,0), (4,3), (2,5), (0,3)"
+		);
+		expect(corpus).toContain("fictional planar exercise routes");
+		const route = course.modules
+			.flatMap(module => [
+				...module.curriculum,
+				...module.supplementalProjects
+			])
+			.find(item => item.title === "Project: Uber Internship Challenge")!;
+		expect(route.content).toContain("**Pending media:**");
+		expect(route.content).toContain("pab14_0.png");
+	});
+	it("rejects missing and duplicate authored bindings", () => {
+		const missing = structuredClone(preAlgebraBCourse);
+		const first = preAlgebraBCaseData[0];
+		missing.modules.find(
+			module => module.title === first.moduleTitle
+		)!.curriculum = [];
+		expect(() => addPreAlgebraBCases(missing)).toThrow("Missing");
+		const duplicate = structuredClone(preAlgebraBCourse);
+		duplicate.modules.push(structuredClone(duplicate.modules[0]));
+		expect(() => addPreAlgebraBCases(duplicate)).toThrow("Duplicate");
 	});
 });

@@ -1,4 +1,5 @@
 import type { RawCourse } from "./types";
+import { applyAlgebra1AReadings } from "./algebra1Readings";
 import { configureMathCourseFlow } from "./mathCourseFlow";
 import { pendingStaticMediaNotice, staticMediaUrl } from "./staticMedia";
 
@@ -1343,3 +1344,5 @@ configureMathCourseFlow(algebra1ACourse, {
 	],
 	appendixTitles: ["Reference Archive: Algebra 1A"]
 });
+
+applyAlgebra1AReadings(algebra1ACourse);

@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="260" viewBox="0 0 240 260" role="img" aria-labelledby="title desc">
+<title id="title">8:30 a.m.</title>
+<desc id="desc">An analog clock showing 8:30 a.m.. The long hand shows minutes and the short hand shows hours.</desc>
+<rect width="240" height="260" fill="white"/>
+<text x="120" y="21" text-anchor="middle" font-family="sans-serif" font-size="17" fill="#234c41">8:30 a.m.</text>
+<circle cx="120" cy="130" r="94" fill="#f4faf6" stroke="#234c41" stroke-width="3"/>
+<line x1="120.0000" y1="39.0000" x2="120.0000" y2="46.0000" stroke="#234c41" stroke-width="2"/>
+<line x1="129.5121" y1="39.4985" x2="129.1985" y2="42.4821" stroke="#234c41" stroke-width="1"/>
+<line x1="138.9200" y1="40.9886" x2="138.2962" y2="43.9230" stroke="#234c41" stroke-width="1"/>
+<line x1="148.1205" y1="43.4539" x2="147.1935" y2="46.3070" stroke="#234c41" stroke-width="1"/>
+<line x1="157.0130" y1="46.8674" x2="155.7928" y2="49.6080" stroke="#234c41" stroke-width="1"/>
+<line x1="165.5000" y1="51.1917" x2="162.0000" y2="57.2539" stroke="#234c41" stroke-width="2"/>
+<line x1="173.4885" y1="56.3795" x2="171.7251" y2="58.8065" stroke="#234c41" stroke-width="1"/>
+<line x1="180.8909" y1="62.3738" x2="178.8835" y2="64.6033" stroke="#234c41" stroke-width="1"/>
+<line x1="187.6262" y1="69.1091" x2="185.3967" y2="71.1165" stroke="#234c41" stroke-width="1"/>
+<line x1="193.6205" y1="76.5115" x2="191.1935" y2="78.2749" stroke="#234c41" stroke-width="1"/>
+<line x1="198.8083" y1="84.5000" x2="192.7461" y2="88.0000" stroke="#234c41" stroke-width="2"/>
+<line x1="203.1326" y1="92.9870" x2="200.3920" y2="94.2072" stroke="#234c41" stroke-width="1"/>
+<line x1="206.5461" y1="101.8795" x2="203.6930" y2="102.8065" stroke="#234c41" stroke-width="1"/>
+<line x1="209.0114" y1="111.0800" x2="206.0770" y2="111.7038" stroke="#234c41" stroke-width="1"/>
+<line x1="210.5015" y1="120.4879" x2="207.5179" y2="120.8015" stroke="#234c41" stroke-width="1"/>
+<line x1="211.0000" y1="130.0000" x2="204.0000" y2="130.0000" stroke="#234c41" stroke-width="2"/>
+<line x1="210.5015" y1="139.5121" x2="207.5179" y2="139.1985" stroke="#234c41" stroke-width="1"/>
+<line x1="209.0114" y1="148.9200" x2="206.0770" y2="148.2962" stroke="#234c41" stroke-width="1"/>
+<line x1="206.5461" y1="158.1205" x2="203.6930" y2="157.1935" stroke="#234c41" stroke-width="1"/>
+<line x1="203.1326" y1="167.0130" x2="200.3920" y2="165.7928" stroke="#234c41" stroke-width="1"/>
+<line x1="198.8083" y1="175.5000" x2="192.7461" y2="172.0000" stroke="#234c41" stroke-width="2"/>
+<line x1="193.6205" y1="183.4885" x2="191.1935" y2="181.7251" stroke="#234c41" stroke-width="1"/>
+<line x1="187.6262" y1="190.8909" x2="185.3967" y2="188.8835" stroke="#234c41" stroke-width="1"/>
+<line x1="180.8909" y1="197.6262" x2="178.8835" y2="195.3967" stroke="#234c41" stroke-width="1"/>
+<line x1="173.4885" y1="203.6205" x2="171.7251" y2="201.1935" stroke="#234c41" stroke-width="1"/>
+<line x1="165.5000" y1="208.8083" x2="162.0000" y2="202.7461" stroke="#234c41" stroke-width="2"/>
+<line x1="157.0130" y1="213.1326" x2="155.7928" y2="210.3920" stroke="#234c41" stroke-width="1"/>
+<line x1="148.1205" y1="216.5461" x2="147.1935" y2="213.6930" stroke="#234c41" stroke-width="1"/>
+<line x1="138.9200" y1="219.0114" x2="138.2962" y2="216.0770" stroke="#234c41" stroke-width="1"/>
+<line x1="129.5121" y1="220.5015" x2="129.1985" y2="217.5179" stroke="#234c41" stroke-width="1"/>
+<line x1="120.0000" y1="221.0000" x2="120.0000" y2="214.0000" stroke="#234c41" stroke-width="2"/>
+<line x1="110.4879" y1="220.5015" x2="110.8015" y2="217.5179" stroke="#234c41" stroke-width="1"/>
+<line x1="101.0800" y1="219.0114" x2="101.7038" y2="216.0770" stroke="#234c41" stroke-width="1"/>
+<line x1="91.8795" y1="216.5461" x2="92.8065" y2="213.6930" stroke="#234c41" stroke-width="1"/>
+<line x1="82.9870" y1="213.1326" x2="84.2072" y2="210.3920" stroke="#234c41" stroke-width="1"/>
+<line x1="74.5000" y1="208.8083" x2="78.0000" y2="202.7461" stroke="#234c41" stroke-width="2"/>
+<line x1="66.5115" y1="203.6205" x2="68.2749" y2="201.1935" stroke="#234c41" stroke-width="1"/>
+<line x1="59.1091" y1="197.6262" x2="61.1165" y2="195.3967" stroke="#234c41" stroke-width="1"/>
+<line x1="52.3738" y1="190.8909" x2="54.6033" y2="188.8835" stroke="#234c41" stroke-width="1"/>
+<line x1="46.3795" y1="183.4885" x2="48.8065" y2="181.7251" stroke="#234c41" stroke-width="1"/>
+<line x1="41.1917" y1="175.5000" x2="47.2539" y2="172.0000" stroke="#234c41" stroke-width="2"/>
+<line x1="36.8674" y1="167.0130" x2="39.6080" y2="165.7928" stroke="#234c41" stroke-width="1"/>
+<line x1="33.4539" y1="158.1205" x2="36.3070" y2="157.1935" stroke="#234c41" stroke-width="1"/>
+<line x1="30.9886" y1="148.9200" x2="33.9230" y2="148.2962" stroke="#234c41" stroke-width="1"/>
+<line x1="29.4985" y1="139.5121" x2="32.4821" y2="139.1985" stroke="#234c41" stroke-width="1"/>
+<line x1="29.0000" y1="130.0000" x2="36.0000" y2="130.0000" stroke="#234c41" stroke-width="2"/>
+<line x1="29.4985" y1="120.4879" x2="32.4821" y2="120.8015" stroke="#234c41" stroke-width="1"/>
+<line x1="30.9886" y1="111.0800" x2="33.9230" y2="111.7038" stroke="#234c41" stroke-width="1"/>
+<line x1="33.4539" y1="101.8795" x2="36.3070" y2="102.8065" stroke="#234c41" stroke-width="1"/>
+<line x1="36.8674" y1="92.9870" x2="39.6080" y2="94.2072" stroke="#234c41" stroke-width="1"/>
+<line x1="41.1917" y1="84.5000" x2="47.2539" y2="88.0000" stroke="#234c41" stroke-width="2"/>
+<line x1="46.3795" y1="76.5115" x2="48.8065" y2="78.2749" stroke="#234c41" stroke-width="1"/>
+<line x1="52.3738" y1="69.1091" x2="54.6033" y2="71.1165" stroke="#234c41" stroke-width="1"/>
+<line x1="59.1091" y1="62.3738" x2="61.1165" y2="64.6033" stroke="#234c41" stroke-width="1"/>
+<line x1="66.5115" y1="56.3795" x2="68.2749" y2="58.8065" stroke="#234c41" stroke-width="1"/>
+<line x1="74.5000" y1="51.1917" x2="78.0000" y2="57.2539" stroke="#234c41" stroke-width="2"/>
+<line x1="82.9870" y1="46.8674" x2="84.2072" y2="49.6080" stroke="#234c41" stroke-width="1"/>
+<line x1="91.8795" y1="43.4539" x2="92.8065" y2="46.3070" stroke="#234c41" stroke-width="1"/>
+<line x1="101.0800" y1="40.9886" x2="101.7038" y2="43.9230" stroke="#234c41" stroke-width="1"/>
+<line x1="110.4879" y1="39.4985" x2="110.8015" y2="42.4821" stroke="#234c41" stroke-width="1"/>
+<text x="156.0000" y="72.6462" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#234c41">1</text>
+<text x="182.3538" y="99.0000" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#234c41">2</text>
+<text x="192.0000" y="135.0000" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#234c41">3</text>
+<text x="182.3538" y="171.0000" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#234c41">4</text>
+<text x="156.0000" y="197.3538" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#234c41">5</text>
+<text x="120.0000" y="207.0000" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#234c41">6</text>
+<text x="84.0000" y="197.3538" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#234c41">7</text>
+<text x="57.6462" y="171.0000" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#234c41">8</text>
+<text x="48.0000" y="135.0000" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#234c41">9</text>
+<text x="57.6462" y="99.0000" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#234c41">10</text>
+<text x="84.0000" y="72.6462" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#234c41">11</text>
+<text x="120.0000" y="63.0000" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#234c41">12</text>
+<line id="hour-hand" x1="120" y1="130" x2="76.5333" y2="141.6469" stroke="#234c41" stroke-linecap="round" stroke-width="6"/>
+<line id="minute-hand" x1="120" y1="130" x2="120.0000" y2="194.0000" stroke="#234c41" stroke-linecap="round" stroke-width="3"/>
+<circle cx="120" cy="130" r="5" fill="#234c41"/>
+</svg>

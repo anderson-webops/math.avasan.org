@@ -2,11 +2,18 @@ import type { RawCourse, RawCourseModule, RawCourseModuleItem } from "./types";
 import { applyAlgebra1ACourseReadings } from "./algebra1ACourseReadings";
 import { applyAlgebra1APractice } from "./algebra1APractice";
 import { applyAlgebraErrorAnalysisCases } from "./algebraErrorAnalysisCases";
+import { applyAlgebraHistoricalBaseline } from "./algebraHistoricalBaseline";
+import { applyCalculusBaseline } from "./calculusBaseline";
+import { applyEarlyElementaryAProjects } from "./earlyElementaryAProjects";
+import { applyEarlyElementaryBProjects } from "./earlyElementaryBProjects";
+import { applyLateElementaryAProjects } from "./lateElementaryAProjects";
+import { applyLateElementaryBProjects } from "./lateElementaryBProjects";
 import { mapMarkdownProse } from "./markdownProse";
 import { applyMathCourseImplementationArtifacts } from "./math-course-implementation-artifacts";
 import { applyMathResearchBackedExpansions } from "./math-research-expansions";
 import { preserveMathArchiveProgress } from "./mathArchiveProgress";
 import { mathCourseSlugify } from "./mathCourseFlow";
+import { applyPrealgebraGeometryBaseline } from "./prealgebraGeometryBaseline";
 import { buildProjectGuidance } from "./projectGuidance";
 import {
 	canonicalStaticMediaUrl,
@@ -1140,7 +1147,7 @@ function isProjectLikeItem(item: RawCourseModuleItem) {
 
 function isConceptLessonItem(item: RawCourseModuleItem) {
 	return (
-		!(item.contentKind === "reading" && item.preserveAssignment) &&
+		!item.preserveAssignment &&
 		!isProjectLikeItem(item) &&
 		!isInformationalResourceItem(item)
 	);
@@ -9501,9 +9508,20 @@ export function normalizeRawCourse(id: string, rawCourse: RawCourse) {
 		);
 	}
 	if (id === "algebra-1a") applyAlgebra1APractice(course);
+	applyAlgebraHistoricalBaseline(id, course, rawCourse);
 	applyAlgebraErrorAnalysisCases(id, course);
 	if (id === "algebra-1a")
 		applyAlgebra1ACourseReadings(course, mathCourseSlugify);
+	if (id === "early-elementary-a-math")
+		applyEarlyElementaryAProjects(course, rawCourse);
+	if (id === "early-elementary-b-math")
+		applyEarlyElementaryBProjects(course, rawCourse);
+	if (id === "late-elementary-a-math")
+		applyLateElementaryAProjects(course, rawCourse);
+	if (id === "late-elementary-b-math")
+		applyLateElementaryBProjects(course, rawCourse);
+	applyPrealgebraGeometryBaseline(id, course, rawCourse);
+	applyCalculusBaseline(id, course, rawCourse);
 	preserveMathArchiveProgress(course, id);
 	return course;
 }

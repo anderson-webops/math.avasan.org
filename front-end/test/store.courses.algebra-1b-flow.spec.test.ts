@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
+import { describe, expect, it } from "vitest";
 import { useCoursesStore } from "@/stores/courses";
+import { algebra1BReadingMethods } from "@/stores/courses/algebra1BReadings";
 import { algebra1BCourse } from "@/stores/courses/algebra-1b";
 
 const EXPECTED_MODULE_SEQUENCE = [
@@ -39,7 +40,7 @@ function requireModule(title: string) {
 	return module;
 }
 
-describe("Algebra 1B learner flow", () => {
+describe("algebra 1B learner flow", () => {
 	it("places the comprehensive checkpoint before the capstone", () => {
 		expect(
 			algebra1BCourse.modules
@@ -111,10 +112,10 @@ describe("Algebra 1B learner flow", () => {
 				title: "Answer Key and Profit Models"
 			})
 		);
-		expect(
-			requireModule("AB22 Master Project: Algebra 1B").curriculum[0]
-				?.content
-		).toContain("Begin after the comprehensive checkpoint");
+		const capstone = requireModule("AB22 Master Project: Algebra 1B");
+		expect(capstone.curriculum[0]?.content).toContain(
+			"Begin after the comprehensive checkpoint"
+		);
 		setActivePinia(createPinia());
 		const course = await useCoursesStore().loadCourseById("algebra-1b");
 		const answer = course?.modules
@@ -129,5 +130,36 @@ describe("Algebra 1B learner flow", () => {
 			"Compare the two profit values directly"
 		])
 			expect(answer?.content).toContain(condition);
+	});
+});
+
+describe("algebra 1B historical reading coverage", () => {
+	it("preserves all twenty-six complete method/example pairs through normalization", async () => {
+		const { loadRawCourse } = await import("@/stores/courses/index");
+		const course = await loadRawCourse("algebra-1b");
+		expect(algebra1BReadingMethods).toHaveLength(26);
+		for (const entry of algebra1BReadingMethods) {
+			const module = course!.modules.find(
+				module => module.title === entry.moduleTitle
+			)!;
+			const matches = module.curriculum.filter(
+				item =>
+					item.content.includes(entry.method) &&
+					item.content.includes(entry.worked)
+			);
+			expect(matches, entry.target).toHaveLength(1);
+			expect(
+				matches[0].content.split(entry.method),
+				entry.target
+			).toHaveLength(2);
+			expect(matches[0].contentKind).toBe("reading");
+		}
+		const models = course!.modules.find(
+			module => module.title === "AB19 Data Modeling"
+		)!;
+		expect(models.curriculum[0].content).toContain("| D | 1, 4, 0, 3, 2 |");
+		expect(models.curriculum[1].content).toContain(
+			"squared errors sum to `10`"
+		);
 	});
 });

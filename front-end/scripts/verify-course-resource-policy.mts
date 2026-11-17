@@ -1,4 +1,3 @@
-import { pathToFileURL } from "node:url";
 import { courseCatalog, loadRawCourse } from "@/stores/courses/index";
 
 const PLAIN_HTTP_URL = /\bhttp:\/\/[^\s<>"')\]]+/gi;
@@ -36,7 +35,7 @@ export async function publishedPlainHttpReferences() {
 
 	for (const entry of courseCatalog) {
 		const course = await loadRawCourse(entry.id);
-		if (!course) continue;
+		if (!course) throw new Error(`Missing published course ${entry.id}`);
 		collectPlainHttpReferences(course, entry.id, findings);
 	}
 
@@ -50,10 +49,4 @@ export async function verifyPublishedCourseResources() {
 			`Published course resources must use authenticated HTTPS or remain inert text:\n${findings.join("\n")}`
 		);
 	}
-}
-
-const invoked = process.argv[1] ? pathToFileURL(process.argv[1]).href : "";
-if (import.meta.url === invoked) {
-	await verifyPublishedCourseResources();
-	console.log("[verify-course-resource-policy] published course links use HTTPS");
 }

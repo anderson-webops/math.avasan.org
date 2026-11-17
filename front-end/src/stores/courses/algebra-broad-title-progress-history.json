@@ -1,0 +1,23 @@
+{
+	"algebra-1b": {
+		"algebra-1b-ab3-fractions-with-polynomials-curriculum-fractions-warm-up-and-least-common-denominators": [
+			"algebra-1b-ab3-fractions-with-polynomials-curriculum-core-concepts"
+		],
+		"algebra-1b-ab2-multiplying-polynomials-curriculum-multiplying-polynomials-core-concepts": [
+			"algebra-1b-ab2-multiplying-polynomials-curriculum-core-concepts-and-learning-sequence"
+		]
+	},
+	"algebra-1a": {
+		"algebra-1a-aa2-solving-single-step-linear-equations-curriculum-solving-single-step-linear-equations-core-concepts": [
+			"algebra-1a-aa2-solving-single-step-linear-equations-curriculum-core-concepts-and-learning-sequence"
+		],
+		"algebra-1a-aa4-solving-multi-step-linear-equations-curriculum-solving-multi-step-linear-equations-core-concepts": [
+			"algebra-1a-aa4-solving-multi-step-linear-equations-curriculum-core-concepts-and-learning-sequence"
+		]
+	},
+	"algebra-2a": {
+		"algebra-2a-ala2-quadratic-functions-curriculum-quadratic-functions-core-concepts": [
+			"algebra-2a-ala2-quadratic-functions-curriculum-core-concepts-and-learning-sequence"
+		]
+	}
+}

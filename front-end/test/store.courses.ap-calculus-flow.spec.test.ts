@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { apCalculusCourse } from "@/stores/courses/ap-calculus";
+import { createPinia, setActivePinia } from "pinia";
+import { useCoursesStore } from "@/stores/courses";
+import {
+	apCalculusCases,
+	apCalculusPortfolios,
+	apCalculusRootExtension
+} from "@/stores/courses/apCalculusCases";
+import { applyCalculusBaseline } from "@/stores/courses/calculusBaseline";
+import { normalizeRawCourse } from "@/stores/courses/normalization";
+import { expectAuthoredCalculusContent } from "./calculusBaselineAssertions";
 
 const AB_ROUTE_TITLES = [
 	"APCA0 Preparing for AP Calculus",
@@ -44,6 +54,81 @@ function requireModule(title: string) {
 }
 
 describe("AP Calculus learner flow", () => {
+	it("preserves authored instructions and supplies every AB and BC unit", async () => {
+		setActivePinia(createPinia());
+		const course = (await useCoursesStore().loadCourseById("ap-calculus"))!;
+		expectAuthoredCalculusContent("ap-calculus", apCalculusCourse, course);
+		expect(apCalculusCases).toHaveLength(28);
+		for (const unit of apCalculusCases) {
+			const module = course.modules.find(item =>
+				item.title.startsWith(`${unit.code} `)
+			)!;
+			const reading = module.curriculum.find(
+				item => item.id === unit.published.id
+			)!;
+			expect(reading.content).toContain(unit.reading);
+			expect(reading.content).toContain(unit.worked);
+			for (const alias of unit.published.aliases)
+				expect(reading.aliases).toContain(alias);
+			const practice = module.curriculum.find(item =>
+				item.id.endsWith(`-practice-${unit.code.toLowerCase()}`)
+			)!;
+			expect(practice.preserveAssignment).toBe(true);
+			for (const problem of unit.problems)
+				expect(practice.content).toContain(problem);
+			if (typeof unit.bcFrom === "number")
+				expect(practice.content).toContain(
+					`AB route: problems 1–${unit.bcFrom - 1}. BC route: all problems.`
+				);
+		}
+		for (const portfolio of apCalculusPortfolios) {
+			const project = course.modules
+				.flatMap(module => module.curriculum)
+				.find(item => item.title === portfolio.title)!;
+			expect(project.learningPath).toBe("core");
+			for (const text of [...portfolio.problems, ...portfolio.rubric])
+				expect(project.content).toContain(text);
+		}
+		const rootMatches = course.modules
+			.flatMap(module => [
+				...module.curriculum,
+				...module.supplementalProjects
+			])
+			.filter(item =>
+				item.content.includes(apCalculusRootExtension.problem)
+			);
+		expect(rootMatches).toHaveLength(1);
+		expect(rootMatches[0].learningPath).toBe("challenge");
+		expect(rootMatches[0].content).toContain(
+			apCalculusRootExtension.reading
+		);
+	});
+
+	it("fails closed for missing portfolios and optional challenge bindings", () => {
+		for (const title of [
+			"AP Calculus AB Exam Readiness Portfolio",
+			"APC25 AP Practice Plan"
+		]) {
+			const missing = structuredClone(apCalculusCourse);
+			for (const module of missing.modules) {
+				module.curriculum = module.curriculum.filter(
+					item => item.title !== title
+				);
+				module.supplementalProjects =
+					module.supplementalProjects.filter(
+						item => item.title !== title
+					);
+			}
+			expect(() => normalizeRawCourse("ap-calculus", missing)).toThrow(
+				"found 0"
+			);
+		}
+		const unrelated = structuredClone(apCalculusCourse);
+		const before = JSON.stringify(unrelated);
+		applyCalculusBaseline("algebra-2a", unrelated, apCalculusCourse);
+		expect(JSON.stringify(unrelated)).toBe(before);
+	});
+
 	it("keeps the complete AB route before the BC extension", () => {
 		const activeTitles = apCalculusCourse.modules
 			.filter(module => module.kind !== "appendix")
@@ -60,9 +145,9 @@ describe("AP Calculus learner flow", () => {
 	});
 
 	it("states the AB and BC routes in the diagnostic module", () => {
-		const setupText = requireModule(
-			"APCA0 Preparing for AP Calculus"
-		).curriculum.map(item => item.content).join("\n");
+		const setupText = requireModule("APCA0 Preparing for AP Calculus")
+			.curriculum.map(item => item.content)
+			.join("\n");
 		expect(setupText).toContain(
 			"The AB route runs from APCA0 through APC22"
 		);
@@ -82,9 +167,9 @@ describe("AP Calculus learner flow", () => {
 				module.curriculum.every(item => item.learningPath === "core"),
 				module.title
 			).toBe(true);
-			expect(module.supplementalProjects.map(item => item.learningPath)).toEqual(
-				["choice", "challenge"]
-			);
+			expect(
+				module.supplementalProjects.map(item => item.learningPath)
+			).toEqual(["choice", "challenge"]);
 			expect(module.curriculum[0]?.content, module.title).toContain(
 				"**Course flow:**"
 			);

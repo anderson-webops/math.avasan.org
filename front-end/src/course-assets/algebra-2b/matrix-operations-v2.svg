@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" fill="none" role="img" aria-labelledby="title description">
+<title id="title">Matrix operations</title><desc id="description">Addition requires matching dimensions. Matrix multiplication uses row by column. The inverse requires a nonzero determinant and a right quotient retains multiplication order.</desc>
+<rect width="1200" height="720" fill="#f8fafc"/>
+<rect x="24" y="24" width="1152" height="672" rx="28" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+<text x="600" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#0f172a">Matrix Operations Workflow</text>
+<text x="600" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#475569">Entry-wise addition, row-by-column multiplication, and the 2 x 2 inverse rule.</text>
+
+<rect x="54" y="122" width="330" height="520" rx="20" fill="#eff6ff" stroke="#93c5fd"/>
+<text x="219" y="156" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#1d4ed8">Add entry by entry</text>
+<text x="219" y="244" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" fill="#0f172a">[[2, -3], [5, 7]]</text>
+<text x="219" y="296" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" fill="#2563eb">+</text>
+<text x="219" y="352" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" fill="#0f172a">[[7, 1], [6.5, -4]]</text>
+<text x="219" y="408" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" fill="#2563eb">=</text>
+<text x="219" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" fill="#0f172a">[[9, -2], [11.5, 3]]</text>
+<text x="219" y="586" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1d4ed8">Same dimensions are required for addition and subtraction.</text>
+
+<rect x="435" y="122" width="330" height="520" rx="20" fill="#ecfdf5" stroke="#86efac"/>
+<text x="600" y="156" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#15803d">Multiply row by column</text>
+<text x="600" y="232" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" fill="#0f172a">[[1, 2], [3, 4]]</text>
+<text x="600" y="286" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" fill="#16a34a">times</text>
+<text x="600" y="344" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" fill="#0f172a">[[2, 0], [-1, 5]]</text>
+<text x="600" y="404" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" fill="#16a34a">= [[0, 10], [2, 20]]</text>
+<path d="M502 450 L698 450" stroke="#16a34a" stroke-width="3" stroke-dasharray="10 10"/>
+<text x="600" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#166534">(1)(2) + (2)(-1) = 0</text>
+<text x="600" y="530" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#166534">(1)(0) + (2)(5) = 10</text>
+<text x="600" y="586" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#166534">Inner dimensions must match.</text>
+
+<rect x="816" y="122" width="330" height="520" rx="20" fill="#fff7ed" stroke="#fdba74"/>
+<text x="981" y="156" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#c2410c">2 x 2 inverse</text>
+<text x="981" y="242" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#0f172a">A = [[a, b], [c, d]]</text>
+<text x="981" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#9a3412">det(A) = ad - bc</text>
+<text x="981" y="392" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#9a3412">A^(-1) = 1 / (ad - bc)</text>
+<text x="981" y="432" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#0f172a">times [[d, -b], [-c, a]]</text>
+<text x="981" y="528" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#7c2d12">Right quotient: A/B = A B⁻¹.</text>
+<text x="981" y="354" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#334155">det(A) ≠ 0</text>
+<text x="981" y="560" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#334155">det(B) ≠ 0; order matters</text>
+</svg>

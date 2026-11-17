@@ -2,6 +2,13 @@ import { describe, expect, it } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useCoursesStore } from "@/stores/courses";
 import { preCalculusACourse } from "@/stores/courses/pre-calculus-a";
+import {
+	preCalculusACases,
+	preCalculusACheckIns,
+	addPreCalculusACases
+} from "@/stores/courses/preCalculusACases";
+import { normalizeRawCourse } from "@/stores/courses/normalization";
+import { expectAuthoredCalculusContent } from "./calculusBaselineAssertions";
 
 const EXPECTED_MODULE_SEQUENCE = [
 	"PCTA1 Piecewise Functions",
@@ -31,6 +38,62 @@ function requireModule(title: string) {
 }
 
 describe("Pre-Calculus A learner flow", () => {
+	it("preserves complete authored work and supplies all fourteen units and two reviews", async () => {
+		setActivePinia(createPinia());
+		const course =
+			(await useCoursesStore().loadCourseById("pre-calculus-a"))!;
+		expectAuthoredCalculusContent(
+			"pre-calculus-a",
+			preCalculusACourse,
+			course
+		);
+		expect(preCalculusACases).toHaveLength(14);
+		expect(preCalculusACheckIns).toHaveLength(2);
+		for (const unit of preCalculusACases) {
+			const module = course.modules.find(item =>
+				item.title.startsWith(`${unit.code} `)
+			)!;
+			expect(
+				module.curriculum.find(item => item.contentKind === "reading")
+					?.content
+			).toContain(unit.example);
+			const practice = module.curriculum.find(item =>
+				item.title.startsWith("Problem Set:")
+			)!;
+			expect(practice.content).toContain(unit.problems);
+			expect(practice.preserveAssignment).toBe(true);
+			expect(practice.content).toContain("course=pre-calculus-a");
+		}
+		for (const [index, check] of preCalculusACheckIns.entries()) {
+			const item = course.modules
+				.flatMap(module => module.curriculum)
+				.find(
+					candidate => candidate.title === `Check-In #${index + 1}`
+				)!;
+			expect(item.content).toContain(check.problems);
+		}
+	});
+
+	it("rejects missing, duplicate, and unbound insertion targets", () => {
+		const baseline = normalizeRawCourse(
+			"pre-calculus-a",
+			preCalculusACourse
+		);
+		const missing = structuredClone(baseline);
+		missing.modules = missing.modules.filter(
+			module => !module.title.startsWith("PCTA1 ")
+		);
+		expect(() => addPreCalculusACases(missing)).toThrow("found 0");
+		const duplicate = structuredClone(baseline);
+		duplicate.modules.push(structuredClone(duplicate.modules[0]));
+		expect(() => addPreCalculusACases(duplicate)).toThrow("found 2");
+		const marker = structuredClone(baseline);
+		marker.modules[0].curriculum[0].content = "Missing insertion marker";
+		expect(() => addPreCalculusACases(marker)).toThrow(
+			"Expected exactly one **Practice model:**"
+		);
+	});
+
 	it("keeps the two-stage sequence and separates reference appendices", () => {
 		expect(
 			preCalculusACourse.modules

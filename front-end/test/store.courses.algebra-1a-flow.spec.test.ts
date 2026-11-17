@@ -1,12 +1,16 @@
-import { describe, expect, it } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
+import { describe, expect, it } from "vitest";
 import { useCoursesStore } from "@/stores/courses";
-import { algebra1ACourse } from "@/stores/courses/algebra-1a";
+import readings from "@/stores/courses/algebra1ACourseReadingsData.json";
 import { applyAlgebra1APractice } from "@/stores/courses/algebra1APractice";
 import practice from "@/stores/courses/algebra1APracticeData.json";
-import readings from "@/stores/courses/algebra1ACourseReadingsData.json";
-import { mathCourseSlugify } from "@/stores/courses/mathCourseFlow";
+import {
+	algebra1AReadingMethods,
+	applyAuthoredAlgebraMethods
+} from "@/stores/courses/algebra1Readings";
+import { algebra1ACourse } from "@/stores/courses/algebra-1a";
 import { loadRawCourse } from "@/stores/courses/index";
+import { mathCourseSlugify } from "@/stores/courses/mathCourseFlow";
 
 const EXPECTED_MODULE_SEQUENCE = [
 	"Algebra 1A Kick-Off and Placement",
@@ -40,7 +44,7 @@ function requireModule(title: string) {
 	return module;
 }
 
-describe("Algebra 1A learner flow", () => {
+describe("algebra 1A learner flow", () => {
 	it("places the systems checkpoint before the final project", () => {
 		expect(
 			algebra1ACourse.modules
@@ -106,10 +110,10 @@ describe("Algebra 1A learner flow", () => {
 				)
 			).toBe(true);
 		}
-		expect(
-			requireModule("AA17 Master Project: Algebra 1A").curriculum[0]
-				?.content
-		).toContain("Begin only after the systems checkpoint");
+		const capstone = requireModule("AA17 Master Project: Algebra 1A");
+		expect(capstone.curriculum[0]?.content).toContain(
+			"Begin only after the systems checkpoint"
+		);
 	});
 	it("publishes every authored reading and complete practice task without losing prior identities", async () => {
 		setActivePinia(createPinia());
@@ -161,14 +165,12 @@ describe("Algebra 1A learner flow", () => {
 				"[Project self-check](/courses/?asset="
 			);
 		}
-		expect(
-			course.modules
-				.flatMap(module => [
-					...module.curriculum,
-					...module.supplementalProjects
-				])
-				.filter(item => item.preserveInstructions)
-		).toHaveLength(61);
+		const itemIds = course.modules.flatMap(module =>
+			[...module.curriculum, ...module.supplementalProjects].map(
+				item => item.id
+			)
+		);
+		expect(new Set(itemIds).size).toBe(itemIds.length);
 		const raw = await loadRawCourse("algebra-1a");
 		if (!raw) throw new Error("Expected Algebra practice fixture.");
 		const altered = structuredClone(raw);
@@ -181,6 +183,51 @@ describe("Algebra 1A learner flow", () => {
 		);
 		expect(() => applyAlgebra1APractice(altered)).toThrow(
 			"Missing Algebra 1A practice task"
+		);
+	});
+});
+
+describe("algebra 1A historical reading coverage", () => {
+	it("binds all sixteen complete method/example pairs once without replacing the authored cohort", async () => {
+		const course = await loadRawCourse("algebra-1a");
+		expect(algebra1AReadingMethods).toHaveLength(16);
+		for (const entry of algebra1AReadingMethods) {
+			const module = course!.modules.find(
+				module => module.title === entry.moduleTitle
+			)!;
+			const matches = module.curriculum.filter(
+				item =>
+					item.content.includes(entry.method) &&
+					item.content.includes(entry.worked)
+			);
+			expect(matches, entry.target).toHaveLength(1);
+			expect(
+				matches[0].content.split(entry.method),
+				entry.target
+			).toHaveLength(2);
+			expect(matches[0].preserveInstructions).toBe(true);
+		}
+	});
+
+	it("rejects duplicate and misplaced reading targets", () => {
+		const entry = algebra1AReadingMethods[0];
+		const duplicate = structuredClone(algebra1ACourse);
+		const module = duplicate.modules.find(
+			module => module.title === entry.moduleTitle
+		)!;
+		const item = module.curriculum.find(
+			item => item.title === entry.target
+		)!;
+		module.curriculum.push({ ...item });
+		expect(() => applyAuthoredAlgebraMethods(duplicate, [entry])).toThrow(
+			"Missing unique Algebra reading"
+		);
+		module.curriculum = module.curriculum.filter(
+			item => item.title !== entry.target
+		);
+		duplicate.modules[0].curriculum.push(item);
+		expect(() => applyAuthoredAlgebraMethods(duplicate, [entry])).toThrow(
+			"Missing unique Algebra reading"
 		);
 	});
 });

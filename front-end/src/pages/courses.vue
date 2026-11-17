@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed, defineAsyncComponent, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import { isCourseAssetCourse } from "@/modules/courseAssetPreview";
 
 defineOptions({ name: "MathCoursesPage" });
 
@@ -23,7 +24,7 @@ const showAsset = computed(
 	() => mounted.value && typeof route.query.asset === "string"
 );
 const assetCourse = computed(() =>
-	route.query.course === "algebra-1b" ? "algebra-1b" : "algebra-1a"
+	isCourseAssetCourse(route.query.course) ? route.query.course : "algebra-1a"
 );
 const courseNames = [
 	"Early Elementary A: Numbers, Operations, and Measurement",

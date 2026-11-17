@@ -1,0 +1,65 @@
+{
+  "sourceRevision": "10344255d3856efe0cf83d136cbf606c82c795a2",
+  "files": [
+    {
+      "path": "src/stores/courses/earlyElementaryAMaterials.ts",
+      "sha256": "a5f371cdac8f48e182abb8ded07e2b94c103d4572838ca859f48fa94e77310c6"
+    },
+    {
+      "path": "src/stores/courses/earlyElementaryBMaterials.ts",
+      "sha256": "97f0b7d78d8ca1eafbd6c4bad7f40aae9b4ddc5868b2008415cef89a787ca927"
+    },
+    {
+      "path": "src/stores/courses/lateElementaryAMaterials.ts",
+      "sha256": "4084f077367d6db0caba1261578d0cd97e0eff2aab0295f5e86bb2896ad4e446"
+    },
+    {
+      "path": "src/stores/courses/lateElementaryBMaterials.ts",
+      "sha256": "9896b113153a8f2445a39932a0316f20a0fca4bb34abfac41ee7273c94768e03"
+    },
+    {
+      "path": "src/course-assets/early-elementary-a/clock-0830-v1.svg",
+      "sha256": "7bd30981167451d93b934d34db8b07975cc9e48a72d55ac0b7601d516c103c1c"
+    },
+    {
+      "path": "src/course-assets/early-elementary-a/clock-0945-v1.svg",
+      "sha256": "4be91b783f90296100fee6f221cc915678b7de3473649a9805862da9d2389d61"
+    },
+    {
+      "path": "src/course-assets/early-elementary-a/equal-array-v1.svg",
+      "sha256": "d50b0ab005973d797ec48f505d862f2f7a307b84fb135d5cb091d83cda6b12e2"
+    },
+    {
+      "path": "src/course-assets/early-elementary-a/equal-shares-v1.svg",
+      "sha256": "3e9588b503c780d7528da51a78002f4d987543ab1e6b9940ed71af2af508c71e"
+    },
+    {
+      "path": "src/course-assets/early-elementary-a/practice-checks-v1.md",
+      "sha256": "c34959a72b4e7d8a691ab8535daf6958e21ebf1453a04efceb64361171f3634e"
+    },
+    {
+      "path": "src/course-assets/early-elementary-a/practice-checks-v2.md",
+      "sha256": "d9602f71d9c158f9ca17bebb1cba5fd560de2be36e1cda0fdb757abc467ff0a1"
+    },
+    {
+      "path": "src/course-assets/early-elementary-b/practice-checks-v1.md",
+      "sha256": "e366a52c2d8bc8ec3e9439450a019da1205e90d79e0657326cc306b9d5d1c646"
+    },
+    {
+      "path": "src/course-assets/late-elementary-a/light-rotation-v1.svg",
+      "sha256": "956ae1837d52dd5ad41440f51c5446fde598ad849bbe7e63a9e1d74e6d7045c0"
+    },
+    {
+      "path": "src/course-assets/late-elementary-a/practice-checks-v1.md",
+      "sha256": "63c881d463ecf29cc33b09f2d00ba5a8390d31e46b7812a02ab41ac58c7e4912"
+    },
+    {
+      "path": "src/course-assets/late-elementary-a/triangle-groups-v1.svg",
+      "sha256": "159c6031a0de8b3adf64ab67ca0366f84542bf1894217b8282848830463aaed1"
+    },
+    {
+      "path": "src/course-assets/late-elementary-b/practice-checks-v1.md",
+      "sha256": "3b39603c4ca7707eee494e20fb5b89abf30e4221ba1eea7a83cee2ca648865b6"
+    }
+  ]
+}

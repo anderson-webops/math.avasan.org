@@ -1,3 +1,19 @@
+import {
+	algebraCourseAssetCourseIds,
+	algebraCourseAssetSources,
+	algebraCourseImageUrls
+} from "./courseAssetSourcesAlgebra";
+import {
+	CALCULUS_ASSET_LOADERS,
+	CALCULUS_COURSE_IDS
+} from "./courseAssetSourcesCalculus";
+import { elementaryCourseAssetSources } from "./courseAssetSourcesElementary";
+import {
+	prealgebraCourseAssetSources,
+	prealgebraCourseIds,
+	prealgebraCourseImageUrls
+} from "./courseAssetSourcesPrealgebra";
+
 export interface ParsedCourseAssetUrl {
 	hash: string;
 	path: string;
@@ -11,8 +27,48 @@ const ASSET_LOADERS: Record<string, () => Promise<string>> = {
 	"/course-assets/algebra-1a/practice-checks-v1.md": () =>
 		import("../course-assets/algebra-1a/practice-checks-v1.md?raw").then(
 			module => module.default
-		)
+		),
+	...elementaryCourseAssetSources.markdown,
+	...algebraCourseAssetSources,
+	...CALCULUS_ASSET_LOADERS,
+	...prealgebraCourseAssetSources
 };
+
+export const courseAssetCourseIds = [
+	"algebra-1a",
+	"algebra-1b",
+	...elementaryCourseAssetSources.courseIds,
+	...algebraCourseAssetCourseIds,
+	...CALCULUS_COURSE_IDS,
+	...prealgebraCourseIds
+] as const;
+export type CourseAssetCourseId = (typeof courseAssetCourseIds)[number];
+
+export function isCourseAssetCourse(
+	value: unknown
+): value is CourseAssetCourseId {
+	return (
+		typeof value === "string" &&
+		(courseAssetCourseIds as readonly string[]).includes(value)
+	);
+}
+
+export async function resolveCourseAssetImages(content: string) {
+	const images = Object.entries(elementaryCourseAssetSources.images).filter(
+		([source]) => content.includes(`](${source})`)
+	);
+	for (const [source, loadUrl] of images) {
+		const url = await loadUrl();
+		content = content.replaceAll(`](${source})`, `](${url})`);
+	}
+	for (const [source, url] of Object.entries({
+		...prealgebraCourseImageUrls,
+		...algebraCourseImageUrls
+	})) {
+		content = content.replaceAll(`](${source})`, `](${url})`);
+	}
+	return content;
+}
 const MAX_ASSET_BYTES = 64 * 1024;
 const assetCache = new Map<string, Promise<string>>();
 
@@ -51,7 +107,7 @@ export function courseAssetViewerUrl(
 ) {
 	if (!parseCourseAssetUrl(value))
 		throw new Error("Unsupported course resource.");
-	if (!["algebra-1a", "algebra-1b"].includes(courseId))
+	if (!isCourseAssetCourse(courseId))
 		throw new Error("Unsupported self-check course.");
 	const query = new URLSearchParams({ asset: value });
 	query.set("course", courseId);

@@ -14,6 +14,7 @@ declare module 'vue' {
     CourseAssetReader: typeof import('./components/CourseAssetReader.vue')['default']
     CourseAssignmentContent: typeof import('./components/CourseAssignmentContent.vue')['default']
     CourseExplorer: typeof import('./components/CourseExplorer.vue')['default']
+    CourseMarkdownContent: typeof import('./components/CourseMarkdownContent.vue')['default']
     GraphSketcherWorkspace: typeof import('./components/GraphSketcherWorkspace.vue')['default']
     LazyMarkdownContent: typeof import('./components/LazyMarkdownContent.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

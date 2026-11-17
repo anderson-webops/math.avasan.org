@@ -1,4 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { createPinia, setActivePinia } from "pinia";
+import { useCoursesStore } from "@/stores/courses";
+import {
+	geometryCaseTracks,
+	addGeometryCases
+} from "@/stores/courses/geometryCases";
 import { geometryBCourse } from "@/stores/courses/geometry-b";
 
 const EXPECTED_MODULE_SEQUENCE = [
@@ -38,9 +44,10 @@ describe("Geometry B learner flow", () => {
 			candidate => candidate.kind !== "appendix"
 		)) {
 			expect(module.estimatedTime, module.title).toMatch(/session/);
-			expect(module.keyBlocks?.length, module.title).toBeGreaterThanOrEqual(
-				5
-			);
+			expect(
+				module.keyBlocks?.length,
+				module.title
+			).toBeGreaterThanOrEqual(5);
 			expect(
 				module.curriculum.every(item => item.learningPath === "core"),
 				module.title
@@ -75,9 +82,7 @@ describe("Geometry B learner flow", () => {
 	});
 
 	it("promotes the design defense and documents the two real gates", () => {
-		const capstone = requireModule(
-			"Check-In #2 and Geometry B Capstone"
-		);
+		const capstone = requireModule("Check-In #2 and Geometry B Capstone");
 		expect(capstone.curriculum.map(item => item.title)).toEqual([
 			"Transformations and Solids Readiness Check",
 			"Geometry B Capstone Synthesis",
@@ -86,8 +91,67 @@ describe("Geometry B learner flow", () => {
 		expect(
 			geometryBCourse.developmentMetadata?.assessmentCadence
 		).toHaveLength(2);
-		expect(capstone.curriculum[0]?.content).toContain(
-			"required capstone"
+		expect(capstone.curriculum[0]?.content).toContain("required capstone");
+	});
+});
+
+describe("complete Geometry B baseline", () => {
+	it("retains all topic methods, examples, supplied exercises and capstone changed cases", async () => {
+		setActivePinia(createPinia());
+		const course = (await useCoursesStore().loadCourseById("geometry-b"))!;
+		const corpus = course.modules
+			.flatMap(module => [
+				...module.curriculum,
+				...module.supplementalProjects
+			])
+			.map(item => item.content)
+			.join("\n");
+		for (const unit of geometryCaseTracks.b.cases) {
+			for (const piece of unit.reading.split(
+				/(?=This course uses|A radius to a tangent)/
+			))
+				expect(corpus).toContain(piece.trim());
+			expect(corpus).toContain(unit.worked);
+			for (const problem of unit.problems)
+				expect(corpus).toContain(problem);
+		}
+		for (const review of geometryCaseTracks.b.reviews) {
+			for (const problem of review.problems)
+				expect(corpus).toContain(problem);
+		}
+		const capstone = course.modules.find(module =>
+			module.title.includes("and Geometry B Capstone")
+		)!;
+		const optional = capstone.supplementalProjects.find(item =>
+			item.title.endsWith("Changed-Case Review")
+		)!;
+		expect(optional.learningPath ?? "choice").toBe("choice");
+		expect(optional.content).toContain("A sign has vertices A=(0,0)");
+		expect(corpus).not.toContain("http:");
+	});
+	it("fails missing topics and duplicate module bindings", () => {
+		const missing = structuredClone(geometryBCourse);
+		missing.modules[0].curriculum = [];
+		expect(() => addGeometryCases(missing, "b")).toThrow("Missing");
+		const duplicate = structuredClone(geometryBCourse);
+		duplicate.modules.push(structuredClone(duplicate.modules[0]));
+		expect(() => addGeometryCases(duplicate, "b")).toThrow("Duplicate");
+		const duplicateReview = structuredClone(geometryBCourse);
+		const reviewModule = duplicateReview.modules.find(module =>
+			module.curriculum.some(item =>
+				item.title.endsWith("Readiness Check")
+			)
+		)!;
+		const original = reviewModule.curriculum.find(item =>
+			item.title.endsWith("Readiness Check")
+		)!;
+		reviewModule.curriculum.push({
+			...original,
+			id: "duplicate-review",
+			title: "Duplicate Readiness Check"
+		});
+		expect(() => addGeometryCases(duplicateReview, "b")).toThrow(
+			"duplicate Geometry review"
 		);
 	});
 });

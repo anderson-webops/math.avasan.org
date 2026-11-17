@@ -1,4 +1,5 @@
 import type { RawCourse } from "./types";
+import { courseAssetViewerUrl } from "@/modules/courseAssetSourcesPrealgebra";
 import { configureMathCourseFlow } from "./mathCourseFlow";
 import { pendingStaticMediaNotice, staticMediaUrl } from "./staticMedia";
 
@@ -47,11 +48,13 @@ function overview({
 }
 
 function project({
+	answerSection,
 	evidence,
 	goal,
 	steps,
 	title
 }: {
+	answerSection?: string;
 	evidence: string;
 	goal: string;
 	steps: string[];
@@ -61,7 +64,15 @@ function project({
 		`**Project goal:** ${goal}`,
 		`**Work path:**\n${steps.map((step, index) => `${index + 1}. ${step}`).join("\n")}`,
 		`**Evidence of completion:** ${evidence}`,
-		`**Project reference:** ${title}`
+		`**Project reference:** ${title}`,
+		...(answerSection
+			? [
+					`[Project self-check](${courseAssetViewerUrl(
+						`/course-assets/pre-algebra-a/practice-checks-v1.md#${answerSection}`,
+						"Project self-check"
+					)})`
+				]
+			: [])
 	].join("\n\n");
 }
 
@@ -102,12 +113,12 @@ export const preAlgebraACourse: RawCourse = {
 						steps: [
 							"Create a store name and budget plan with a starting investment of $3000.",
 							"Write and evaluate an expression for inventory, moving carts, and advertising expenses.",
-							"Represent floor-repair depths with negative numbers and absolute value.",
+							"Represent floor-repair depths with negative numbers and sum their absolute values in feet. Hole areas are not supplied, so the depths do not determine a concrete volume.",
 							"Choose items from plant, tool, pot, and miscellaneous categories, then compare the category fractions.",
 							"Divide four tenths of a bag of soil across three garden sections and record the result as a fraction."
 						],
 						evidence:
-							"The finished plan shows the spending expression, money remaining, absolute concrete amount, ordered category fractions, and soil-per-section fraction."
+							"The finished plan shows the spending expression, money remaining, total absolute repair depth in feet, ordered category fractions, and soil-per-section fraction."
 					}),
 					sourceAnchor({
 						title: "Starting a Gardening Business",
@@ -120,13 +131,11 @@ export const preAlgebraACourse: RawCourse = {
 						],
 						evidence: [
 							"Spending expression and remaining budget are labeled.",
-							"Absolute concrete amount treats depth as distance from the floor surface.",
+							"The total absolute repair depth is 2×abs(-4)+3×abs(-2)=14 feet; a concrete volume would also require each hole's area.",
 							"Category fractions are ordered, combined, and rewritten as a mixed number."
 						]
-					}),
-					pendingStaticMediaNotice(KICKOFF_INVENTORY)
-				].join("\n\n"),
-				staticMediaUrl(KICKOFF_INVENTORY)
+					})
+				].join("\n\n")
 			),
 			lesson(
 				"Project: Growing the Gardening Business",
@@ -160,9 +169,8 @@ export const preAlgebraACourse: RawCourse = {
 							"Exponent and scientific-notation corrections explain whether the receipt value is reasonable."
 						]
 					}),
-					pendingStaticMediaNotice(KICKOFF_PRICING)
-				].join("\n\n"),
-				staticMediaUrl(KICKOFF_PRICING)
+					"**Pricing exercise:**\n\nUse these prices per item: succulent $8; flower bundle $18; wheelbarrow $120; gardening gloves $6; basic plant pot $12; multi-pot plant stand $45; decorative garden lights $20 per pair; small garden tool shed $240. The quantities in the reference details give first-week revenue.\n\nThe wheelbarrow costs $80 and the gloves cost $4 per pair. For this exercise, the 30% profit target means markup on cost: (selling price-cost)/cost >= 0.30. Profit margin instead divides by selling price and is a different percentage. Startup expenses are $1500+3×$400+$700; the $3000 investment is the starting budget, so a negative remaining balance represents a shortfall.\n\nFor the flower-bundle exponent calculation, each box contains 5^2 bundles and an order contains 3^2 boxes. For the receipt calculation, the amount is 0.000000000265×10^9 dollars and the missing term satisfies 2^(-4)×4^2+q=33.52."
+				].join("\n\n")
 			)
 		]),
 		module(
@@ -280,7 +288,10 @@ export const preAlgebraACourse: RawCourse = {
 						title: "Ratios compare quantities, proportions state two ratios are equal, conversions change units, and distance problems connect d = rt.",
 						concepts: [
 							"A ratio compares two quantities in a fixed relationship, such as cups of flour to batches of cookies.",
-							"A proportion uses equivalent ratios to solve for an unknown value.",
+							"A proportion uses equivalent ratios to solve for an unknown value. For k/6 = 4/3, multiply both sides by 6: k = 8. Substitute to check 8/6 = 4/3.",
+							"For 6/k = 4/3, require k != 0. Multiply both sides by 3k to get 18 = 4k, so k = 9/2. Check 6/(9/2) = 4/3. The position of the unknown changes the solution.",
+							"A scale factor is new length divided by corresponding original length. Scaling 6 cm to 8 cm gives 4/3; multiply each matching length by that factor. A GCF or a difference is not a scale factor.",
+							"Keep ratios in the same quantity order and show the same operation on both sides. Multiply or divide by a nonzero value when preserving an equivalent equation; multiplication by zero can lose information. Cancel common factors in products, not individual terms in a sum.",
 							"Unit conversion multiplies by a form of 1 so the value stays the same while the unit changes.",
 							"Distance-rate-time problems use d = rt and can be reorganized to find distance, rate, or time."
 						],
@@ -399,8 +410,9 @@ export const preAlgebraACourse: RawCourse = {
 							"A positive whole-number exponent counts repeated multiplication by the same base.",
 							"When multiplying powers with the same base, add exponents; when dividing powers with the same base, subtract exponents.",
 							"A zero exponent equals 1 for any nonzero base because the quotient rule leaves no factors behind.",
-							"A negative exponent represents a reciprocal power.",
-							"A square root asks which value squared gives the radicand; fractional exponents connect roots and powers."
+							"A negative exponent represents a reciprocal power with a nonzero base. Division also requires a nonzero denominator.",
+							"The square-root symbol denotes the nonnegative principal root: sqrt(49) = 7. Solving x^2 = 49 instead gives x = 7 or x = -7. For real x, sqrt(x^2) = abs(x). Real square roots require a nonnegative radicand.",
+							"Nested roots and products differ: sqrt(sqrt(16)) = 2, while sqrt(16) times sqrt(16) = 16. Fractional powers involving even roots retain the real-domain restriction; do not apply root rules across a sum."
 						],
 						practice:
 							"Rewrite each expression in expanded form first, then simplify with exponent rules and compare the two paths.",
@@ -410,7 +422,7 @@ export const preAlgebraACourse: RawCourse = {
 				lesson(
 					"Scientific Notation and Scale",
 					overview({
-						title: "Scientific notation writes very large or very small values as a number between 1 and 10 times a power of 10.",
+						title: "For nonzero values, scientific notation uses a coefficient whose absolute value is at least 1 and below 10, multiplied by an integer power of 10.",
 						concepts: [
 							"Positive powers of 10 move the decimal point to create large values.",
 							"Negative powers of 10 move the decimal point to create small values.",
@@ -419,7 +431,7 @@ export const preAlgebraACourse: RawCourse = {
 						],
 						practice:
 							"Convert ordinary notation to scientific notation and back, then compare two values by coefficient and exponent.",
-						check: "A correct conversion keeps the coefficient between 1 and 10 and keeps the same value."
+						check: "A correct conversion retains the original sign and value, with 1 <= abs(coefficient) < 10 for a nonzero quantity."
 					})
 				)
 			],
@@ -428,32 +440,34 @@ export const preAlgebraACourse: RawCourse = {
 					"Project: Symptom Spree",
 					project({
 						title: "PAA22 Module Project: Symptom Spree",
-						goal: "Use exponent rules, roots, and scale reasoning in a symptom-spread or population-growth scenario.",
+						answerSection: "symptom-spree-model-checks",
+						goal: "Compare fictional, dimensionless models using exponent rules, roots, and scale reasoning.",
 						steps: [
-							"Choose a starting amount and a repeated growth or shrink factor.",
-							"Write an exponential expression for several stages.",
-							"Use exponent rules to simplify or compare stages.",
-							"Translate one large or small value into scientific notation.",
-							"Explain what the model captures and what real-world detail it leaves out."
+							"For elapsed values 10, 20, 30, 40 and 50, the fictional scores are 4, 16, 64, 256 and 1024. Define n as elapsed value divided by 10, write the score as a power and predict the score at elapsed value 60.",
+							"In a separate comparison, use positive dimensionless input t and baseline t^4. Model A is (t^4)^(1/5)×t; B is sqrt(t^4)/t^(3/2); C is (t^4×t^(-1))^(1/7); D is (t^4)^3/t^(2/3). Simplify each to one power of t, showing the rule at each step.",
+							"Compare the four models at t=1 and rank their outputs for t>1. Check whether the ordering changes for 0<t<1, using an exact power or a calculator value as evidence.",
+							"Write the predicted table score at elapsed value 60 in scientific notation. Explain why the table's exponential rule 4^n and the comparison baseline t^4 are different models.",
+							"State the positive-input restriction and keep the conclusions about these fictional mathematical scores; they are not clinical predictions."
 						],
 						evidence:
-							"The model includes exponent expressions, at least one simplified comparison, a scientific-notation value, and a sentence about model limits."
+							"The comparison includes the table rule and prediction, four simplified powers, rankings on both positive-input intervals, scientific notation, and the model/domain distinction."
 					})
 				),
 				lesson(
 					"Project: Red Hot Chilli Chicken",
 					project({
 						title: "PAA23 Module Project: Red Hot Chilli Chicken",
-						goal: "Use exponents, roots, ratios, and scale to model a spicy-food challenge or recipe-growth scenario.",
+						answerSection: "red-hot-chilli-chicken-sales-checks",
+						goal: "Use order proportions, rates and powers to analyze the supplied sandwich-sales model.",
 						steps: [
-							"Define a spice scale or recipe scale with a starting value.",
-							"Use powers or roots to model repeated increases, decreases, or comparisons.",
-							"Convert one extreme value into scientific notation.",
-							"Compare two recipes or challenge levels using ratios.",
-							"Write a recommendation backed by the calculations."
+							"Use these sandwich orders: Dani California 615, Tell Me Baby 123, Californication 246 and The Classic 369, totaling 1353. Calculate each share as a simplified fraction, decimal and percent, then check that the shares total one.",
+							"A proposed new sandwich could interest one third of the existing Classic customers. Calculate that potential audience separately from a projected total of 2706 orders. If the original product shares stay constant when the total doubles, calculate each product's projected orders and state that assumption.",
+							"Compare two pop-up trials: 123 new orders over two weeks and 246 new orders over three weeks. Calculate orders per week before recommending a location.",
+							"For the separate idealized growth model, month n has 53^n orders, starting with n=1. Find the first whole-number month exceeding one million and one billion. Show neighboring powers to verify each threshold and write one large result in scientific notation.",
+							"Explain why the idealized power model does not establish an actual demand forecast: its repeated factor and unlimited capacity are assumptions."
 						],
 						evidence:
-							"The recommendation includes a scale definition, exponent or root calculation, scientific notation, ratio comparison, and a reasonableness check."
+							"The analysis includes four order shares, the potential audience and conditional projections, both weekly rates, checked month thresholds, scientific notation and a limitation of the growth model."
 					})
 				)
 			]
@@ -490,7 +504,7 @@ export const preAlgebraACourse: RawCourse = {
 					references: [
 						"The capstone asks for one course module or concept that was especially challenging or exciting.",
 						"The final explanation covers purpose, real-world application, and at least 2 student-created problems using course content.",
-						"The current version keeps the same reflection and created-problem requirements without requiring platform-specific recording tools."
+						"The explanation may use text, diagrams, speech or a recording."
 					],
 					evidence: [
 						"Selected concept is named and connected to a real-world use.",
@@ -571,17 +585,17 @@ export const preAlgebraACourse: RawCourse = {
 						sourceAnchor({
 							title: "Symptom Spree",
 							references: [
-								"Michelle Lee's radiology-resident context compares side effects from x-rays, MRIs, PET scans, CT scans, and CAT scans.",
-								"The x-ray symptom-score table uses 10, 20, 30, 40, and 50 minutes with scores 4, 16, 64, 256, and 1024.",
-								"The x-ray baseline is modeled as t^4.",
-								"PET scans raise the baseline to the 1/5 power and multiply by t.",
-								"MRIs take the square root and divide by t^(3/2), CT scans multiply by t^-1 and take the 7th root, and CAT scans raise to the 3rd power then divide by t^(2/3).",
+								"Michelle Lee's radiology work provides the career context for this exercise. The scores are fictional, dimensionless mathematical quantities; interpret their growth within the stated formulas and positive-input domain.",
+								"A fictional table pairs elapsed values 10, 20, 30, 40 and 50 with scores 4, 16, 64, 256, and 1024. With step n equal to elapsed value divided by 10, the table follows 4^n.",
+								"For a separate algebra comparison, t is a positive dimensionless input and the baseline is t^4. This is a different rule from the table above.",
+								"Model A raises the baseline to the 1/5 power and multiplies by t.",
+								"Model B takes the baseline square root and divides by t^(3/2). Model C multiplies the baseline by t^(-1), then takes the seventh root. Model D cubes the baseline, then divides by t^(2/3).",
 								"Desmos is used as an optional graphing tool for comparing the trends."
 							],
 							evidence: [
-								"Research notes list 3 to 5 possible side effects from x-rays and PET scans.",
+								"The comparison states t>0 and simplifies each model using exponent rules.",
 								"Growth-pattern explanation connects the table to exponential notation.",
-								"Final growth-rate expressions and graph comparisons identify the most concerning trend."
+								"Final expressions and graph comparisons distinguish the mathematical growth rates for the stated positive inputs."
 							]
 						}),
 						sourceAnchor({
@@ -779,3 +793,11 @@ configureMathCourseFlow(preAlgebraACourse, {
 	],
 	appendixTitles: ["Pre-Algebra A Reference Archive", "Pending Static Assets"]
 });
+
+const capstoneReference = preAlgebraACourse.modules
+	.flatMap(module => module.curriculum)
+	.find(item => item.title === "Pre-Algebra A Capstone Reference Map");
+if (!capstoneReference)
+	throw new Error("Missing Pre-Algebra A capstone reference");
+capstoneReference.contentKind = "reading";
+capstoneReference.preserveInstructions = true;

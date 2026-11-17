@@ -35,3 +35,8 @@ Dockerfile text eol=lf
 *.webp binary
 *.woff2 binary
 *.tgz binary
+
+front-end/src/course-assets/** -text -eol
+front-end/src/course-assets/early-elementary-b/practice-checks-v1.md whitespace=-blank-at-eof
+front-end/src/course-assets/late-elementary-a/practice-checks-v1.md whitespace=-blank-at-eof
+front-end/src/course-assets/late-elementary-b/practice-checks-v1.md whitespace=-blank-at-eof

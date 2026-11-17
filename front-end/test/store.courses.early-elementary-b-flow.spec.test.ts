@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { earlyElementaryBMaterials } from "@/stores/courses/earlyElementaryBMaterials";
+import { expectElementaryMaterials } from "./elementaryMaterialAssertions";
 import { loadRawCourse } from "@/stores/courses/index";
 import { earlyElementaryMathBCourse } from "@/stores/courses/elementary-math-courses";
 
@@ -26,7 +28,7 @@ const EXPECTED_MODULE_SEQUENCE = [
 
 function requireModule(title: string) {
 	const module = earlyElementaryMathBCourse.modules.find(
-		candidate => candidate.title === title
+		(candidate) => candidate.title === title
 	);
 	if (!module)
 		throw new Error(`Expected Early Elementary B module ${title}.`);
@@ -36,11 +38,11 @@ function requireModule(title: string) {
 describe("Early Elementary B math learner flow", () => {
 	it("keeps the operation-to-geometry progression without asset bookkeeping", () => {
 		expect(
-			earlyElementaryMathBCourse.modules.map(module => module.title)
+			earlyElementaryMathBCourse.modules.map((module) => module.title)
 		).toEqual(EXPECTED_MODULE_SEQUENCE);
 		expect(
 			earlyElementaryMathBCourse.modules.some(
-				module => module.title === "Pending Static Assets"
+				(module) => module.title === "Pending Static Assets"
 			)
 		).toBe(false);
 	});
@@ -53,11 +55,11 @@ describe("Early Elementary B math learner flow", () => {
 				module.title
 			).toBeGreaterThanOrEqual(5);
 			expect(
-				module.curriculum.every(item => item.learningPath === "core"),
+				module.curriculum.every((item) => item.learningPath === "core"),
 				module.title
 			).toBe(true);
 			expect(
-				module.supplementalProjects.every(item =>
+				module.supplementalProjects.every((item) =>
 					["choice", "challenge"].includes(item.learningPath ?? "")
 				),
 				module.title
@@ -68,7 +70,12 @@ describe("Early Elementary B math learner flow", () => {
 		}
 	});
 
-	it("preserves every authored activity while making extensions optional", () => {
+	it("preserves every authored activity while making extensions optional", async () => {
+		await expectElementaryMaterials(
+			"early-elementary-b-math",
+			earlyElementaryMathBCourse,
+			earlyElementaryBMaterials
+		);
 		const requiredCount = earlyElementaryMathBCourse.modules.reduce(
 			(total, module) => total + module.curriculum.length,
 			0
@@ -83,7 +90,7 @@ describe("Early Elementary B math learner flow", () => {
 		expect(
 			requireModule(
 				"EEB8 Module Project: Using Science For Good"
-			).curriculum.map(item => item.title)
+			).curriculum.map((item) => item.title)
 		).toEqual([
 			"Concepts: Using Science For Good",
 			"Fritz Four-Week Dosage Budget",
@@ -92,7 +99,7 @@ describe("Early Elementary B math learner flow", () => {
 		expect(
 			requireModule("EEB17 Module Project: 2001: A Warehouse Odyssey")
 				.curriculum.slice(1)
-				.every(item =>
+				.every((item) =>
 					item.content.includes("**Completion evidence:**")
 				)
 		).toBe(true);
@@ -114,7 +121,7 @@ describe("Early Elementary B math learner flow", () => {
 		expect(course).not.toBeNull();
 
 		const text = JSON.stringify(
-			course!.modules.filter(module => module.kind !== "appendix")
+			course!.modules.filter((module) => module.kind !== "appendix")
 		);
 		for (const filename of [
 			"checkin2_app_0.png",
@@ -127,7 +134,7 @@ describe("Early Elementary B math learner flow", () => {
 		}
 		expect(
 			course!.modules.find(
-				module => module.title === "Pending Source Media Inventory"
+				(module) => module.title === "Pending Source Media Inventory"
 			)?.kind
 		).toBe("appendix");
 	});

@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
+import {
+	algebra2Checkpoint,
+	algebra2Checkpoints
+} from "@/stores/courses/algebra2Checkpoints";
+import {
+	algebra2ReadingMethods,
+	algebra2Readings,
+	applyAlgebra2Readings
+} from "@/stores/courses/algebra2Readings";
 import { algebra2ACourse } from "@/stores/courses/algebra-2a";
+import { loadRawCourse } from "@/stores/courses/index";
 
 const EXPECTED_MODULE_SEQUENCE = [
 	"ALA1 Complex Numbers",
@@ -27,7 +37,7 @@ function requireModule(title: string) {
 	return module;
 }
 
-describe("Algebra 2A learner flow", () => {
+describe("algebra 2A learner flow", () => {
 	it("adds a synthesis capstone after all three readiness gates", () => {
 		expect(
 			algebra2ACourse.modules
@@ -46,9 +56,10 @@ describe("Algebra 2A learner flow", () => {
 			candidate => candidate.kind !== "appendix"
 		)) {
 			expect(module.estimatedTime, module.title).toMatch(/session/);
-			expect(module.keyBlocks?.length, module.title).toBeGreaterThanOrEqual(
-				5
-			);
+			expect(
+				module.keyBlocks?.length,
+				module.title
+			).toBeGreaterThanOrEqual(5);
 			expect(
 				module.curriculum.every(item => item.learningPath === "core"),
 				module.title
@@ -92,9 +103,79 @@ describe("Algebra 2A learner flow", () => {
 		expect(capstone.curriculum[0]?.content).toContain(
 			"Build and justify two candidate models"
 		);
-		expect(capstone.supplementalProjects.map(item => item.learningPath)).toEqual(
-			["choice", "challenge"]
-		);
+		expect(
+			capstone.supplementalProjects.map(item => item.learningPath)
+		).toEqual(["choice", "challenge"]);
 		expect(capstone.curriculum[0]?.content).toContain("Algebra 2B");
+	});
+});
+
+describe("algebra 2A historical baseline", () => {
+	it("retains seventeen methods, twenty-seven classified readings and three complete checkpoints", async () => {
+		const course = (await loadRawCourse("algebra-2a"))!;
+		const methods = algebra2ReadingMethods.filter(
+			entry => entry.courseId === "algebra-2a"
+		);
+		const readings = algebra2Readings.filter(
+			entry => entry.courseId === "algebra-2a"
+		);
+		expect(methods).toHaveLength(17);
+		expect(readings).toHaveLength(27);
+		for (const entry of methods) {
+			const module = course.modules.find(
+				module => module.title === entry.moduleTitle
+			)!;
+			expect(
+				module.curriculum.filter(
+					item =>
+						item.content.includes(entry.methods) &&
+						item.content.includes(entry.worked)
+				),
+				entry.target
+			).toHaveLength(1);
+		}
+		for (const entry of readings) {
+			const module = course.modules.find(
+				module => module.title === entry.moduleTitle
+			)!;
+			const item = module[entry.section].find(
+				item => item.id === entry.id
+			)!;
+			expect(item, entry.title).toBeDefined();
+			expect(item.contentKind).toBe("reading");
+			expect(item.preserveInstructions).toBe(true);
+		}
+		const checkpoints = algebra2Checkpoints.filter(
+			entry => entry.course === "algebra-2a"
+		);
+		expect(checkpoints).toHaveLength(3);
+		for (const entry of checkpoints) {
+			const module = course.modules.find(
+				module => module.title === entry.moduleTitle
+			)!;
+			const review = module.curriculum.find(item =>
+				item.title.includes("Representative Review Problems")
+			)!;
+			expect(review.content).toBe(
+				algebra2Checkpoint(entry.course, entry.moduleTitle)
+			);
+			for (const problem of entry.problems)
+				expect(review.content).toContain(problem);
+			expect(review.content).toContain("course=algebra-2a");
+		}
+	});
+
+	it("fails missing or duplicate bindings and keeps its adapter course-gated", () => {
+		const course = structuredClone(algebra2ACourse);
+		const module = course.modules.find(
+			module => module.title === "ALA1 Complex Numbers"
+		)!;
+		module.curriculum.push({ ...module.curriculum[0] });
+		expect(() => applyAlgebra2Readings(course, "algebra-2a")).toThrow(
+			"Missing unique Algebra reading"
+		);
+		const unrelated = { name: "Unrelated", modules: [] };
+		applyAlgebra2Readings(unrelated, "geometry-a");
+		expect(unrelated).toEqual({ name: "Unrelated", modules: [] });
 	});
 });

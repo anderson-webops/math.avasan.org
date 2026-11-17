@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" fill="none" role="img" aria-labelledby="title description">
+<title id="title">Probability and counting</title><desc id="description">The joint probability uses a conditional factor; independent events permit ordinary multiplication. The coin and die examples assume fairness and independence.</desc>
+<rect width="1200" height="720" fill="#f8fafc"/>
+<rect x="24" y="24" width="1152" height="672" rx="28" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+<text x="600" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#0f172a">Probability and Counting Reference</text>
+<text x="600" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#475569">Sample spaces, compound rules, two-way tables, and counting methods.</text>
+
+<rect x="54" y="122" width="330" height="520" rx="20" fill="#eff6ff" stroke="#93c5fd"/>
+<text x="219" y="156" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#1d4ed8">Sample space: 3 coin flips</text>
+<rect x="96" y="194" width="246" height="324" rx="16" fill="#ffffff" stroke="#bfdbfe"/>
+<text x="219" y="238" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#334155">HHH, HHT, HTH, HTT</text>
+<text x="219" y="286" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#334155">THH, THT, TTH, TTT</text>
+<text x="219" y="356" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#1d4ed8">At least two heads = 4 outcomes</text>
+<text x="219" y="396" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#1d4ed8">P(at least two heads) = 4/8 = 1/2</text>
+
+<rect x="435" y="122" width="330" height="520" rx="20" fill="#ecfdf5" stroke="#86efac"/>
+<text x="600" y="156" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#15803d">Core rules</text>
+<text x="600" y="246" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#166534">P(A and B) = P(A) P(B | A)</text>
+<text x="600" y="294" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#166534">or -> add disjoint events</text>
+<text x="600" y="342" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#166534">not -> subtract from 1</text>
+<text x="600" y="422" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#166534">Four heads in a row: (1/2)^4 = 1/16</text>
+<text x="600" y="462" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#166534">Not rolling a 5: 1 - 1/6 = 5/6</text>
+
+<rect x="816" y="122" width="330" height="520" rx="20" fill="#fff7ed" stroke="#fdba74"/>
+<text x="981" y="156" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#c2410c">Two-way table and counting</text>
+<rect x="858" y="214" width="246" height="184" rx="12" fill="#ffffff" stroke="#fed7aa"/>
+<line x1="940" y1="214" x2="940" y2="398" stroke="#fdba74"/>
+<line x1="1018" y1="214" x2="1018" y2="398" stroke="#fdba74"/>
+<line x1="858" y1="268" x2="1104" y2="268" stroke="#fdba74"/>
+<line x1="858" y1="332" x2="1104" y2="332" stroke="#fdba74"/>
+<text x="979" y="244" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#7c2d12">Dog</text>
+<text x="1060" y="244" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#7c2d12">Cat</text>
+<text x="896" y="302" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#7c2d12">Discord</text>
+<text x="896" y="366" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#7c2d12">Skype</text>
+<text x="979" y="302" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#334155">40</text>
+<text x="1060" y="302" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#334155">210</text>
+<text x="979" y="366" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#334155">78</text>
+<text x="1060" y="366" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#334155">105</text>
+<text x="981" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#9a3412">P(n, r) = n! / (n - r)!</text>
+<text x="981" y="506" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#9a3412">C(n, r) = n! / (r!(n - r)!)</text>
+<text x="981" y="556" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#7c2d12">Use row or column conditionals to compare subgroups fairly.</text>
+<text x="600" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#334155">For P(A) &gt; 0; independent: P(A)P(B)</text>
+<text x="600" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#334155">Fair independent flips and a fair die</text>
+</svg>

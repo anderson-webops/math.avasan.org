@@ -7,6 +7,7 @@ import { lessonContentSections } from "@/modules/courseLessonPresentation";
 function createModule(id = "module"): CourseModule {
 	return {
 		id,
+		aliases: [`historical-${id}`],
 		title: "Events",
 		curriculum: [
 			{
@@ -49,9 +50,15 @@ function createViews(initialAnchor = "") {
 
 describe("shared lesson views", () => {
 	it("keeps classroom checks required after an optional hard extension", () => {
-		const sections = lessonContentSections("**Block guide:** Learn event blocks.\n\n**Normal:** Add a click event.\n\n**Hard:** Add sound.\n\n**Check:** Test the click event.\n\n**Explain:** Predict a change.");
+		const sections = lessonContentSections(
+			"**Block guide:** Learn event blocks.\n\n**Normal:** Add a click event.\n\n**Hard:** Add sound.\n\n**Check:** Test the click event.\n\n**Explain:** Predict a change."
+		);
 		expect(sections.map(section => [section.label, section.kind])).toEqual([
-			["Block guide", "learn"], ["Normal", "assignment"], ["Hard", "optional"], ["Check", "assignment"], ["Explain", "assignment"]
+			["Block guide", "learn"],
+			["Normal", "assignment"],
+			["Hard", "optional"],
+			["Check", "assignment"],
+			["Explain", "assignment"]
 		]);
 	});
 	it("keeps an activity's only task with its completion evidence", () => {
@@ -90,7 +97,9 @@ describe("shared lesson views", () => {
 		}
 	});
 	it("opens bookmarked supplemental projects and historical aliases", async () => {
-		const { scope, anchor, views } = createViews("module-old-extension");
+		const { scope, anchor, views } = createViews(
+			"historical-module-old-extension"
+		);
 		try {
 			expect(views.lessonView.value).toBe("supplemental");
 			anchor.value = "module-concepts";

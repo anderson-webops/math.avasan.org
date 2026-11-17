@@ -1,4 +1,5 @@
 import type { RawCourse } from "./types";
+import { applyAlgebra1BReadings } from "./algebra1BReadings";
 import { configureMathCourseFlow } from "./mathCourseFlow";
 import { pendingStaticMediaNotice, staticMediaUrl } from "./staticMedia";
 
@@ -203,8 +204,8 @@ Use the kick-off project as placement rather than as a formal test.
 - Temperature conversion inverse: \`C = (5/9)(F - 32)\`
 - Sundae weight tolerance: \`|w - 2.6| <= 0.1\`, so \`2.5 <= w <= 2.7\`
 - Summer pay model: \`s(w) = 7.65(1.015)^w\`, and \`s(12) ≈ 9.15\`
-- Food-item cost: \`13 * (45/7) ≈ 83.57\`
-- To finish the same order in \`15\` minutes, at least \`3\` employees are needed
+- Seven identical food items cost \`$45\`. At the same unit price, what do \`13\` items cost? \`13 * (45/7) ≈ $83.57\`, rounded to the nearest cent.
+- One employee can prepare an order in \`45\` minutes. Assume equal constant work rates and that employees can split the work without delays. How many employees are needed to finish in at most \`15\` minutes? For a positive whole-number employee count \`n\`, \`T(n) = 45/n\`, so \`45/n <= 15\` gives \`n >= 3\`. At least \`3\` employees are needed; \`2\` take \`22.5\` minutes and \`3\` take \`15\`.
 - Using the estimated line of best fit \`y ≈ 2x\`, predicted sales at \`123\` visitors are \`246\`, so the residual for an actual value of \`221\` is \`221 - 246 = -25\`
 				`.trim(),
 				media.ridePathParabolas
@@ -359,7 +360,7 @@ To combine rational expressions, use a shared denominator exactly as you would w
 			createLesson(
 				"Rationalizing Denominators",
 				`
-Rationalizing removes radicals from the denominator.
+Rationalizing removes radicals from the denominator. Work with real radicals and a nonzero original denominator; simplify perfect-square radicals first.
 
 **Representative results**
 
@@ -371,8 +372,9 @@ Rationalizing removes radicals from the denominator.
 
 **Conjugate rule**
 
-- For a denominator like \`a + sqrt(b)\`, multiply numerator and denominator by \`a - sqrt(b)\`
+- For a denominator like \`a + sqrt(b)\`, multiply numerator and denominator by \`a - sqrt(b)\` only when that conjugate is nonzero.
 - This works because \`(a + sqrt(b))(a - sqrt(b)) = a^2 - b\`
+- If the conjugate is zero, simplify first: \`1/(2 + sqrt(4)) = 1/4\`. Multiplying by \`(2 - sqrt(4))/(2 - sqrt(4))\` would introduce division by zero.
 				`.trim()
 			)
 		]),
@@ -398,7 +400,11 @@ This project applies polynomial modeling to event-planning revenue, cost, and co
 - Competitor revenue: \`R_2(x) = -0.055x^2 + 60x\`
 - Competitor cost: \`C_2(x) = 9x + 600\`
 - Build the competitor profit model and a ratio function comparing Amy's profit to the competitor's
-				`.trim()
+				`.trim(),
+				undefined,
+				[
+					"algebra-1b-ab4-module-project-smart-and-elegant-with-amy-katz-curriculum-project-brief"
+				]
 			),
 			createLesson(
 				"Answer Key and Profit Models",
@@ -758,27 +764,33 @@ This project uses composition and inverse functions to model a fictional wormhol
 
 - invert the composed function to recover the required time for a given power level
 - write the return-trip explanation for the script
-				`.trim()
+				`.trim(),
+				undefined,
+				[
+					"algebra-1b-ab16-module-project-j-t-phone-home-curriculum-project-brief"
+				]
 			),
 			createLesson(
 				"Worked Solution",
 				`
-One consistent choice set is:
+One consistent choice set using linear functions is:
 
-- \`a(t) = t^2\`
-- \`f(a) = 2a\`
-- \`p(f) = ln(f)\`
+- \`a(t) = 2t\`
+- \`f(a) = 3a\`
+- \`p(f) = 4f\`
+
+These are the fictional system's numerical rules. Use \`t >= 0\` and nonnegative outputs. Write \`P(t)\` for the complete pipeline so it is distinct from the final stage \`p(f)\`.
 
 **Composition**
 
-- \`p(t) = ln(2t^2)\`
+- \`P(t) = p(f(a(t))) = 4(3(2t)) = 24t\`
+- At \`t = 2\`, the stages give \`a = 4\`, \`f = 12\`, and \`P = 48\`.
 
 **Inverse**
 
-- Start with \`p = ln(2t^2)\`
-- Exponentiate: \`e^p = 2t^2\`
-- Solve for positive time:
-  - \`t = sqrt(e^p / 2)\`
+- Start with \`P = 24t\` and divide by \`24\`: \`t = P/24\` for \`P >= 0\`.
+- Check both orders: \`24(P/24) = P\` and \`(24t)/24 = t\`.
+- A target output of \`48\` therefore requires \`t = 2\`, matching the forward trace. Negative target outputs are outside this model's range.
 				`.trim(),
 				media.functionComposition
 			)
@@ -905,18 +917,29 @@ Inverse variation has the form \`y = k/x\`.
 			createLesson(
 				"Trend Lines and Interpreting a Fit",
 				`
-Data rarely lands perfectly on a clean function, so this module focuses on choosing a reasonable model and interpreting what it says.
+Compare candidate models using plotted observations and their numerical pattern. A line has a constant change in output for equal input steps. A pure exponential \`y=ab^x\`, with \`a!=0\` and \`b>0\`, has a constant ratio between consecutive outputs at unit input steps. Quadratic and cubic shapes suggest other candidates; verify each proposed model against the observations and account for its residuals.
 
-**Graph-classification reference**
+**Worked example**
 
-- quadratic
-- exponential
-- linear
-- none
-- cubic
-- linear
+For inputs \`0,1,2,3\` and outputs \`2,5,8,11\`, consecutive output changes are all \`3\`. The input-zero value is \`2\`, giving the candidate \`y=3x+2\`. It reproduces all four observations. This is evidence about the supplied values, not proof that an unknown real process stays linear outside them.
 
-Use those labels as a check after classifying each graph by its visible shape. A live graphing tool can recreate nearby examples for extra practice.
+**Model comparison task**
+
+Use these complete classroom datasets. Every series uses the ordered inputs \`x=-2,-1,0,1,2\`; the five outputs in each row follow that order.
+
+| Series | Output values |
+| --- | --- |
+| A | 4, 1, 0, 1, 4 |
+| B | 0.25, 0.5, 1, 2, 4 |
+| C | -3, -1, 1, 3, 5 |
+| D | 1, 4, 0, 3, 2 |
+| E | -8, -1, 0, 1, 8 |
+| F | -5, -2, 1, 4, 7 |
+
+1. Plot and label every supplied point for each series. Keep the source values unchanged.
+2. Compare a linear, quadratic, cubic or pure exponential candidate. For the exact-pattern series, write a rule and verify every listed input. Identify a series without one of these simple exact patterns.
+3. Choose a simple prediction rule for series D and calculate all five residuals as observed minus predicted. Use the errors to explain a limitation of that rule.
+4. Separate interpolation within the supplied input range from extrapolation outside it. Explain why five observations alone do not establish a real-world cause or a unique model.
 				`.trim(),
 				media.costOfLivingTrend
 			),
@@ -934,10 +957,12 @@ Residual = actual value minus predicted value.
   - predicted \`= 3625\`
   - residual \`= 3250 - 3625 = -375\`
 
-**Visual-reference note**
+**Model comparison checks**
 
-- Some residual plots and scatterplots are best handled with a graphing tool built from the provided data.
-- Focus on identifying the residual as vertical prediction error and explaining whether the model overpredicts or underpredicts.
+- A: \`y=x^2\`; B: \`y=2^x\`; C: \`y=2x+1\`; E: \`y=x^3\`; F: \`y=3x+1\`. Substituting each of the five inputs reproduces its series.
+- D has irregular successive changes \`3,-4,3,-1\`. The simple constant prediction \`y=2\` gives residuals \`-1,2,-2,1,0\`, whose squared errors sum to \`10\`. This is one candidate for comparison, not an exact fit or the only possible model.
+- A positive residual means the model underpredicts that observation; a negative residual means it overpredicts. A zero residual at one input checks that point alone.
+- Any conclusion about an unobserved input requires an assumption that the proposed pattern continues. A graphing tool can plot these supplied points, but the values and calculations above are sufficient without an external chart.
 				`.trim()
 			)
 		]),
@@ -959,7 +984,11 @@ This project connects interference patterns, data visualization, and inverse pro
 
 - connect wavelength to mass and speed
 - use the de Broglie relationship to compare atoms with very different masses
-				`.trim()
+				`.trim(),
+					undefined,
+					[
+						"algebra-1b-ab20-module-project-the-mysteries-of-light-with-blake-eaton-curriculum-project-brief"
+					]
 				),
 				createLesson(
 					"Photon Count Graph and Modeling Notes",
@@ -979,16 +1008,19 @@ The photon-count data for this activity is:
 **Selected observations**
 
 - Highest measured count: \`x = 0\`
-- Lowest-likelihood positions in the zero-filled comparison line are the inserted half-step gaps such as \`x = -3.5, -2.5, ..., 3.5\`
-- The candidate best-fit equations use a different scale than the raw count data, so treat them as model-shape comparisons unless the data is rescaled first
+- The smallest supplied count is \`29\` at \`x = 4\`. No measurements are supplied at half-step positions such as \`x = -3.5\`; inserting a zero there would invent an observation.
+- Compare candidate curve shapes on the same position and count scales. These nine samples alone do not establish the positions of unsampled minima or a complete interference pattern.
 
 **de Broglie wavelength**
 
 - \`lambda = h / (mv)\`
-- Carbon atom with \`m = 6.63 x 10^-27\` kg and \`v = 2200\` m/s:
-  - \`lambda ≈ 4.55 x 10^-11\` m
-- Uranium atom with \`m = 3.95 x 10^-22\` kg and \`lambda = 3.9 x 10^-16\` m:
-  - \`v ≈ 4.30 x 10^3\` m/s
+- Planck's constant is \`h = 6.62607015 x 10^-34\` joule seconds. Use the nonrelativistic particle model and masses in kilograms.
+- A carbon-12 atom has mass approximately \`1.99 x 10^-26\` kg. At \`v = 2200\` m/s:
+  - \`lambda = (6.62607015 x 10^-34)/(1.99 x 10^-26 * 2200) ≈ 1.51 x 10^-11\` m
+- A uranium-238 atom has mass approximately \`3.95 x 10^-25\` kg. For \`lambda = 3.9 x 10^-16\` m, rearrange to \`v = h/(m * lambda)\`:
+  - \`v ≈ 4.30 x 10^6\` m/s
+
+Masses are rounded from the NIST isotope masses for [carbon](https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?ascii=ascii&ele=C) and [uranium](https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?ascii=ascii&ele=U), using the [NIST atomic mass unit and Planck constant](https://physics.nist.gov/cuu/pdf/wall_2022.pdf).
 				`.trim(),
 					media.photonCounts
 				),
@@ -1011,9 +1043,12 @@ This project combines exponential growth with quadratic transformations.
 
 **Mission 1: Radiofungi in the Lab**
 
+Let \`t\` be the number of completed weeks and \`s\` the initial modeled fungal-cell count.
+
 - Earth model: \`f(t) = s * 7^t\`
-- To reach \`50,000,000\` bacteria after \`2\` weeks:
-  - \`s = 50,000,000 / 7^2 ≈ 1,020,408\`
+- To reach at least \`50,000,000\` modeled fungal cells after \`2\` weeks:
+  - The equation gives \`s = 50,000,000 / 7^2 ≈ 1,020,408.16\`.
+  - The smallest whole-number starting count meeting the target is \`1,020,409\`; after two weeks it gives \`1,020,409 * 49 = 50,000,041\`.
 - Space model: \`f(t) = s * 5^t\`
 - To reach the same goal in space:
   - \`s = 50,000,000 / 5^2 = 2,000,000\`
@@ -1031,13 +1066,16 @@ This project combines exponential growth with quadratic transformations.
   - \`x = 7 ± sqrt(7)\`
   - about \`4.35\` and \`9.65\`
 
-**Earth-side use cases**
+**Design ideas to investigate**
 
 - nuclear cleanup sites
 - medical or industrial radiation-shielding structures
 - mining or research environments with elevated exposure risk
 				`.trim(),
-				media.radiofungiCanopies
+				media.radiofungiCanopies,
+				[
+					"algebra-1b-ab21-module-project-radiofungi-with-sunanda-sharma-curriculum-project-brief-and-cleaned-answers"
+				]
 			)
 		]),
 		createModule("AB22 Master Project: Algebra 1B", [
@@ -1520,3 +1558,19 @@ configureMathCourseFlow(algebra1BCourse, {
 	],
 	appendixTitles: ["Reference Archive: Algebra 1B"]
 });
+
+applyAlgebra1BReadings(algebra1BCourse);
+
+const dataModelModule = algebra1BCourse.modules.find(module =>
+	module.title.startsWith("AB19 ")
+);
+if (!dataModelModule) {
+	throw new Error("Missing Algebra 1B data-model module.");
+}
+for (const item of dataModelModule.curriculum) {
+	item.preserveInstructions = true;
+	item.contentKind =
+		item.title === "Residuals and Visual References"
+			? "reading"
+			: "assignment";
+}

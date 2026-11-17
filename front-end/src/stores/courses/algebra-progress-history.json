@@ -1,0 +1,514 @@
+{
+	"algebra-1a": {
+		"algebra-1a-algebra-1a-kick-off-and-placement-supplemental-standards-practice-set-kick-off-and-placement": [
+			"algebra-1a-algebra-1a-kick-off-projects-supplemental-algebra-1a-kick-off-projects-standards-practice-set",
+			"algebra-1a-algebra-1a-kick-off-projects-supplemental-standards-practice-set"
+		],
+		"algebra-1a-algebra-1a-kick-off-and-placement-supplemental-modeling-or-error-analysis-kick-off-and-placement": [
+			"algebra-1a-algebra-1a-kick-off-projects-supplemental-algebra-1a-kick-off-projects-modeling-or-error-analysis-project",
+			"algebra-1a-algebra-1a-kick-off-projects-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa1-algebraic-properties-supplemental-standards-practice-set-algebraic-properties": [
+			"algebra-1a-aa1-algebraic-properties-supplemental-aa1-algebraic-properties-standards-practice-set",
+			"algebra-1a-aa1-algebraic-properties-supplemental-standards-practice-set"
+		],
+		"algebra-1a-aa1-algebraic-properties-supplemental-modeling-or-error-analysis-algebraic-properties": [
+			"algebra-1a-aa1-algebraic-properties-supplemental-aa1-algebraic-properties-modeling-or-error-analysis-project",
+			"algebra-1a-aa1-algebraic-properties-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa2-solving-single-step-linear-equations-supplemental-standards-practice-set-solving-single-step-linear-equations": [
+			"algebra-1a-aa2-solving-single-step-linear-equations-supplemental-aa2-solving-single-step-linear-equations-standards-practice-set",
+			"algebra-1a-aa2-solving-single-step-linear-equations-supplemental-standards-practice-set"
+		],
+		"algebra-1a-aa2-solving-single-step-linear-equations-supplemental-modeling-or-error-analysis-solving-single-step-linear-equations": [
+			"algebra-1a-aa2-solving-single-step-linear-equations-supplemental-aa2-solving-single-step-linear-equations-modeling-or-error-analysis-project",
+			"algebra-1a-aa2-solving-single-step-linear-equations-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa3-module-project-movie-star-status-with-maddie-van-beek-supplemental-modeling-or-error-analysis-movie-star-status-with-maddie-van-beek": [
+			"algebra-1a-aa3-module-project-movie-star-status-with-maddie-van-beek-supplemental-aa3-module-project-movie-star-status-with-maddie-van-beek-modeling-or-error-analysis-project",
+			"algebra-1a-aa3-module-project-movie-star-status-with-maddie-van-beek-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa4-solving-multi-step-linear-equations-supplemental-standards-practice-set-solving-multi-step-linear-equations": [
+			"algebra-1a-aa4-solving-multi-step-linear-equations-supplemental-aa4-solving-multi-step-linear-equations-standards-practice-set",
+			"algebra-1a-aa4-solving-multi-step-linear-equations-supplemental-standards-practice-set"
+		],
+		"algebra-1a-aa4-solving-multi-step-linear-equations-supplemental-modeling-or-error-analysis-solving-multi-step-linear-equations": [
+			"algebra-1a-aa4-solving-multi-step-linear-equations-supplemental-aa4-solving-multi-step-linear-equations-modeling-or-error-analysis-project",
+			"algebra-1a-aa4-solving-multi-step-linear-equations-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa5-module-project-free-swag-with-amisha-sisodiya-supplemental-modeling-or-error-analysis-free-swag-with-amisha-sisodiya": [
+			"algebra-1a-aa5-module-project-free-swag-with-amisha-sisodiya-supplemental-aa5-module-project-free-swag-with-amisha-sisodiya-modeling-or-error-analysis-project",
+			"algebra-1a-aa5-module-project-free-swag-with-amisha-sisodiya-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-check-in-1-supplemental-algebra-1a-check-in-1-standards-practice-set": [
+			"algebra-1a-check-in-1-supplemental-check-in-1-standards-practice-set",
+			"algebra-1a-check-in-1-supplemental-standards-practice-set"
+		],
+		"algebra-1a-check-in-1-supplemental-algebra-1a-check-in-1-modeling-or-error-analysis": [
+			"algebra-1a-check-in-1-supplemental-check-in-1-modeling-or-error-analysis-project",
+			"algebra-1a-check-in-1-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa6-slope-and-rate-of-change-supplemental-standards-practice-set-slope-and-rate-of-change": [
+			"algebra-1a-aa6-slope-and-rate-of-change-supplemental-aa6-slope-and-rate-of-change-standards-practice-set",
+			"algebra-1a-aa6-slope-and-rate-of-change-supplemental-standards-practice-set"
+		],
+		"algebra-1a-aa6-slope-and-rate-of-change-supplemental-modeling-or-error-analysis-slope-and-rate-of-change": [
+			"algebra-1a-aa6-slope-and-rate-of-change-supplemental-aa6-slope-and-rate-of-change-modeling-or-error-analysis-project",
+			"algebra-1a-aa6-slope-and-rate-of-change-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa7-module-project-community-data-analysis-with-davin-lee-supplemental-standards-practice-set-community-data-analysis-with-davin-lee": [
+			"algebra-1a-aa7-module-project-community-data-analysis-with-davin-lee-supplemental-aa7-module-project-community-data-analysis-with-davin-lee-standards-practice-set",
+			"algebra-1a-aa7-module-project-community-data-analysis-with-davin-lee-supplemental-standards-practice-set"
+		],
+		"algebra-1a-aa7-module-project-community-data-analysis-with-davin-lee-supplemental-modeling-or-error-analysis-community-data-analysis-with-davin-lee": [
+			"algebra-1a-aa7-module-project-community-data-analysis-with-davin-lee-supplemental-aa7-module-project-community-data-analysis-with-davin-lee-modeling-or-error-analysis-project",
+			"algebra-1a-aa7-module-project-community-data-analysis-with-davin-lee-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa8-slope-intercept-form-supplemental-standards-practice-set-slope-intercept-form": [
+			"algebra-1a-aa8-slope-intercept-form-supplemental-aa8-slope-intercept-form-standards-practice-set",
+			"algebra-1a-aa8-slope-intercept-form-supplemental-standards-practice-set"
+		],
+		"algebra-1a-aa8-slope-intercept-form-supplemental-modeling-or-error-analysis-slope-intercept-form": [
+			"algebra-1a-aa8-slope-intercept-form-supplemental-aa8-slope-intercept-form-modeling-or-error-analysis-project",
+			"algebra-1a-aa8-slope-intercept-form-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa9-point-slope-form-supplemental-standards-practice-set-point-slope-form": [
+			"algebra-1a-aa9-point-slope-form-supplemental-aa9-point-slope-form-standards-practice-set",
+			"algebra-1a-aa9-point-slope-form-supplemental-standards-practice-set"
+		],
+		"algebra-1a-aa9-point-slope-form-supplemental-modeling-or-error-analysis-point-slope-form": [
+			"algebra-1a-aa9-point-slope-form-supplemental-aa9-point-slope-form-modeling-or-error-analysis-project",
+			"algebra-1a-aa9-point-slope-form-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa10-graphing-inequalities-supplemental-standards-practice-set-graphing-inequalities": [
+			"algebra-1a-aa10-graphing-inequalities-supplemental-aa10-graphing-inequalities-standards-practice-set",
+			"algebra-1a-aa10-graphing-inequalities-supplemental-standards-practice-set"
+		],
+		"algebra-1a-aa10-graphing-inequalities-supplemental-modeling-or-error-analysis-graphing-inequalities": [
+			"algebra-1a-aa10-graphing-inequalities-supplemental-aa10-graphing-inequalities-modeling-or-error-analysis-project",
+			"algebra-1a-aa10-graphing-inequalities-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa11-module-project-predicting-avalanches-with-ruby-lee-supplemental-modeling-or-error-analysis-predicting-avalanches-with-ruby-lee": [
+			"algebra-1a-aa11-module-project-predicting-avalanches-with-ruby-lee-supplemental-aa11-module-project-predicting-avalanches-with-ruby-lee-modeling-or-error-analysis-project",
+			"algebra-1a-aa11-module-project-predicting-avalanches-with-ruby-lee-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-check-in-2-supplemental-algebra-1a-check-in-2-modeling-or-error-analysis": [
+			"algebra-1a-check-in-2-supplemental-check-in-2-modeling-or-error-analysis-project",
+			"algebra-1a-check-in-2-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa12-solving-linear-systems-by-graphing-supplemental-standards-practice-set-solving-linear-systems-by-graphing": [
+			"algebra-1a-aa12-solving-linear-systems-by-graphing-supplemental-aa12-solving-linear-systems-by-graphing-standards-practice-set",
+			"algebra-1a-aa12-solving-linear-systems-by-graphing-supplemental-standards-practice-set"
+		],
+		"algebra-1a-aa12-solving-linear-systems-by-graphing-supplemental-modeling-or-error-analysis-solving-linear-systems-by-graphing": [
+			"algebra-1a-aa12-solving-linear-systems-by-graphing-supplemental-aa12-solving-linear-systems-by-graphing-modeling-or-error-analysis-project",
+			"algebra-1a-aa12-solving-linear-systems-by-graphing-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa13-solving-linear-systems-by-substitution-supplemental-standards-practice-set-solving-linear-systems-by-substitution": [
+			"algebra-1a-aa13-solving-linear-systems-by-substitution-supplemental-aa13-solving-linear-systems-by-substitution-standards-practice-set",
+			"algebra-1a-aa13-solving-linear-systems-by-substitution-supplemental-standards-practice-set"
+		],
+		"algebra-1a-aa13-solving-linear-systems-by-substitution-supplemental-modeling-or-error-analysis-solving-linear-systems-by-substitution": [
+			"algebra-1a-aa13-solving-linear-systems-by-substitution-supplemental-aa13-solving-linear-systems-by-substitution-modeling-or-error-analysis-project",
+			"algebra-1a-aa13-solving-linear-systems-by-substitution-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa14-solving-linear-systems-by-elimination-supplemental-standards-practice-set-solving-linear-systems-by-elimination": [
+			"algebra-1a-aa14-solving-linear-systems-by-elimination-supplemental-aa14-solving-linear-systems-by-elimination-standards-practice-set",
+			"algebra-1a-aa14-solving-linear-systems-by-elimination-supplemental-standards-practice-set"
+		],
+		"algebra-1a-aa14-solving-linear-systems-by-elimination-supplemental-modeling-or-error-analysis-solving-linear-systems-by-elimination": [
+			"algebra-1a-aa14-solving-linear-systems-by-elimination-supplemental-aa14-solving-linear-systems-by-elimination-modeling-or-error-analysis-project",
+			"algebra-1a-aa14-solving-linear-systems-by-elimination-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa15-module-project-cytogenetics-quest-with-dr-renu-bajaj-supplemental-modeling-or-error-analysis-cytogenetics-quest-with-dr-renu-bajaj": [
+			"algebra-1a-aa15-module-project-cytogenetics-quest-with-dr-renu-bajaj-supplemental-aa15-module-project-cytogenetics-quest-with-dr-renu-bajaj-modeling-or-error-analysis-project",
+			"algebra-1a-aa15-module-project-cytogenetics-quest-with-dr-renu-bajaj-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa16-module-project-battle-of-the-publications-with-konstantin-kaganovsky-supplemental-modeling-or-error-analysis-battle-of-the-publications-with-konstantin-kaganovsky": [
+			"algebra-1a-aa16-module-project-battle-of-the-publications-with-konstantin-kaganovsky-supplemental-aa16-module-project-battle-of-the-publications-with-konstantin-kaganovsky-modeling-or-error-analysis-project",
+			"algebra-1a-aa16-module-project-battle-of-the-publications-with-konstantin-kaganovsky-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-check-in-3-supplemental-algebra-1a-check-in-3-modeling-or-error-analysis": [
+			"algebra-1a-check-in-3-supplemental-check-in-3-modeling-or-error-analysis-project",
+			"algebra-1a-check-in-3-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1a-aa17-master-project-algebra-1a-supplemental-standards-practice-set-algebra-1a": [
+			"algebra-1a-aa17-master-project-algebra-1a-supplemental-aa17-master-project-algebra-1a-standards-practice-set",
+			"algebra-1a-aa17-master-project-algebra-1a-supplemental-standards-practice-set"
+		],
+		"algebra-1a-aa17-master-project-algebra-1a-supplemental-modeling-or-error-analysis-algebra-1a": [
+			"algebra-1a-aa17-master-project-algebra-1a-supplemental-aa17-master-project-algebra-1a-modeling-or-error-analysis-project",
+			"algebra-1a-aa17-master-project-algebra-1a-supplemental-modeling-or-error-analysis"
+		]
+	},
+	"algebra-1b": {
+		"algebra-1b-algebra-1b-kick-off-and-placement-supplemental-standards-practice-set-kick-off-and-placement": [
+			"algebra-1b-algebra-1b-kick-off-project-supplemental-algebra-1b-kick-off-project-standards-practice-set",
+			"algebra-1b-algebra-1b-kick-off-project-supplemental-standards-practice-set"
+		],
+		"algebra-1b-algebra-1b-kick-off-and-placement-supplemental-modeling-or-error-analysis-kick-off-and-placement": [
+			"algebra-1b-algebra-1b-kick-off-project-supplemental-algebra-1b-kick-off-project-modeling-or-error-analysis-project",
+			"algebra-1b-algebra-1b-kick-off-project-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab1-introduction-to-polynomials-supplemental-standards-practice-set-introduction-to-polynomials": [
+			"algebra-1b-ab1-introduction-to-polynomials-supplemental-ab1-introduction-to-polynomials-standards-practice-set",
+			"algebra-1b-ab1-introduction-to-polynomials-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab1-introduction-to-polynomials-supplemental-modeling-or-error-analysis-introduction-to-polynomials": [
+			"algebra-1b-ab1-introduction-to-polynomials-supplemental-ab1-introduction-to-polynomials-modeling-or-error-analysis-project",
+			"algebra-1b-ab1-introduction-to-polynomials-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab2-multiplying-polynomials-supplemental-standards-practice-set-multiplying-polynomials": [
+			"algebra-1b-ab2-multiplying-polynomials-supplemental-ab2-multiplying-polynomials-standards-practice-set",
+			"algebra-1b-ab2-multiplying-polynomials-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab2-multiplying-polynomials-supplemental-modeling-or-error-analysis-multiplying-polynomials": [
+			"algebra-1b-ab2-multiplying-polynomials-supplemental-ab2-multiplying-polynomials-modeling-or-error-analysis-project",
+			"algebra-1b-ab2-multiplying-polynomials-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab3-fractions-with-polynomials-supplemental-modeling-or-error-analysis-fractions-with-polynomials": [
+			"algebra-1b-ab3-fractions-with-polynomials-supplemental-ab3-fractions-with-polynomials-modeling-or-error-analysis-project",
+			"algebra-1b-ab3-fractions-with-polynomials-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab4-module-project-smart-and-elegant-with-amy-katz-supplemental-modeling-or-error-analysis-smart-and-elegant-with-amy-katz": [
+			"algebra-1b-ab4-module-project-smart-and-elegant-with-amy-katz-supplemental-ab4-module-project-smart-and-elegant-with-amy-katz-modeling-or-error-analysis-project",
+			"algebra-1b-ab4-module-project-smart-and-elegant-with-amy-katz-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab5-solving-quadratics-by-factoring-supplemental-standards-practice-set-solving-quadratics-by-factoring": [
+			"algebra-1b-ab5-solving-quadratics-by-factoring-supplemental-ab5-solving-quadratics-by-factoring-standards-practice-set",
+			"algebra-1b-ab5-solving-quadratics-by-factoring-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab5-solving-quadratics-by-factoring-supplemental-modeling-or-error-analysis-solving-quadratics-by-factoring": [
+			"algebra-1b-ab5-solving-quadratics-by-factoring-supplemental-ab5-solving-quadratics-by-factoring-modeling-or-error-analysis-project",
+			"algebra-1b-ab5-solving-quadratics-by-factoring-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab6-special-factorizations-supplemental-standards-practice-set-special-factorizations": [
+			"algebra-1b-ab6-special-factorizations-supplemental-ab6-special-factorizations-standards-practice-set",
+			"algebra-1b-ab6-special-factorizations-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab6-special-factorizations-supplemental-modeling-or-error-analysis-special-factorizations": [
+			"algebra-1b-ab6-special-factorizations-supplemental-ab6-special-factorizations-modeling-or-error-analysis-project",
+			"algebra-1b-ab6-special-factorizations-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab7-solving-quadratics-by-completing-the-square-supplemental-standards-practice-set-solving-quadratics-by-completing-the-square": [
+			"algebra-1b-ab7-solving-quadratics-by-completing-the-square-supplemental-ab7-solving-quadratics-by-completing-the-square-standards-practice-set",
+			"algebra-1b-ab7-solving-quadratics-by-completing-the-square-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab7-solving-quadratics-by-completing-the-square-supplemental-modeling-or-error-analysis-solving-quadratics-by-completing-the-square": [
+			"algebra-1b-ab7-solving-quadratics-by-completing-the-square-supplemental-ab7-solving-quadratics-by-completing-the-square-modeling-or-error-analysis-project",
+			"algebra-1b-ab7-solving-quadratics-by-completing-the-square-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab8-quadratic-formula-supplemental-standards-practice-set-quadratic-formula": [
+			"algebra-1b-ab8-quadratic-formula-supplemental-ab8-quadratic-formula-standards-practice-set",
+			"algebra-1b-ab8-quadratic-formula-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab8-quadratic-formula-supplemental-modeling-or-error-analysis-quadratic-formula": [
+			"algebra-1b-ab8-quadratic-formula-supplemental-ab8-quadratic-formula-modeling-or-error-analysis-project",
+			"algebra-1b-ab8-quadratic-formula-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab9-module-project-the-half-court-challenge-with-ian-kennedy-supplemental-standards-practice-set-the-half-court-challenge-with-ian-kennedy": [
+			"algebra-1b-ab9-module-project-the-half-court-challenge-with-ian-kennedy-supplemental-ab9-module-project-the-half-court-challenge-with-ian-kennedy-standards-practice-set",
+			"algebra-1b-ab9-module-project-the-half-court-challenge-with-ian-kennedy-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab9-module-project-the-half-court-challenge-with-ian-kennedy-supplemental-modeling-or-error-analysis-the-half-court-challenge-with-ian-kennedy": [
+			"algebra-1b-ab9-module-project-the-half-court-challenge-with-ian-kennedy-supplemental-ab9-module-project-the-half-court-challenge-with-ian-kennedy-modeling-or-error-analysis-project",
+			"algebra-1b-ab9-module-project-the-half-court-challenge-with-ian-kennedy-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-check-in-1-supplemental-algebra-1b-check-in-1-standards-practice-set": [
+			"algebra-1b-check-in-1-supplemental-check-in-1-standards-practice-set",
+			"algebra-1b-check-in-1-supplemental-standards-practice-set"
+		],
+		"algebra-1b-check-in-1-supplemental-algebra-1b-check-in-1-modeling-or-error-analysis": [
+			"algebra-1b-check-in-1-supplemental-check-in-1-modeling-or-error-analysis-project",
+			"algebra-1b-check-in-1-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab10-graphing-vertex-form-supplemental-standards-practice-set-graphing-vertex-form": [
+			"algebra-1b-ab10-graphing-vertex-form-supplemental-ab10-graphing-vertex-form-standards-practice-set",
+			"algebra-1b-ab10-graphing-vertex-form-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab10-graphing-vertex-form-supplemental-modeling-or-error-analysis-graphing-vertex-form": [
+			"algebra-1b-ab10-graphing-vertex-form-supplemental-ab10-graphing-vertex-form-modeling-or-error-analysis-project",
+			"algebra-1b-ab10-graphing-vertex-form-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab11-graphing-standard-form-supplemental-standards-practice-set-graphing-standard-form": [
+			"algebra-1b-ab11-graphing-standard-form-supplemental-ab11-graphing-standard-form-standards-practice-set",
+			"algebra-1b-ab11-graphing-standard-form-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab11-graphing-standard-form-supplemental-modeling-or-error-analysis-graphing-standard-form": [
+			"algebra-1b-ab11-graphing-standard-form-supplemental-ab11-graphing-standard-form-modeling-or-error-analysis-project",
+			"algebra-1b-ab11-graphing-standard-form-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab12-transformations-supplemental-standards-practice-set-transformations": [
+			"algebra-1b-ab12-transformations-supplemental-ab12-transformations-standards-practice-set",
+			"algebra-1b-ab12-transformations-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab12-transformations-supplemental-modeling-or-error-analysis-transformations": [
+			"algebra-1b-ab12-transformations-supplemental-ab12-transformations-modeling-or-error-analysis-project",
+			"algebra-1b-ab12-transformations-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab13-module-project-put-me-in-coach-with-tom-dethlefs-supplemental-standards-practice-set-put-me-in-coach-with-tom-dethlefs": [
+			"algebra-1b-ab13-module-project-put-me-in-coach-with-tom-dethlefs-supplemental-ab13-module-project-put-me-in-coach-with-tom-dethlefs-standards-practice-set",
+			"algebra-1b-ab13-module-project-put-me-in-coach-with-tom-dethlefs-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab13-module-project-put-me-in-coach-with-tom-dethlefs-supplemental-modeling-or-error-analysis-put-me-in-coach-with-tom-dethlefs": [
+			"algebra-1b-ab13-module-project-put-me-in-coach-with-tom-dethlefs-supplemental-ab13-module-project-put-me-in-coach-with-tom-dethlefs-modeling-or-error-analysis-project",
+			"algebra-1b-ab13-module-project-put-me-in-coach-with-tom-dethlefs-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab14-introduction-to-functions-supplemental-standards-practice-set-introduction-to-functions": [
+			"algebra-1b-ab14-introduction-to-functions-supplemental-ab14-introduction-to-functions-standards-practice-set",
+			"algebra-1b-ab14-introduction-to-functions-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab14-introduction-to-functions-supplemental-modeling-or-error-analysis-introduction-to-functions": [
+			"algebra-1b-ab14-introduction-to-functions-supplemental-ab14-introduction-to-functions-modeling-or-error-analysis-project",
+			"algebra-1b-ab14-introduction-to-functions-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab15-function-composition-and-inverse-functions-supplemental-standards-practice-set-function-composition-and-inverse-functions": [
+			"algebra-1b-ab15-function-composition-and-inverse-functions-supplemental-ab15-function-composition-and-inverse-functions-standards-practice-set",
+			"algebra-1b-ab15-function-composition-and-inverse-functions-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab15-function-composition-and-inverse-functions-supplemental-modeling-or-error-analysis-function-composition-and-inverse-functions": [
+			"algebra-1b-ab15-function-composition-and-inverse-functions-supplemental-ab15-function-composition-and-inverse-functions-modeling-or-error-analysis-project",
+			"algebra-1b-ab15-function-composition-and-inverse-functions-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab16-module-project-j-t-phone-home-supplemental-modeling-or-error-analysis-j-t-phone-home": [
+			"algebra-1b-ab16-module-project-j-t-phone-home-supplemental-ab16-module-project-j-t-phone-home-modeling-or-error-analysis-project",
+			"algebra-1b-ab16-module-project-j-t-phone-home-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab17-absolute-value-and-exponential-functions-supplemental-standards-practice-set-absolute-value-and-exponential-functions": [
+			"algebra-1b-ab17-absolute-value-and-exponential-functions-supplemental-ab17-absolute-value-and-exponential-functions-standards-practice-set",
+			"algebra-1b-ab17-absolute-value-and-exponential-functions-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab17-absolute-value-and-exponential-functions-supplemental-modeling-or-error-analysis-absolute-value-and-exponential-functions": [
+			"algebra-1b-ab17-absolute-value-and-exponential-functions-supplemental-ab17-absolute-value-and-exponential-functions-modeling-or-error-analysis-project",
+			"algebra-1b-ab17-absolute-value-and-exponential-functions-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab18-direct-and-inverse-variation-supplemental-standards-practice-set-direct-and-inverse-variation": [
+			"algebra-1b-ab18-direct-and-inverse-variation-supplemental-ab18-direct-and-inverse-variation-standards-practice-set",
+			"algebra-1b-ab18-direct-and-inverse-variation-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab18-direct-and-inverse-variation-supplemental-modeling-or-error-analysis-direct-and-inverse-variation": [
+			"algebra-1b-ab18-direct-and-inverse-variation-supplemental-ab18-direct-and-inverse-variation-modeling-or-error-analysis-project",
+			"algebra-1b-ab18-direct-and-inverse-variation-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab19-data-modeling-supplemental-standards-practice-set-data-modeling": [
+			"algebra-1b-ab19-data-modeling-supplemental-ab19-data-modeling-standards-practice-set",
+			"algebra-1b-ab19-data-modeling-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab19-data-modeling-supplemental-modeling-or-error-analysis-data-modeling": [
+			"algebra-1b-ab19-data-modeling-supplemental-ab19-data-modeling-modeling-or-error-analysis-project",
+			"algebra-1b-ab19-data-modeling-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab20-module-project-the-mysteries-of-light-with-blake-eaton-supplemental-standards-practice-set-the-mysteries-of-light-with-blake-eaton": [
+			"algebra-1b-ab20-module-project-the-mysteries-of-light-with-blake-eaton-supplemental-ab20-module-project-the-mysteries-of-light-with-blake-eaton-standards-practice-set",
+			"algebra-1b-ab20-module-project-the-mysteries-of-light-with-blake-eaton-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab20-module-project-the-mysteries-of-light-with-blake-eaton-supplemental-modeling-or-error-analysis-the-mysteries-of-light-with-blake-eaton": [
+			"algebra-1b-ab20-module-project-the-mysteries-of-light-with-blake-eaton-supplemental-ab20-module-project-the-mysteries-of-light-with-blake-eaton-modeling-or-error-analysis-project",
+			"algebra-1b-ab20-module-project-the-mysteries-of-light-with-blake-eaton-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab21-module-project-radiofungi-with-sunanda-sharma-supplemental-standards-practice-set-radiofungi-with-sunanda-sharma": [
+			"algebra-1b-ab21-module-project-radiofungi-with-sunanda-sharma-supplemental-ab21-module-project-radiofungi-with-sunanda-sharma-standards-practice-set",
+			"algebra-1b-ab21-module-project-radiofungi-with-sunanda-sharma-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab21-module-project-radiofungi-with-sunanda-sharma-supplemental-modeling-or-error-analysis-radiofungi-with-sunanda-sharma": [
+			"algebra-1b-ab21-module-project-radiofungi-with-sunanda-sharma-supplemental-ab21-module-project-radiofungi-with-sunanda-sharma-modeling-or-error-analysis-project",
+			"algebra-1b-ab21-module-project-radiofungi-with-sunanda-sharma-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-check-in-2-supplemental-algebra-1b-check-in-2-modeling-or-error-analysis": [
+			"algebra-1b-check-in-2-supplemental-check-in-2-modeling-or-error-analysis-project",
+			"algebra-1b-check-in-2-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-1b-ab22-master-project-algebra-1b-supplemental-standards-practice-set-algebra-1b": [
+			"algebra-1b-ab22-master-project-algebra-1b-supplemental-ab22-master-project-algebra-1b-standards-practice-set",
+			"algebra-1b-ab22-master-project-algebra-1b-supplemental-standards-practice-set"
+		],
+		"algebra-1b-ab22-master-project-algebra-1b-supplemental-modeling-or-error-analysis-algebra-1b": [
+			"algebra-1b-ab22-master-project-algebra-1b-supplemental-ab22-master-project-algebra-1b-modeling-or-error-analysis-project",
+			"algebra-1b-ab22-master-project-algebra-1b-supplemental-modeling-or-error-analysis"
+		]
+	},
+	"algebra-2a": {
+		"algebra-2a-ala1-complex-numbers-supplemental-standards-practice-set-complex-numbers": [
+			"algebra-2a-ala1-complex-numbers-supplemental-ala1-complex-numbers-standards-practice-set",
+			"algebra-2a-ala1-complex-numbers-supplemental-standards-practice-set"
+		],
+		"algebra-2a-ala1-complex-numbers-supplemental-modeling-or-error-analysis-complex-numbers": [
+			"algebra-2a-ala1-complex-numbers-supplemental-ala1-complex-numbers-modeling-or-error-analysis-project",
+			"algebra-2a-ala1-complex-numbers-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2a-ala2-quadratic-functions-supplemental-standards-practice-set-quadratic-functions": [
+			"algebra-2a-ala2-quadratic-functions-supplemental-ala2-quadratic-functions-standards-practice-set",
+			"algebra-2a-ala2-quadratic-functions-supplemental-standards-practice-set"
+		],
+		"algebra-2a-ala2-quadratic-functions-supplemental-modeling-or-error-analysis-quadratic-functions": [
+			"algebra-2a-ala2-quadratic-functions-supplemental-ala2-quadratic-functions-modeling-or-error-analysis-project",
+			"algebra-2a-ala2-quadratic-functions-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2a-ala3-graphing-quadratic-functions-supplemental-modeling-or-error-analysis-graphing-quadratic-functions": [
+			"algebra-2a-ala3-graphing-quadratic-functions-supplemental-ala3-graphing-quadratic-functions-modeling-or-error-analysis-project",
+			"algebra-2a-ala3-graphing-quadratic-functions-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2a-check-in-1-supplemental-algebra-2a-check-in-1-standards-practice-set": [
+			"algebra-2a-check-in-1-supplemental-check-in-1-standards-practice-set",
+			"algebra-2a-check-in-1-supplemental-standards-practice-set"
+		],
+		"algebra-2a-check-in-1-supplemental-algebra-2a-check-in-1-modeling-or-error-analysis": [
+			"algebra-2a-check-in-1-supplemental-check-in-1-modeling-or-error-analysis-project",
+			"algebra-2a-check-in-1-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2a-ala4-higher-degree-polynomials-supplemental-standards-practice-set-higher-degree-polynomials": [
+			"algebra-2a-ala4-higher-degree-polynomials-supplemental-ala4-higher-degree-polynomials-standards-practice-set",
+			"algebra-2a-ala4-higher-degree-polynomials-supplemental-standards-practice-set"
+		],
+		"algebra-2a-ala4-higher-degree-polynomials-supplemental-modeling-or-error-analysis-higher-degree-polynomials": [
+			"algebra-2a-ala4-higher-degree-polynomials-supplemental-ala4-higher-degree-polynomials-modeling-or-error-analysis-project",
+			"algebra-2a-ala4-higher-degree-polynomials-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2a-ala5-polynomial-division-supplemental-standards-practice-set-polynomial-division": [
+			"algebra-2a-ala5-polynomial-division-supplemental-ala5-polynomial-division-standards-practice-set",
+			"algebra-2a-ala5-polynomial-division-supplemental-standards-practice-set"
+		],
+		"algebra-2a-ala5-polynomial-division-supplemental-modeling-or-error-analysis-polynomial-division": [
+			"algebra-2a-ala5-polynomial-division-supplemental-ala5-polynomial-division-modeling-or-error-analysis-project",
+			"algebra-2a-ala5-polynomial-division-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2a-ala6-zeros-of-polynomials-supplemental-standards-practice-set-zeros-of-polynomials": [
+			"algebra-2a-ala6-zeros-of-polynomials-supplemental-ala6-zeros-of-polynomials-standards-practice-set",
+			"algebra-2a-ala6-zeros-of-polynomials-supplemental-standards-practice-set"
+		],
+		"algebra-2a-ala6-zeros-of-polynomials-supplemental-modeling-or-error-analysis-zeros-of-polynomials": [
+			"algebra-2a-ala6-zeros-of-polynomials-supplemental-ala6-zeros-of-polynomials-modeling-or-error-analysis-project",
+			"algebra-2a-ala6-zeros-of-polynomials-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2a-ala7-graphing-polynomials-supplemental-standards-practice-set-graphing-polynomials": [
+			"algebra-2a-ala7-graphing-polynomials-supplemental-ala7-graphing-polynomials-standards-practice-set",
+			"algebra-2a-ala7-graphing-polynomials-supplemental-standards-practice-set"
+		],
+		"algebra-2a-ala7-graphing-polynomials-supplemental-modeling-or-error-analysis-graphing-polynomials": [
+			"algebra-2a-ala7-graphing-polynomials-supplemental-ala7-graphing-polynomials-modeling-or-error-analysis-project",
+			"algebra-2a-ala7-graphing-polynomials-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2a-check-in-2-supplemental-algebra-2a-check-in-2-standards-practice-set": [
+			"algebra-2a-check-in-2-supplemental-check-in-2-standards-practice-set",
+			"algebra-2a-check-in-2-supplemental-standards-practice-set"
+		],
+		"algebra-2a-check-in-2-supplemental-algebra-2a-check-in-2-modeling-or-error-analysis": [
+			"algebra-2a-check-in-2-supplemental-check-in-2-modeling-or-error-analysis-project",
+			"algebra-2a-check-in-2-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2a-ala8-rational-functions-supplemental-modeling-or-error-analysis-rational-functions": [
+			"algebra-2a-ala8-rational-functions-supplemental-ala8-rational-functions-modeling-or-error-analysis-project",
+			"algebra-2a-ala8-rational-functions-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2a-ala9-rational-function-operations-supplemental-standards-practice-set-rational-function-operations": [
+			"algebra-2a-ala9-rational-function-operations-supplemental-ala9-rational-function-operations-standards-practice-set",
+			"algebra-2a-ala9-rational-function-operations-supplemental-standards-practice-set"
+		],
+		"algebra-2a-ala9-rational-function-operations-supplemental-modeling-or-error-analysis-rational-function-operations": [
+			"algebra-2a-ala9-rational-function-operations-supplemental-ala9-rational-function-operations-modeling-or-error-analysis-project",
+			"algebra-2a-ala9-rational-function-operations-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2a-ala10-radical-functions-supplemental-standards-practice-set-radical-functions": [
+			"algebra-2a-ala10-radical-functions-supplemental-ala10-radical-functions-standards-practice-set",
+			"algebra-2a-ala10-radical-functions-supplemental-standards-practice-set"
+		],
+		"algebra-2a-ala10-radical-functions-supplemental-modeling-or-error-analysis-radical-functions": [
+			"algebra-2a-ala10-radical-functions-supplemental-ala10-radical-functions-modeling-or-error-analysis-project",
+			"algebra-2a-ala10-radical-functions-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2a-ala11-piecewise-functions-supplemental-standards-practice-set-piecewise-functions": [
+			"algebra-2a-ala11-piecewise-functions-supplemental-ala11-piecewise-functions-standards-practice-set",
+			"algebra-2a-ala11-piecewise-functions-supplemental-standards-practice-set"
+		],
+		"algebra-2a-ala11-piecewise-functions-supplemental-modeling-or-error-analysis-piecewise-functions": [
+			"algebra-2a-ala11-piecewise-functions-supplemental-ala11-piecewise-functions-modeling-or-error-analysis-project",
+			"algebra-2a-ala11-piecewise-functions-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2a-check-in-3-supplemental-algebra-2a-check-in-3-modeling-or-error-analysis": [
+			"algebra-2a-check-in-3-supplemental-check-in-3-modeling-or-error-analysis-project",
+			"algebra-2a-check-in-3-supplemental-modeling-or-error-analysis"
+		]
+	},
+	"algebra-2b": {
+		"algebra-2b-alb1-introduction-to-logarithms-supplemental-standards-practice-set-introduction-to-logarithms": [
+			"algebra-2b-alb1-introduction-to-logarithms-supplemental-alb1-introduction-to-logarithms-standards-practice-set",
+			"algebra-2b-alb1-introduction-to-logarithms-supplemental-standards-practice-set"
+		],
+		"algebra-2b-alb1-introduction-to-logarithms-supplemental-modeling-or-error-analysis-introduction-to-logarithms": [
+			"algebra-2b-alb1-introduction-to-logarithms-supplemental-alb1-introduction-to-logarithms-modeling-or-error-analysis-project",
+			"algebra-2b-alb1-introduction-to-logarithms-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2b-alb2-exponential-and-logarithmic-functions-supplemental-standards-practice-set-exponential-and-logarithmic-functions": [
+			"algebra-2b-alb2-exponential-and-logarithmic-functions-supplemental-alb2-exponential-and-logarithmic-functions-standards-practice-set",
+			"algebra-2b-alb2-exponential-and-logarithmic-functions-supplemental-standards-practice-set"
+		],
+		"algebra-2b-alb2-exponential-and-logarithmic-functions-supplemental-modeling-or-error-analysis-exponential-and-logarithmic-functions": [
+			"algebra-2b-alb2-exponential-and-logarithmic-functions-supplemental-alb2-exponential-and-logarithmic-functions-modeling-or-error-analysis-project",
+			"algebra-2b-alb2-exponential-and-logarithmic-functions-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2b-alb3-arithmetic-sequences-supplemental-standards-practice-set-arithmetic-sequences": [
+			"algebra-2b-alb3-arithmetic-sequences-supplemental-alb3-arithmetic-sequences-standards-practice-set",
+			"algebra-2b-alb3-arithmetic-sequences-supplemental-standards-practice-set"
+		],
+		"algebra-2b-alb3-arithmetic-sequences-supplemental-modeling-or-error-analysis-arithmetic-sequences": [
+			"algebra-2b-alb3-arithmetic-sequences-supplemental-alb3-arithmetic-sequences-modeling-or-error-analysis-project",
+			"algebra-2b-alb3-arithmetic-sequences-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2b-alb4-geometric-sequences-supplemental-standards-practice-set-geometric-sequences": [
+			"algebra-2b-alb4-geometric-sequences-supplemental-alb4-geometric-sequences-standards-practice-set",
+			"algebra-2b-alb4-geometric-sequences-supplemental-standards-practice-set"
+		],
+		"algebra-2b-alb4-geometric-sequences-supplemental-modeling-or-error-analysis-geometric-sequences": [
+			"algebra-2b-alb4-geometric-sequences-supplemental-alb4-geometric-sequences-modeling-or-error-analysis-project",
+			"algebra-2b-alb4-geometric-sequences-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2b-alb5-matrix-operations-supplemental-standards-practice-set-matrix-operations": [
+			"algebra-2b-alb5-matrix-operations-supplemental-alb5-matrix-operations-standards-practice-set",
+			"algebra-2b-alb5-matrix-operations-supplemental-standards-practice-set"
+		],
+		"algebra-2b-alb5-matrix-operations-supplemental-modeling-or-error-analysis-matrix-operations": [
+			"algebra-2b-alb5-matrix-operations-supplemental-alb5-matrix-operations-modeling-or-error-analysis-project",
+			"algebra-2b-alb5-matrix-operations-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2b-check-in-1-supplemental-algebra-2b-check-in-1-standards-practice-set": [
+			"algebra-2b-check-in-1-supplemental-check-in-1-standards-practice-set",
+			"algebra-2b-check-in-1-supplemental-standards-practice-set"
+		],
+		"algebra-2b-check-in-1-supplemental-algebra-2b-check-in-1-modeling-or-error-analysis": [
+			"algebra-2b-check-in-1-supplemental-check-in-1-modeling-or-error-analysis-project",
+			"algebra-2b-check-in-1-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2b-alb6-probability-supplemental-standards-practice-set-probability": [
+			"algebra-2b-alb6-probability-supplemental-alb6-probability-standards-practice-set",
+			"algebra-2b-alb6-probability-supplemental-standards-practice-set"
+		],
+		"algebra-2b-alb6-probability-supplemental-modeling-or-error-analysis-probability": [
+			"algebra-2b-alb6-probability-supplemental-alb6-probability-modeling-or-error-analysis-project",
+			"algebra-2b-alb6-probability-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2b-alb7-data-and-statistics-supplemental-modeling-or-error-analysis-data-and-statistics": [
+			"algebra-2b-alb7-data-and-statistics-supplemental-alb7-data-and-statistics-modeling-or-error-analysis-project",
+			"algebra-2b-alb7-data-and-statistics-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2b-alb8-trigonometry-basics-supplemental-modeling-or-error-analysis-trigonometry-basics": [
+			"algebra-2b-alb8-trigonometry-basics-supplemental-alb8-trigonometry-basics-modeling-or-error-analysis-project",
+			"algebra-2b-alb8-trigonometry-basics-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2b-alb9-graphing-trigonometric-functions-supplemental-standards-practice-set-graphing-trigonometric-functions": [
+			"algebra-2b-alb9-graphing-trigonometric-functions-supplemental-alb9-graphing-trigonometric-functions-standards-practice-set",
+			"algebra-2b-alb9-graphing-trigonometric-functions-supplemental-standards-practice-set"
+		],
+		"algebra-2b-alb9-graphing-trigonometric-functions-supplemental-modeling-or-error-analysis-graphing-trigonometric-functions": [
+			"algebra-2b-alb9-graphing-trigonometric-functions-supplemental-alb9-graphing-trigonometric-functions-modeling-or-error-analysis-project",
+			"algebra-2b-alb9-graphing-trigonometric-functions-supplemental-modeling-or-error-analysis"
+		],
+		"algebra-2b-check-in-2-supplemental-algebra-2b-check-in-2-standards-practice-set": [
+			"algebra-2b-check-in-2-supplemental-check-in-2-standards-practice-set",
+			"algebra-2b-check-in-2-supplemental-standards-practice-set"
+		],
+		"algebra-2b-check-in-2-supplemental-algebra-2b-check-in-2-modeling-or-error-analysis": [
+			"algebra-2b-check-in-2-supplemental-check-in-2-modeling-or-error-analysis-project",
+			"algebra-2b-check-in-2-supplemental-modeling-or-error-analysis"
+		]
+	}
+}

@@ -1,17 +1,39 @@
 import type { RawCourse } from "./types";
+import { algebraCourseImageUrls } from "@/modules/courseAssetSourcesAlgebra";
+import { algebra2Checkpoint } from "./algebra2Checkpoints";
+import { applyAlgebra2Readings } from "./algebra2Readings";
 import { configureMathCourseFlow } from "./mathCourseFlow";
 import { pendingStaticMediaNotice, staticMediaUrl } from "./staticMedia";
 
-const MEDIA_BASE = "https://static.classes.jacobdanderson.net/algebra-2a";
-
 const media = {
-	complexPlane: `${MEDIA_BASE}/ala1-complex-plane.svg`,
-	quadraticForms: `${MEDIA_BASE}/ala3-quadratic-forms.svg`,
-	quadraticTransforms: `${MEDIA_BASE}/ala3-quadratic-transformations.svg`,
-	polynomialBehavior: `${MEDIA_BASE}/ala7-polynomial-behavior.svg`,
-	rationalFunctions: `${MEDIA_BASE}/ala8-rational-functions.svg`,
-	radicalFunctions: `${MEDIA_BASE}/ala10-radical-functions.svg`,
-	piecewiseFunctions: `${MEDIA_BASE}/ala11-piecewise-functions.svg`
+	complexPlane:
+		algebraCourseImageUrls[
+			"/course-assets/algebra-2a/complex-plane-v2.svg"
+		],
+	quadraticForms:
+		algebraCourseImageUrls[
+			"/course-assets/algebra-2a/quadratic-forms-v2.svg"
+		],
+	quadraticTransforms:
+		algebraCourseImageUrls[
+			"/course-assets/algebra-2a/quadratic-transformations-v2.svg"
+		],
+	polynomialBehavior:
+		algebraCourseImageUrls[
+			"/course-assets/algebra-2a/polynomial-behavior-v2.svg"
+		],
+	rationalFunctions:
+		algebraCourseImageUrls[
+			"/course-assets/algebra-2a/rational-functions-v2.svg"
+		],
+	radicalFunctions:
+		algebraCourseImageUrls[
+			"/course-assets/algebra-2a/radical-functions-v2.svg"
+		],
+	piecewiseFunctions:
+		algebraCourseImageUrls[
+			"/course-assets/algebra-2a/piecewise-functions-v2.svg"
+		]
 } as const;
 
 const sourceStaticFilenames = [
@@ -230,18 +252,18 @@ Start by moving every term to one side so the equation is in the form \`ax^2 + b
 
 - \`(x + 2)(x - 4) = 0\` -> \`x = -2, 4\`
 - \`x^2 + 4x + 4 = 0\` -> \`x = -2\`
-- \`z^2 + 5z + 4 = 0\` -> \`x = -4, -1\`
-- \`z^2 - 5z + 4 = 0\` -> \`x = 1, 4\`
-- \`z^2 + 2z - 15 = 0\` -> \`x = -5, 3\`
-- \`y^2 - 5y - 50 = 0\` -> \`x = -5, 10\`
+- \`z^2 + 5z + 4 = 0\` -> \`z = -4, -1\`
+- \`z^2 - 5z + 4 = 0\` -> \`z = 1, 4\`
+- \`z^2 + 2z - 15 = 0\` -> \`z = -5, 3\`
+- \`y^2 - 5y - 50 = 0\` -> \`y = -5, 10\`
 - \`x^2 - 7x - 44 = 0\` -> \`x = -4, 11\`
 
 **Application checks**
 
-- Triangle with area \`12\` and base two feet longer than height: base \`6\`
+- Triangle with area \`12\` square feet and base two feet longer than its positive height: base \`6\` feet and height \`4\` feet
 - Rocket modeled by \`-4t^2 + 8t + 96\` hits the ground at \`t = 6\`
-- A penny dropped from \`64\` feet reaches the ground in \`2\` seconds
-				`.trim()
+- A penny dropped from rest at \`64\` feet follows \`h(t)=64-16t^2\` when air resistance is neglected and gravity is \`32\` feet per second squared. For \`t>=0\`, it reaches the ground at \`t=2\` seconds
+`.trim()
 			),
 			createLesson(
 				"Special Factorizations",
@@ -291,8 +313,8 @@ When factoring is awkward or impossible, turn the quadratic into a perfect squar
 **Quadratic-formula examples**
 
 - \`x^2 - 6x + 5 = 0\` -> \`x = 1, 5\`
-- \`7z^2 - 10z + 3 = 0\` -> \`x = 3/7, 1\`
-- \`5z^2 + 2z - 7 = 0\` -> \`x = -7/5, 1\`
+- \`7z^2 - 10z + 3 = 0\` -> \`z = 3/7, 1\`
+- \`5z^2 + 2z - 7 = 0\` -> \`z = -7/5, 1\`
 - \`2x^2 - 11x + 9 = 0\` -> \`x = 1, 9/2\`
 
 **Non-real roots**
@@ -302,7 +324,7 @@ When factoring is awkward or impossible, turn the quadratic into a perfect squar
 - \`x^2 - x + 10 = 0\` -> \`x = (1 plus or minus i sqrt(39)) / 2\`
 
 Use the discriminant \`b^2 - 4ac\` to tell the difference between two real roots, one repeated real root, and two non-real roots.
-				`.trim()
+`.trim()
 			)
 		]),
 		createModule("ALA3 Graphing Quadratic Functions", [
@@ -364,13 +386,13 @@ Quadratics model arcs, projectiles, and symmetric structures.
 
 **Application answers**
 
-- Cannonball path \`y = -(x - 4)(x - 10)\`: total horizontal distance \`6\`
-- Jill's ball \`h = -4t^2 + 36t - 72\`:
+- Cannonball path \`y = -(x - 4)(x - 10)\` on \`4<=x<=10\`, between its ground-level endpoints: horizontal distance \`6\` units
+- Jill's ball \`h = -4t^2 + 36t - 72\` feet on \`3<=t<=6\`, with ground height zero and the release at clock time \`t=3\` seconds:
   - thrown at \`t = 3\`
   - lands at \`t = 6\`
   - stays in the air \`3\` seconds
   - reaches a maximum height of \`9\` feet
-- Gannet dive \`h = 2t^2 - 32t + 110\`:
+- Gannet dive \`h = 2t^2 - 32t + 110\` feet on \`0<=t<=16\` seconds, with sea level at height zero:
   - initial height \`110\` feet
   - reaches the water at \`5\` seconds
   - stays underwater \`6\` seconds
@@ -381,21 +403,15 @@ Quadratics model arcs, projectiles, and symmetric structures.
 
 If the directrix is \`y = 1\` and the focus is \`(2, 3)\`, then the parabola is
 \`y = (1/4)x^2 - x + 3\`.
-				`.trim()
+`.trim()
 			),
 			createLesson(
 				"Graph Prompt Reference",
 				`
-Use a graphing tool or the provided quadratic-transformation reference for graph-only prompts such as:
+Compare \`y=x^2\` with \`y=2(x-1)^2-3\`. Their vertices are \`(0,0)\` and \`(1,-3)\`; the second has axis \`x=1\`, opens upward and has twice the vertical scale. Check its points \`(0,-1),(1,-3),(2,-1)\`.
 
-- color-match parabola comparison questions
-- a few transformation sketches with no surviving coordinates
-- at least one directrix-focus reference image
-
-The written response identifies the transformation, asymptote, intercept, or focus/directrix relationship being tested.
-
-For each graph-only prompt, write one sentence naming the parent function or conic feature and one sentence tying that feature to visible evidence. For example, a vertical stretch is supported by narrower arms, a translation is supported by the shifted vertex, and a focus/directrix claim mentions equal distance from a point and a line. This keeps the graph interpretation mathematical even when exact coordinates are not provided.
-				`.trim(),
+For focus \`(2,3)\` and directrix \`y=1\`, the vertex is \`(2,2)\` and \`(x-2)^2=4(y-2)\`. At \`(0,3)\`, the distance to the focus and the distance to the directrix are both \`2\`. These equations and coordinates determine the sketches.
+`.trim(),
 				media.quadraticTransforms
 			)
 		]),
@@ -419,20 +435,7 @@ If work stalls, stop and revisit the specific method immediately.
 			),
 			createLesson(
 				"Representative Review Problems",
-				`
-**Answer-key highlights**
-
-- \`sqrt(-25) + 4i^27 = i\`
-- \`(4 - 3i)(2 - i) / (-5i) = 2 + i\`
-- \`x^2 + 3x - 10 = 0\` -> \`x = -5, 2\`
-- \`2x^2 - 5x - 12 = 0\` -> \`x = -3/2, 4\`
-- \`x^2 - 20x + 100 = (x - 10)^2\`
-- \`x^2 - 10x + 26 = 8\` -> \`x = 5 plus or minus sqrt(7)\`
-- \`y = -(1/2)x^2\` -> down, wider
-- \`y = -(x - 3)^2 + 5\` is the result of flipping \`y = x^2 - 5\` across the x-axis and shifting right \`3\`
-
-Use the complex-plane and quadratic graph references while explaining how each answer was found.
-				`.trim(),
+				algebra2Checkpoint("algebra-2a", "Check-In #1"),
 				media.complexPlane
 			)
 		]),
@@ -528,10 +531,10 @@ Let \`f(x) = 2x^3 - 2x^2 - 20x - 16\`.
 **Additional examples**
 
 - \`2x^3 - 7x^2 + x + 10\` -> roots \`-1, 2, 5/2\`
-- \`x^4 - 9x^2 + 4x + 12\` -> roots \`-3, -1, 2\`
+- \`x^4 - 9x^2 + 4x + 12\` -> roots \`-3, -1, 2\`, with \`2\` repeated twice
 
 The goal is not to guess blindly. Use the theorem list, sign patterns, and intervals first, then divide to confirm.
-				`.trim()
+`.trim()
 			)
 		]),
 		createModule("ALA7 Graphing Polynomials", [
@@ -546,7 +549,7 @@ Polynomial graphs are controlled mainly by degree, leading coefficient, and zero
   - as \`x -> infinity\`, \`f(x) -> -infinity\`
   - as \`x -> -infinity\`, \`f(x) -> infinity\`
   - the function is odd
-- A graph with turning points at \`(-1, 1/2)\`, \`(0, 2)\`, and \`(1, 1/2)\` has
+- The polynomial \`f(x)=(3/2)(x^2-1)^2+1/2\`, with turning points at \`(-1, 1/2)\`, \`(0, 2)\`, and \`(1, 1/2)\`, has
   - domain \`(-infinity, infinity)\`
   - range \`[1/2, infinity)\`
 
@@ -558,7 +561,7 @@ Polynomial graphs are controlled mainly by degree, leading coefficient, and zero
 - even degree + negative leading coefficient -> falls on both ends
 - odd multiplicity crosses the x-axis
 - even multiplicity touches and bounces
-				`.trim(),
+`.trim(),
 				media.polynomialBehavior
 			),
 			createLesson(
@@ -568,17 +571,17 @@ Sometimes a prompt gives graph features instead of a full equation. Those featur
 
 **Example sketch prompt**
 
-Build a graph with:
+Use the concrete cubic \`f(x)=(1/4)(x+2)(x-1)(x-6)\`. Its features are:
 
 - positive leading coefficient
 - odd degree
 - roots at \`-2\`, \`1\`, and \`6\`
 - y-intercept \`(0, 3)\`
-- local max near \`(-3/2, 4)\`
-- local min near \`(4, -9)\`
+- local max at \`(-2/3, 100/27)\`, approximately \`(-0.67, 3.70)\`
+- local min at \`(4, -9)\`
 
-That feature set forces a graph that crosses the x-axis three times, rises to the right, and includes at least two turning points. The polynomial-behavior graphic provides a clean example of this feature set.
-				`.trim(),
+That feature set forces a graph that crosses the x-axis three times, rises to the right, and includes at least two turning points. The explicit equation supplies the graph even when a general reference graphic uses a different polynomial.
+`.trim(),
 				media.polynomialBehavior
 			)
 		]),
@@ -601,19 +604,7 @@ Treat the results as planning data for the next few sessions.
 			),
 			createLesson(
 				"Representative Review Problems",
-				`
-**Answer-key highlights**
-
-- Degree of \`7x - 36x^2 + 2x^7\` -> \`7\`
-- \`12x^4 + 2x^3 - 30x - 5 = (6x + 1)(2x^3 - 5)\`
-- \`8x^3 - 200x = 8x(x - 5)(x + 5)\`
-- \`(-9x^4 - 6x^3 + x^2 + 2) / (x + 1) = -9x^3 + 3x^2 - 2x + 2\`
-- \`2x^3 - 2x^2 - 20x - 16\` has roots \`-2, -1, 4\`
-- Reflecting \`x^3 - 2x + 1\` across the y-axis gives \`-x^3 + 2x + 1\`
-- Reflecting the same function across the x-axis gives \`-x^3 + 2x - 1\`
-
-Use the provided graph pack anywhere a check-in item needs a sketch or color-coded polynomial graph.
-				`.trim(),
+				algebra2Checkpoint("algebra-2a", "Check-In #2"),
 				media.polynomialBehavior
 			)
 		]),
@@ -623,8 +614,10 @@ Use the provided graph pack anywhere a check-in item needs a sketch or color-cod
 				`
 Rational functions can have two kinds of breaks:
 
-- vertical asymptotes, caused by denominator zeros that do not cancel
-- removable discontinuities, caused by common factors that do cancel
+- vertical asymptotes at zeros of the denominator after full cancellation
+- removable discontinuities (holes) at excluded inputs where the fully simplified denominator is nonzero
+
+Keep the original domain restrictions. Partial cancellation alone does not establish a hole: \`(x - 1)/(x - 1)^2 = 1/(x - 1)\` for \`x != 1\`, so \`x = 1\` remains a vertical asymptote.
 
 **Representative examples**
 
@@ -646,7 +639,7 @@ Always factor first. It is the fastest way to tell a hole from an asymptote.
 			createLesson(
 				"Graphing and Roots of Rational Functions",
 				`
-To find a rational root, set the numerator equal to zero and then reject any value that also makes the denominator zero.
+To find a zero of a rational function, set the numerator equal to zero and then reject any value that also makes the denominator zero.
 
 **Representative examples**
 
@@ -670,16 +663,16 @@ If a basketball player has made \`7\` of the last \`13\` shots, their updated av
 To reach \`70%\`, solve
 \`(7 + x)/(13 + x) = 0.7\`,
 which gives \`x = 7\`.
-				`.trim(),
+`.trim(),
 				media.rationalFunctions
 			),
 			createLesson(
 				"Rational Graph References",
 				`
-Some rational-function prompts work best with graph references, including graph-reading exercises with asymptotes, holes, and range questions.
+For \`f(x)=(x^2-1)/(x^2-3x-4)\`, factor and simplify to \`(x-1)/(x-4)\`, retaining exclusions \`x=-1,4\`. The hole is \`(-1,2/5)\`, the vertical asymptote is \`x=4\`, the horizontal asymptote is \`y=1\`, and the valid zero is \`x=1\`.
 
-Use the provided rational-function gallery when a clean reference is enough, and use the linked reference visual when the exact graph must be supplied separately.
-				`.trim(),
+For \`g(x)=(x^2+1)/(x-1)=x+1+2/(x-1)\`, the vertical asymptote is \`x=1\` and the slant asymptote is \`y=x+1\`. There are no real zeros because \`x^2+1>0\`. These formulas supply every feature needed to draw both graphs.
+`.trim(),
 				media.rationalFunctions
 			)
 		]),
@@ -687,21 +680,29 @@ Use the provided rational-function gallery when a clean reference is enough, and
 			createLesson(
 				"Multiplying, Dividing, and Simplifying Rational Expressions",
 				`
-Factor first, then cancel common factors, then multiply or divide.
+Factor first and record every zero of an original denominator. For division, also exclude values that make the entire divisor zero, then multiply by its reciprocal. Cancel common factors and keep all original restrictions in the final answer.
 
 **Representative simplifications**
 
 - \`(6x^3 - 12x)/(3x^2) = 2(x^2 - 2)/x\`
+  - retain \`x != 0\`
 - \`(x^2 + 4x + 3)/(x^2 - 3x - 18) = (x + 1)/(x - 6)\`
+  - retain \`x != -3, 6\`
 - \`(x^3 + 5x^2 - 14x)/(x^2 - 3x + 2) = x(x + 7)/(x - 1)\`
+  - retain \`x != 1, 2\`
 - \`(a^2 - 4)/(4a^2 - 1)\` divided by \`(a - 2)/(2a - 1)\` simplifies to \`(a + 2)/(2a + 1)\`
+  - retain \`a != -1/2, 1/2, 2\`; at 2 the original divisor is zero
 
 **Representative products and quotients**
 
 - \`z/(z^2 - 16) * (z^2 - z - 12)/(z^2 - 4z) = (z + 3)/(z^2 - 16)\`
+  - retain \`z != -4, 0, 4\`
 - \`(2x + 6)/(x^2 - 16) * (x - 4)/(x + 3) = 2/(x + 4)\`
+  - retain \`x != -4, -3, 4\`
 - \`(y^2 + 2y - 8)/15\` divided by \`(y - 2)/(5y)\` simplifies to \`y(y + 4)/3\`
+  - retain \`y != 0, 2\`
 - \`(x^2 - 10x + 25)/(x^2 - 16)\` divided by \`(x^2 - 3x - 10)/(3x - 12)\` simplifies to \`3(x - 5)/[(x + 4)(x + 2)]\`
+  - retain \`x != -4, -2, 4, 5\`; the divisor is zero at 5 and -2
 
 **Application**
 
@@ -713,6 +714,8 @@ Triangle area with
 becomes
 \`[(x - 4)(x + 3)] / [2(x + 12)]\`
 after factoring and canceling.
+
+Retain the original algebraic restrictions \`x != -12, -1, 3\`; a triangle model also requires positive base and height.
 				`.trim()
 			),
 			createLesson(
@@ -816,7 +819,7 @@ A piecewise function changes its rule depending on the input interval.
 			createLesson(
 				"Piecewise Models and Continuity",
 				`
-Piecewise functions show up naturally in pricing and pay-rate problems.
+Piecewise functions show up naturally in pricing and pay-rate problems. Here hours are nonnegative real inputs, and candy-bag counts are nonnegative whole numbers. Each pay formula accumulates earlier tiers; the candy price instead applies its stated rate to every bag in the order.
 
 **Representative models**
 
@@ -841,7 +844,7 @@ Piecewise functions show up naturally in pricing and pay-rate problems.
 For
 \`f(x) = { x^2 + 2c if x <= 3; 2cx + 1 if x > 3 }\`,
 continuity at \`x = 3\` requires \`2c + 9 = 6c + 1\`, so \`c = 2\`.
-				`.trim(),
+`.trim(),
 				media.piecewiseFunctions
 			)
 		]),
@@ -860,38 +863,16 @@ This check-in closes the course by revisiting rational functions, rational opera
 			),
 			createLesson(
 				"Representative Review Problems",
-				`
-**Answer-key highlights**
-
-- An asymptote is a line the graph approaches but does not reach within the function's defined behavior
-- For \`f(x) = (x - 2)/(4x + 1)\`:
-  - vertical asymptote \`x = -1/4\`
-  - horizontal asymptote \`y = 1/4\`
-- For \`[(x^2 - 3x - 10)] / [(x^2 - 4x - 5)]\`:
-  - removable discontinuity \`x = 5\`
-- For \`(x^2 - x - 2)/(x^2 - 4)\`:
-  - valid real root \`x = -1\`
-- \`sqrt(x + 1) = sqrt(2x) - 1\` -> \`x = 8\`
-- Candy pricing check-in:
-  - \`C(x) = 3.50x\` for \`x < 5\`
-  - \`C(x) = 2.75x\` for \`x >= 5\`
-  - \`22\` dollars means \`8\` bags
-
-Reuse the provided rational, radical, and piecewise visuals for any review item that needs a graph reference.
-				`.trim(),
+				algebra2Checkpoint("algebra-2a", "Check-In #3"),
 				media.rationalFunctions
 			),
 			createLesson(
 				"Check-In Visual References",
 				`
-Use a graphing tool or the provided rational/piecewise references for visual prompts such as:
+Use \`f(x)=(x^2-1)/((x-1)(x-2))\`. It simplifies to \`(x+1)/(x-2)\` with original exclusions \`x=1,2\`, a hole at \`(1,-2)\`, vertical asymptote \`x=2\` and horizontal asymptote \`y=1\`.
 
-- one rational-function graph with multiple asymptotes and a hole
-- at least one piecewise graph-definition prompt
-- one floor-function transformation sketch
-
-The important part is the explanation: name the graph feature and connect it to the equation or transformation.
-				`.trim(),
+For the piecewise graph \`g(x)=x-1\` on \`x<0\` and \`g(x)=3x\` on \`x>=0\`, mark an open dot at \`(0,-1)\` and a filled dot at \`(0,0)\`. For \`h(x)=floor(x-1)+2\`, each integer \`k\` gives value \`k+2\` on \`[k+1,k+2)\`, including the left endpoint and excluding the right.
+`.trim(),
 				media.piecewiseFunctions
 			)
 		]),
@@ -925,13 +906,25 @@ Build one coherent portfolio that compares how Algebra 2A function families repr
 				createLesson(
 					"Choice: Portfolio Evidence Audit",
 					`
-Choose one artifact from complex numbers, quadratics, polynomials, rational functions, radicals, and piecewise functions. For each artifact, name the representation, verification method, and one revision that improved the reasoning. Use the audit only when organizing existing evidence would strengthen the capstone plan.
+Select one completed artifact from each of six topics: complex numbers, quadratics, polynomials, rational functions, radicals, and piecewise functions. Build a six-row table naming the original question, the representation used, an independent verification, and any correction needed.
+
+- Verify a complex-number result by multiplication or coordinates, and a quadratic or polynomial result by expansion or substitution.
+- Retain original exclusions for rational expressions, check radical solutions in the original equation, and test both sides of a piecewise boundary.
+- When a result is already correct, record the successful check instead of inventing an error.
+- Use the table to choose the two function families for the capstone and explain which existing evidence supports that choice.
 					`.trim()
 				),
 				createLesson(
 					"Challenge: Cross-Family Model Stress Test",
 					`
-Change one domain boundary, data point, intercept, asymptote, or continuity condition in the capstone scenario. Refit or revise both candidate models, compare which conclusion changes, and explain which model is more stable under the changed condition.
+Compare f(x)=(x^2-1)/(x-1) with g(x)=x+1. Initially restrict inputs to [-2,2]. Evaluate both at x=0,1,2, then change the allowed interval to [1,3] and evaluate at x=1,2,3. Factor before cancelling and retain exclusions from the original expression.
+
+- Give each model's domain before and after the interval change.
+- Make a table distinguishing a numerical value from an undefined value.
+- Explain why matching outputs at shared valid inputs do not make the two domains identical.
+- Apply the same comparison method to one changed domain boundary, intercept, or continuity condition in the capstone's own two models. State which conclusion changes and support it with two checked inputs.
+
+[Project self-check](/courses/?course=algebra-2a&asset=%2Fcourse-assets%2Falgebra-2a%2Fpractice-checks-v1.md%23capstone-domain-stress-test&label=Capstone+domain+stress+test)
 					`.trim()
 				)
 			]
@@ -1177,3 +1170,5 @@ configureMathCourseFlow(algebra2ACourse, {
 	],
 	appendixTitles: ["Reference Archive: Algebra 2A"]
 });
+
+applyAlgebra2Readings(algebra2ACourse, "algebra-2a");

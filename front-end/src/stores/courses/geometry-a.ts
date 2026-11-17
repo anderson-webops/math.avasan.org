@@ -1,4 +1,8 @@
-import type { RawCourse } from "./types";
+import type { RawCourse, RawCourseModuleItem } from "./types";
+import {
+	courseAssetViewerUrl,
+	geometryCompassBisectorUrl
+} from "@/modules/courseAssetSourcesPrealgebra";
 import { configureMathCourseFlow } from "./mathCourseFlow";
 import {
 	geometryAStaticFilenames,
@@ -615,7 +619,6 @@ export const geometryACourse: RawCourse = {
 				lesson(
 					"Geometry A Reference Map",
 					[
-						"This reference map summarizes Geometry A topic coverage and static media slots without embedding diagram files that are still pending in the class asset library.",
 						[
 							"**Course concept map**",
 							"- Geometry foundations: points, lines, rays, segments, planes, angle notation, collinearity, coplanarity, and diagram-supported versus unsupported claims.",
@@ -626,14 +629,20 @@ export const geometryACourse: RawCourse = {
 							"- Triangle work: classification, triangle sum, exterior angles, congruence shortcuts, similarity, right-triangle reasoning, Pythagorean theorem, triangle centers, inequalities, and introductory trigonometry."
 						].join("\n"),
 						[
+							"**Compass and straightedge constructions**",
+							"For a segment AB, choose a compass radius greater than half AB. Draw circles of that same radius centered at A and B. Name their two intersections P and Q and draw line PQ. Both intersections are equidistant from A and B, so PQ is the perpendicular bisector of AB. Its intersection M with AB is the midpoint.",
+							"The diagram uses A=(-3,0), B=(3,0) and radius 5. Its circle intersections are P=(0,4) and Q=(0,-4), since 3^2+4^2=5^2. Their line x=0 crosses AB at midpoint M=(0,0).",
+							`![Equal-radius circles centered at A and B meet at P and Q. Line PQ passes through midpoint M of AB at a right angle.](${geometryCompassBisectorUrl})`,
+							"To construct a perpendicular to a line through a point O on that line, mark C and D on opposite sides of O at the same compass distance. Construct the perpendicular bisector of CD by the method above. Its midpoint is O, so it is the required perpendicular through O.",
+							"For a point O off the line, draw a circle centered at O large enough to meet the line at two distinct points C and D. Since OC=OD, O lies on the perpendicular bisector of CD. Construct that bisector with equal-radius circles centered at C and D; it is perpendicular to the original line and passes through O."
+						].join("\n\n"),
+						[
 							"**Reference links**",
-							"- Perpendicular-line construction: https://www.khanacademy.org/math/geometry-home/geometric-constructions/geo-bisectors/v/constructing-a-perpendicular-line-using-a-compass-and-straightedge?modal=1",
-							"- Perpendicular-bisector construction: https://www.khanacademy.org/math/geometry-home/geometric-constructions/geo-bisectors/v/constructing-a-perpendicular-line-using-a-compass-and-straightedge?modal=1",
+							"- Compass and straightedge video reference: https://www.khanacademy.org/math/geometry-home/geometric-constructions/geo-bisectors/v/constructing-a-perpendicular-line-using-a-compass-and-straightedge?modal=1",
 							"- Equilateral-triangle construction: https://www.khanacademy.org/math/geometry-home/geometric-constructions/polygons-inscribed-in-circles/v/constructing-equilateral-triangle-inscribed-in-circle?modal=1",
 							"- Trigonometry table reference: the external Math2 table is omitted because an authenticated HTTPS copy could not be verified.",
 							"- Scientific calculator reference: https://www.desmos.com/scientific"
-						].join("\n"),
-						"**Static-media note:** Legacy static diagrams are not embedded directly while those files are pending. The appendix lists stable static media URLs by original filename so diagrams can be added later without changing course references."
+						].join("\n")
 					].join("\n\n")
 				)
 			],
@@ -801,3 +810,21 @@ configureMathCourseFlow(geometryACourse, {
 	],
 	appendixTitles: ["Geometry A Reference Archive", "Pending Static Assets"]
 });
+
+export const geometryAChangedCaseReview: RawCourseModuleItem = {
+	id: "geometry-a-check-in-3-and-geometry-a-capstone-supplemental-check-in-3-and-geometry-a-capstone-changed-case-review",
+	title: "Check-In #3 and Geometry A Capstone Changed-Case Review",
+	aliases: ["Applied Challenge"],
+	learningPath: "choice",
+	contentKind: "assignment",
+	preserveInstructions: true,
+	content: [
+		"**Problems:**",
+		"1. A blueprint triangle has vertices A=(0,0), B=(8,0), C=(0,6). Find all side lengths, perimeter and area. Justify the right angle from the coordinates.",
+		"2. A second version uses D=(0,0), E=(12,0), F=(0,9). Match corresponding vertices, find the scale factor from ABC to DEF, and calculate its perimeter and area. Explain why the two quantities use different scale factors.",
+		"3. A third version keeps A and B but moves C to (3,6). Find the three squared side lengths and decide whether it is still a right triangle. State what remains true about its area and why unchanged area does not prove similarity.",
+		"4. Find the centroids of the first and third triangles. Explain the change in their x-coordinates from the vertex averages.",
+		"**Checkpoints:** Match vertices before comparing lengths. Name the perpendicular height for area, check all squared lengths before claiming a right triangle, and distinguish equal area from equal shape.",
+		`[Check answers and reasoning](${courseAssetViewerUrl("/course-assets/geometry-a/practice-checks-v1.md#blueprint-changed-case-review", "Blueprint self-check")})`
+	].join("\n\n")
+};

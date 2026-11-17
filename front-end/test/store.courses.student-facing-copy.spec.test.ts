@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { courseCatalog, loadRawCourse } from "@/stores/courses/index";
+import { geometryCompassBisectorUrl } from "@/modules/courseAssetSourcesPrealgebra";
+import { algebraCourseImageUrls } from "@/modules/courseAssetSourcesAlgebra";
 
 const INTERNAL_COPY_RE =
 	/\b(?:admin dashboard|book a class|create an account|freelance|instructor note|log in|scheduler|sign up|student account|tutor|zoom)\b/i;
@@ -9,6 +11,10 @@ const ALLOWED_MEDIA_HOSTS = new Set([
 	"youtu.be"
 ]);
 const COURSE_SWEEP_TIMEOUT = 180000;
+const ALLOWED_LOCAL_MEDIA = new Set([
+	geometryCompassBisectorUrl,
+	...Object.values(algebraCourseImageUrls)
+]);
 
 describe("student-facing math course copy", () => {
 	it(
@@ -67,7 +73,11 @@ describe("student-facing math course copy", () => {
 							);
 						}
 
-						if (!item.mediaLink) continue;
+						if (
+							!item.mediaLink ||
+							ALLOWED_LOCAL_MEDIA.has(item.mediaLink)
+						)
+							continue;
 						const hostname = new URL(item.mediaLink).hostname;
 						if (!ALLOWED_MEDIA_HOSTS.has(hostname)) {
 							failures.push(

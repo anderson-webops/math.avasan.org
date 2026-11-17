@@ -866,3 +866,18 @@ configureMathCourseFlow(preAlgebraBCourse, {
 	],
 	appendixTitles: ["Pre-Algebra B Reference Archive"]
 });
+
+for (const module of preAlgebraBCourse.modules) {
+	for (const item of [...module.curriculum, ...module.supplementalProjects]) {
+		if (item.title === "Project: Gymnastics Geometry Challenge") {
+			item.content +=
+				"\n\n**Exercise measurements:**\n\nTurns are 351, 372 and 365 degrees, compared with one full 360-degree rotation. A quadrilateral has corresponding sides 4, 5, 3 and 7 feet; a comparison figure has sides 8, 10, 6 and 14 feet in the same order and equal corresponding angles. Draw a grouped bar graph of the following fictional routine measurements: routine A has vertical distance 3 feet and diagonal distance 5 feet; B has vertical 5 feet and diagonal 13 feet; C has vertical 6 feet and diagonal 10 feet. Each diagonal is the hypotenuse of a right triangle. Calculate each horizontal distance and decide which routines meet a horizontal-distance requirement of at least 10 feet. These are fixed exercise values rather than measurements of the linked performance.";
+			item.preserveInstructions = true;
+		}
+		if (item.title === "Project: Uber Internship Challenge") {
+			item.content +=
+				"\n\n**Exercise route map:**\n\nUse coordinates measured in kilometers. Route A joins (0,0), (4,0), (4,3), (2,5), (0,3) and returns to (0,0). Route B joins (0,0), (4,0), (4,4), (0,4) and returns to (0,0). Draw both routes to scale, treating each segment as straight and each vertex as a hub. Split the pentagon into a rectangle and a triangle to calculate enclosed area, and use right triangles for slanted lengths. Compare hub count, perimeter and enclosed area; state whether minimizing distance or adding a hub drives the recommendation. These are fictional planar exercise routes; the coordinates are separate from the historical city-map figures in the reference archive.";
+			item.preserveInstructions = true;
+		}
+	}
+}

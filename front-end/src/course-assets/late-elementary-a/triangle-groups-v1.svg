@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 440" role="img" aria-labelledby="title desc">
+<title id="title">Triangle side and angle groups</title><desc id="desc">A right scalene triangle has sides 3, 4, 5. An acute equilateral triangle has sides 4, 4, 4. An obtuse isosceles triangle has sides 3, 3, 5.</desc>
+<rect width="480" height="440" fill="white"/><g font-family="sans-serif" font-size="17" fill="#173b45" text-anchor="middle">
+<text x="240" y="28" font-size="21">Two ways to group triangles</text>
+<polygon id="right-triangle" points="35,155 155,155 35,65" fill="#ddf2ed" stroke="#007a69" stroke-width="3"/><path d="M35 137 H53 V155" fill="none" stroke="#173b45" stroke-width="2"/>
+<text x="95" y="179">3, 4, 5</text><text x="95" y="202">Scalene / right</text>
+<polygon id="equilateral-triangle" points="295,155 415,155 355,51.076952" fill="#ddf2ed" stroke="#007a69" stroke-width="3"/><text x="355" y="179">4, 4, 4</text><text x="355" y="202">Equilateral / acute</text>
+<polygon id="obtuse-triangle" points="165,360 315,360 240,310.250628" fill="#fbe8d5" stroke="#a75b15" stroke-width="3"/><text x="240" y="389">3, 3, 5</text><text x="240" y="414">Isosceles / obtuse</text></g></svg>

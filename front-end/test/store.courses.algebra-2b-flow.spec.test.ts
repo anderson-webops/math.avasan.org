@@ -1,5 +1,19 @@
 import { describe, expect, it } from "vitest";
+import { extractMarkdownSection } from "@/modules/courseAssetPreview";
+import {
+	algebraCourseAssetSources,
+	algebraCourseAssetViewerUrl
+} from "@/modules/courseAssetSourcesAlgebra";
+import {
+	algebra2Checkpoint,
+	algebra2Checkpoints
+} from "@/stores/courses/algebra2Checkpoints";
+import {
+	algebra2ReadingMethods,
+	algebra2Readings
+} from "@/stores/courses/algebra2Readings";
 import { algebra2BCourse } from "@/stores/courses/algebra-2b";
+import { loadRawCourse } from "@/stores/courses/index";
 
 const EXPECTED_MODULE_SEQUENCE = [
 	"ALB1 Introduction to Logarithms",
@@ -24,7 +38,7 @@ function requireModule(title: string) {
 	return module;
 }
 
-describe("Algebra 2B learner flow", () => {
+describe("algebra 2B learner flow", () => {
 	it("adds a synthesis capstone after both readiness gates", () => {
 		expect(
 			algebra2BCourse.modules
@@ -43,9 +57,10 @@ describe("Algebra 2B learner flow", () => {
 			candidate => candidate.kind !== "appendix"
 		)) {
 			expect(module.estimatedTime, module.title).toMatch(/session/);
-			expect(module.keyBlocks?.length, module.title).toBeGreaterThanOrEqual(
-				5
-			);
+			expect(
+				module.keyBlocks?.length,
+				module.title
+			).toBeGreaterThanOrEqual(5);
 			expect(
 				module.curriculum.every(item => item.learningPath === "core"),
 				module.title
@@ -87,8 +102,91 @@ describe("Algebra 2B learner flow", () => {
 			"connects at least three Algebra 2B strands"
 		);
 		expect(capstone.curriculum[0]?.content).toContain("Pre-Calculus");
-		expect(capstone.supplementalProjects.map(item => item.learningPath)).toEqual(
-			["choice", "challenge"]
+		expect(
+			capstone.supplementalProjects.map(item => item.learningPath)
+		).toEqual(["choice", "challenge"]);
+	});
+});
+
+describe("algebra 2B historical baseline", () => {
+	it("retains twelve methods, twenty-two classified readings and both complete checkpoints", async () => {
+		const course = (await loadRawCourse("algebra-2b"))!;
+		const methods = algebra2ReadingMethods.filter(
+			entry => entry.courseId === "algebra-2b"
 		);
+		const readings = algebra2Readings.filter(
+			entry => entry.courseId === "algebra-2b"
+		);
+		expect(methods).toHaveLength(12);
+		expect(readings).toHaveLength(22);
+		for (const entry of methods) {
+			const module = course.modules.find(
+				module => module.title === entry.moduleTitle
+			)!;
+			expect(
+				module.curriculum.filter(
+					item =>
+						item.content.includes(entry.methods) &&
+						item.content.includes(entry.worked)
+				),
+				entry.target
+			).toHaveLength(1);
+		}
+		for (const entry of readings) {
+			const module = course.modules.find(
+				module => module.title === entry.moduleTitle
+			)!;
+			expect(
+				module[entry.section].find(item => item.id === entry.id)
+					?.contentKind,
+				entry.title
+			).toBe("reading");
+		}
+		const checkpoints = algebra2Checkpoints.filter(
+			entry => entry.course === "algebra-2b"
+		);
+		expect(checkpoints).toHaveLength(2);
+		for (const entry of checkpoints) {
+			const module = course.modules.find(
+				module => module.title === entry.moduleTitle
+			)!;
+			const review = module.curriculum.find(item =>
+				item.title.includes("Representative Review Problems")
+			)!;
+			expect(review.content).toBe(
+				algebra2Checkpoint(entry.course, entry.moduleTitle)
+			);
+			for (const problem of entry.problems)
+				expect(review.content).toContain(problem);
+			expect(review.content).toContain("course=algebra-2b");
+		}
+	});
+
+	it("loads the exact finite Markdown sources and binds every self-check to its own course", async () => {
+		expect(Object.keys(algebraCourseAssetSources)).toHaveLength(2);
+		for (const [path, load] of Object.entries(algebraCourseAssetSources)) {
+			const markdown = await load();
+			expect(new TextEncoder().encode(markdown).byteLength).toBeLessThan(
+				65536
+			);
+			const courseId = path.split("/")[2];
+			const heading =
+				courseId === "algebra-2a"
+					? "capstone-domain-stress-test"
+					: "capstone-growth-stress-test";
+			expect(extractMarkdownSection(markdown, heading)).toContain(
+				"Capstone"
+			);
+			expect(
+				algebraCourseAssetViewerUrl(path, "Check", courseId)
+			).toContain(`course=${courseId}`);
+			expect(() =>
+				algebraCourseAssetViewerUrl(
+					path,
+					"Check",
+					courseId === "algebra-2a" ? "algebra-2b" : "algebra-2a"
+				)
+			).toThrow("Unsupported Algebra course resource");
+		}
 	});
 });

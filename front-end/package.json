@@ -14,7 +14,7 @@
 	},
 	"main": "dist/script.js",
 	"scripts": {
-		"build": "tsx --tsconfig tsconfig.json scripts/verify-course-resource-policy.mts && vite-ssg build && node scripts/canonicalize-sitemap.mts && node scripts/normalize-static-routes.mjs && node scripts/write-release-metadata.mjs && node scripts/verify-built-security.mjs",
+		"build": "node scripts/verify-course-resource-policy.mjs && vite-ssg build && node scripts/canonicalize-sitemap.mts && node scripts/normalize-static-routes.mjs && node scripts/write-release-metadata.mjs && node scripts/verify-built-security.mjs",
 		"dev": "vite --port 3333 --open",
 		"start": "vite --port 3333 --open --host",
 		"serve": "vite --port 3333 --open --host",
@@ -26,7 +26,7 @@
 		"typecheck": "vue-tsc --noEmit",
 		"up": "npm exec --yes -- taze major -I",
 		"postinstall": "simple-git-hooks",
-		"lint": "eslint \"src/**/*.{js,ts,vue}\"",
+		"lint": "eslint \"src/**/*.{js,ts,vue}\" \"scripts/verify-course-resource-policy.{mjs,mts}\"",
 		"lint-fix": "eslint \"src/**/*.{js,ts,vue}\" --fix"
 	},
 	"dependencies": {

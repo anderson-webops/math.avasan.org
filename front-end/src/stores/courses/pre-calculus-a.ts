@@ -759,7 +759,7 @@ export const preCalculusACourse: RawCourse = {
 					overview({
 						title: "Operations with rational expressions combine fraction arithmetic with polynomial factoring and domain restrictions.",
 						concepts: [
-							"Multiplying and dividing rational expressions require factoring, canceling common factors, and carrying original restrictions.",
+							"Record original denominator restrictions before factoring and canceling. For division, also exclude zeros of the entire divisor, then multiply by its reciprocal.",
 							"Adding and subtracting rational expressions require a common denominator before combining numerators.",
 							"Solving rational equations often uses a common denominator to clear fractions, but excluded values still matter.",
 							"Extraneous solutions can appear when a proposed answer makes an original denominator zero."
@@ -775,7 +775,7 @@ export const preCalculusACourse: RawCourse = {
 						goal: "Simplify rational expressions and solve rational equations with restrictions.",
 						steps: [
 							"Factor all polynomial numerators and denominators.",
-							"Record excluded values before simplifying.",
+							"Record original denominator zeros and, for division, values that make the entire divisor zero before simplifying.",
 							"Multiply, divide, add, or subtract using fraction rules.",
 							"Solve rational equations after clearing denominators.",
 							"Reject any solution that violates an original restriction."

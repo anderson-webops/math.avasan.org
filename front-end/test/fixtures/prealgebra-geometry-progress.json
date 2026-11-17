@@ -1,0 +1,1067 @@
+{
+	"revision": "252e914d7c8284703a8d45715c1502176d5ccc9e",
+	"courses": {
+		"pre-algebra-a": [
+			{
+				"id": "pre-algebra-a-pre-algebra-a-kick-off",
+				"title": "Pre-Algebra A Kick-Off",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-a-pre-algebra-a-kick-off-curriculum-course-map-and-readiness-check",
+						"title": "Course Map and Readiness Check",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-a-pre-algebra-a-kick-off-curriculum-project-starting-a-gardening-business",
+						"title": "Project: Starting a Gardening Business",
+						"aliases": [
+							"pre-algebra-a-pre-algebra-a-kick-off-supplemental-project-starting-a-gardening-business"
+						],
+						"learningPath": "choice"
+					},
+					{
+						"id": "pre-algebra-a-pre-algebra-a-kick-off-curriculum-project-growing-the-gardening-business",
+						"title": "Project: Growing the Gardening Business",
+						"aliases": [
+							"pre-algebra-a-pre-algebra-a-kick-off-supplemental-project-growing-the-gardening-business"
+						],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-a-paa1-paa2-arithmetic-foundations",
+				"title": "PAA1-PAA2 Arithmetic Foundations",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-a-paa1-paa2-arithmetic-foundations-curriculum-negative-numbers-order-of-operations-and-absolute-value",
+						"title": "Negative Numbers, Order of Operations, and Absolute Value",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-a-paa1-paa2-arithmetic-foundations-supplemental-project-high-and-low-species",
+						"title": "Project: High and Low Species",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "pre-algebra-a-paa1-paa2-arithmetic-foundations-supplemental-transfer-practice-arithmetic-foundations",
+						"title": "Transfer Practice: Arithmetic Foundations",
+						"aliases": []
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-a-paa3-paa7-fractions-and-arithmetic",
+				"title": "PAA3-PAA7 Fractions and Arithmetic",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-a-paa3-paa7-fractions-and-arithmetic-curriculum-long-multiplication-long-division-and-fraction-structure",
+						"title": "Long Multiplication, Long Division, and Fraction Structure",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "pre-algebra-a-paa3-paa7-fractions-and-arithmetic-curriculum-multiplying-dividing-adding-and-subtracting-fractions",
+						"title": "Multiplying, Dividing, Adding, and Subtracting Fractions",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-a-paa3-paa7-fractions-and-arithmetic-supplemental-project-mochi-s-product-adventure",
+						"title": "Project: Mochi's Product Adventure",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "pre-algebra-a-paa3-paa7-fractions-and-arithmetic-supplemental-transfer-practice-fractions-and-arithmetic",
+						"title": "Transfer Practice: Fractions and Arithmetic",
+						"aliases": []
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-a-paa8-paa12-decimals-percents-ratios-and-rates",
+				"title": "PAA8-PAA12 Decimals, Percents, Ratios, and Rates",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-a-paa8-paa12-decimals-percents-ratios-and-rates-curriculum-decimals-and-percents",
+						"title": "Decimals and Percents",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "pre-algebra-a-paa8-paa12-decimals-percents-ratios-and-rates-curriculum-ratios-proportions-unit-conversions-and-distance-rate-time",
+						"title": "Ratios, Proportions, Unit Conversions, and Distance-Rate-Time",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-a-paa8-paa12-decimals-percents-ratios-and-rates-supplemental-project-cookie-catering",
+						"title": "Project: Cookie Catering",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "pre-algebra-a-paa8-paa12-decimals-percents-ratios-and-rates-supplemental-challenge-rate-time-distance-route-plan",
+						"title": "Challenge: Rate-Time-Distance Route Plan",
+						"aliases": [],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-a-check-in-1",
+				"title": "Check-In #1",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-a-check-in-1-curriculum-arithmetic-and-ratio-readiness-check",
+						"title": "Arithmetic and Ratio Readiness Check",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-a-check-in-1-supplemental-checkpoint-check-in-1",
+						"title": "Checkpoint: Check-In #1",
+						"aliases": []
+					},
+					{
+						"id": "pre-algebra-a-check-in-1-supplemental-check-in-1-changed-case-review",
+						"title": "Check-In #1 Changed-Case Review",
+						"aliases": []
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-a-paa13-paa17-expressions-and-sequences",
+				"title": "PAA13-PAA17 Expressions and Sequences",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-a-paa13-paa17-expressions-and-sequences-curriculum-variables-expressions-grouping-distribution-and-factoring",
+						"title": "Variables, Expressions, Grouping, Distribution, and Factoring",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "pre-algebra-a-paa13-paa17-expressions-and-sequences-curriculum-arithmetic-sequences-and-sums",
+						"title": "Arithmetic Sequences and Sums",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-a-paa13-paa17-expressions-and-sequences-supplemental-project-designing-the-perfect-scanning-device",
+						"title": "Project: Designing the Perfect Scanning Device",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "pre-algebra-a-paa13-paa17-expressions-and-sequences-supplemental-transfer-practice-expressions-and-sequences",
+						"title": "Transfer Practice: Expressions and Sequences",
+						"aliases": []
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-a-paa18-paa23-exponents-roots-and-scientific-notation",
+				"title": "PAA18-PAA23 Exponents, Roots, and Scientific Notation",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-a-paa18-paa23-exponents-roots-and-scientific-notation-curriculum-exponent-rules-nonpositive-exponents-roots-and-fractional-exponents",
+						"title": "Exponent Rules, Nonpositive Exponents, Roots, and Fractional Exponents",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "pre-algebra-a-paa18-paa23-exponents-roots-and-scientific-notation-curriculum-scientific-notation-and-scale",
+						"title": "Scientific Notation and Scale",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-a-paa18-paa23-exponents-roots-and-scientific-notation-supplemental-project-symptom-spree",
+						"title": "Project: Symptom Spree",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "pre-algebra-a-paa18-paa23-exponents-roots-and-scientific-notation-supplemental-project-red-hot-chilli-chicken",
+						"title": "Project: Red Hot Chilli Chicken",
+						"aliases": [],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-a-check-in-2-and-capstone",
+				"title": "Check-In #2 and Capstone",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-a-check-in-2-and-capstone-curriculum-expressions-and-exponents-readiness-check",
+						"title": "Expressions and Exponents Readiness Check",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "pre-algebra-a-check-in-2-and-capstone-curriculum-master-project-pre-algebra-a",
+						"title": "Master Project: Pre-Algebra A",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "pre-algebra-a-check-in-2-and-capstone-curriculum-pre-algebra-a-capstone-reference-map",
+						"title": "Pre-Algebra A Capstone Reference Map",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-a-check-in-2-and-capstone-supplemental-checkpoint-check-in-2-and-capstone",
+						"title": "Checkpoint: Check-In #2 and Capstone",
+						"aliases": []
+					},
+					{
+						"id": "pre-algebra-a-check-in-2-and-capstone-supplemental-check-in-2-and-capstone-changed-case-review",
+						"title": "Check-In #2 and Capstone Changed-Case Review",
+						"aliases": []
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-a-pre-algebra-a-reference-archive",
+				"title": "Pre-Algebra A Reference Archive",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-a-pre-algebra-a-reference-archive-curriculum-pre-algebra-a-reference-map",
+						"title": "Pre-Algebra A Reference Map",
+						"aliases": [],
+						"learningPath": "choice"
+					}
+				],
+				"supplementalProjects": []
+			},
+			{
+				"id": "pre-algebra-a-pending-static-assets",
+				"title": "Pending Static Assets",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-a-pending-static-assets-curriculum-pre-algebra-a-asset-status",
+						"title": "Pre-Algebra A Asset Status",
+						"aliases": [],
+						"learningPath": "choice"
+					}
+				],
+				"supplementalProjects": []
+			}
+		],
+		"pre-algebra-b": [
+			{
+				"id": "pre-algebra-b-pre-algebra-b-kick-off",
+				"title": "Pre-Algebra B Kick-Off",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-b-pre-algebra-b-kick-off-curriculum-course-map-and-readiness-check",
+						"title": "Course Map and Readiness Check",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-b-pre-algebra-b-kick-off-curriculum-project-pre-algebra-b-readiness-map",
+						"title": "Project: Pre-Algebra B Readiness Map",
+						"aliases": [
+							"pre-algebra-b-pre-algebra-b-kick-off-supplemental-project-pre-algebra-b-readiness-map"
+						],
+						"learningPath": "choice"
+					},
+					{
+						"id": "pre-algebra-b-pre-algebra-b-kick-off-supplemental-transfer-practice-pre-algebra-b-kick-off",
+						"title": "Transfer Practice: Pre-Algebra B Kick-Off",
+						"aliases": []
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-b-pab1-pab5-data-averages-and-graphs",
+				"title": "PAB1-PAB5 Data, Averages, and Graphs",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-b-pab1-pab5-data-averages-and-graphs-curriculum-range-median-mode-and-mean",
+						"title": "Range, Median, Mode, and Mean",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "pre-algebra-b-pab1-pab5-data-averages-and-graphs-curriculum-single-variable-and-multivariable-graphs",
+						"title": "Single-Variable and Multivariable Graphs",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-b-pab1-pab5-data-averages-and-graphs-supplemental-project-exploring-the-world-with-marco",
+						"title": "Project: Exploring the World with Marco",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "pre-algebra-b-pab1-pab5-data-averages-and-graphs-supplemental-supplemental-project-1-data-summary-error-repair",
+						"title": "Supplemental Project 1: Data Summary Error Repair",
+						"aliases": [],
+						"learningPath": "choice"
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-b-check-in-1-pre-algebra-b-data-and-graphing",
+				"title": "Check-In #1: Pre-Algebra B Data and Graphing",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-b-check-in-1-pre-algebra-b-data-and-graphing-curriculum-data-and-graphing-readiness-check",
+						"title": "Data and Graphing Readiness Check",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-b-check-in-1-pre-algebra-b-data-and-graphing-supplemental-supplemental-project-1-graph-choice-defense",
+						"title": "Supplemental Project 1: Graph Choice Defense",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "pre-algebra-b-check-in-1-pre-algebra-b-data-and-graphing-supplemental-supplemental-project-2-statistic-selection-check",
+						"title": "Supplemental Project 2: Statistic Selection Check",
+						"aliases": [],
+						"learningPath": "choice"
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-b-pab6-pab9-lines-angles-triangles-and-similarity",
+				"title": "PAB6-PAB9 Lines, Angles, Triangles, and Similarity",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-b-pab6-pab9-lines-angles-triangles-and-similarity-curriculum-points-lines-angles-and-triangle-relationships",
+						"title": "Points, Lines, Angles, and Triangle Relationships",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "pre-algebra-b-pab6-pab9-lines-angles-triangles-and-similarity-curriculum-congruence-similarity-and-scale",
+						"title": "Congruence, Similarity, and Scale",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-b-pab6-pab9-lines-angles-triangles-and-similarity-supplemental-project-gymnastics-geometry-challenge",
+						"title": "Project: Gymnastics Geometry Challenge",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "pre-algebra-b-pab6-pab9-lines-angles-triangles-and-similarity-supplemental-transfer-practice-lines-angles-triangles-and-similarity",
+						"title": "Transfer Practice: Lines, Angles, Triangles, and Similarity",
+						"aliases": []
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-b-pab10-pab14-polygons-area-circles-and-solids",
+				"title": "PAB10-PAB14 Polygons, Area, Circles, and Solids",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-b-pab10-pab14-polygons-area-circles-and-solids-curriculum-quadrilaterals-polygons-perimeter-and-area",
+						"title": "Quadrilaterals, Polygons, Perimeter, and Area",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "pre-algebra-b-pab10-pab14-polygons-area-circles-and-solids-curriculum-circles-and-three-dimensional-shapes",
+						"title": "Circles and Three-Dimensional Shapes",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-b-pab10-pab14-polygons-area-circles-and-solids-supplemental-project-uber-internship-challenge",
+						"title": "Project: Uber Internship Challenge",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "pre-algebra-b-pab10-pab14-polygons-area-circles-and-solids-supplemental-transfer-practice-polygons-area-circles-and-solids",
+						"title": "Transfer Practice: Polygons, Area, Circles, and Solids",
+						"aliases": []
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-b-check-in-2-pre-algebra-b-geometry",
+				"title": "Check-In #2: Pre-Algebra B Geometry",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-b-check-in-2-pre-algebra-b-geometry-curriculum-geometry-readiness-check",
+						"title": "Geometry Readiness Check",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-b-check-in-2-pre-algebra-b-geometry-supplemental-supplemental-project-1-geometry-formula-audit",
+						"title": "Supplemental Project 1: Geometry Formula Audit",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "pre-algebra-b-check-in-2-pre-algebra-b-geometry-supplemental-supplemental-project-2-similarity-transfer",
+						"title": "Supplemental Project 2: Similarity Transfer",
+						"aliases": [],
+						"learningPath": "choice"
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-b-pab15-pab19-factors-multiples-and-number-structure",
+				"title": "PAB15-PAB19 Factors, Multiples, and Number Structure",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-b-pab15-pab19-factors-multiples-and-number-structure-curriculum-multiples-factors-divisibility-and-primes",
+						"title": "Multiples, Factors, Divisibility, and Primes",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "pre-algebra-b-pab15-pab19-factors-multiples-and-number-structure-curriculum-gcf-and-lcm",
+						"title": "GCF and LCM",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-b-pab15-pab19-factors-multiples-and-number-structure-supplemental-project-the-marvelous-theme-park",
+						"title": "Project: The MARVELous Theme Park",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "pre-algebra-b-pab15-pab19-factors-multiples-and-number-structure-supplemental-transfer-practice-factors-multiples-and-number-structure",
+						"title": "Transfer Practice: Factors, Multiples, and Number Structure",
+						"aliases": []
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-b-pab20-pab23-counting-probability-and-applied-modeling",
+				"title": "PAB20-PAB23 Counting, Probability, and Applied Modeling",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-b-pab20-pab23-counting-probability-and-applied-modeling-curriculum-counting-strategies-and-probability",
+						"title": "Counting Strategies and Probability",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "pre-algebra-b-pab20-pab23-counting-probability-and-applied-modeling-curriculum-applied-data-models-and-dashboards",
+						"title": "Applied Data Models and Dashboards",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-b-pab20-pab23-counting-probability-and-applied-modeling-supplemental-project-esmash",
+						"title": "Project: eSmash",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "pre-algebra-b-pab20-pab23-counting-probability-and-applied-modeling-supplemental-project-airtable-revamped",
+						"title": "Project: Airtable Revamped",
+						"aliases": [],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-b-check-in-3-and-capstone-pre-algebra-b",
+				"title": "Check-In #3 and Capstone: Pre-Algebra B",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-b-check-in-3-and-capstone-pre-algebra-b-curriculum-number-structure-probability-and-modeling-readiness-check",
+						"title": "Number Structure, Probability, and Modeling Readiness Check",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "pre-algebra-b-check-in-3-and-capstone-pre-algebra-b-curriculum-master-project-pre-algebra-b",
+						"title": "Master Project: Pre-Algebra B",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "pre-algebra-b-check-in-3-and-capstone-pre-algebra-b-supplemental-supplemental-project-1-probability-fairness-audit",
+						"title": "Supplemental Project 1: Probability Fairness Audit",
+						"aliases": [],
+						"learningPath": "challenge"
+					},
+					{
+						"id": "pre-algebra-b-check-in-3-and-capstone-pre-algebra-b-supplemental-supplemental-project-2-capstone-evidence-plan",
+						"title": "Supplemental Project 2: Capstone Evidence Plan",
+						"aliases": [],
+						"learningPath": "choice"
+					}
+				]
+			},
+			{
+				"id": "pre-algebra-b-pre-algebra-b-reference-archive",
+				"title": "Pre-Algebra B Reference Archive",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "pre-algebra-b-pre-algebra-b-reference-archive-curriculum-pre-algebra-b-reference-map",
+						"title": "Pre-Algebra B Reference Map",
+						"aliases": [],
+						"learningPath": "choice"
+					}
+				],
+				"supplementalProjects": []
+			}
+		],
+		"geometry-a": [
+			{
+				"id": "geometry-a-geometry-a-foundations-definitions-logic-and-proofs",
+				"title": "Geometry A Foundations: Definitions, Logic, and Proofs",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-a-geometry-a-foundations-definitions-logic-and-proofs-curriculum-definitions-logic-and-proofs-core-concepts",
+						"title": "Definitions, Logic, and Proofs Core Concepts",
+						"aliases": []
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "geometry-a-geometry-a-foundations-definitions-logic-and-proofs-supplemental-project-geometry-notation-reference-map",
+						"title": "Project: Geometry Notation Reference Map",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "geometry-a-geometry-a-foundations-definitions-logic-and-proofs-supplemental-project-proof-repair-lab",
+						"title": "Project: Proof Repair Lab",
+						"aliases": [],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "geometry-a-geoa4-geoa5-lines-angles-and-coordinate-geometry",
+				"title": "GEOA4-GEOA5 Lines, Angles, and Coordinate Geometry",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-a-geoa4-geoa5-lines-angles-and-coordinate-geometry-curriculum-geoa4-parallel-and-perpendicular-lines",
+						"title": "GEOA4 Parallel and Perpendicular Lines",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "geometry-a-geoa4-geoa5-lines-angles-and-coordinate-geometry-curriculum-geoa5-coordinate-geometry",
+						"title": "GEOA5 Coordinate Geometry",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "geometry-a-geoa4-geoa5-lines-angles-and-coordinate-geometry-supplemental-project-coordinate-line-design",
+						"title": "Project: Coordinate Line Design",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "geometry-a-geoa4-geoa5-lines-angles-and-coordinate-geometry-supplemental-project-parallel-line-proof-case-file",
+						"title": "Project: Parallel-Line Proof Case File",
+						"aliases": [],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "geometry-a-check-in-1-foundations-and-lines",
+				"title": "Check-In #1: Foundations and Lines",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-a-check-in-1-foundations-and-lines-curriculum-foundations-readiness-check",
+						"title": "Foundations Readiness Check",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "geometry-a-check-in-1-foundations-and-lines-supplemental-project-foundations-mixed-review",
+						"title": "Project: Foundations Mixed Review",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "geometry-a-check-in-1-foundations-and-lines-supplemental-project-conditional-statement-sort",
+						"title": "Project: Conditional Statement Sort",
+						"aliases": [],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "geometry-a-geoa6-geoa9-triangles-congruence-similarity-and-right-triangles",
+				"title": "GEOA6-GEOA9 Triangles, Congruence, Similarity, and Right Triangles",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-a-geoa6-geoa9-triangles-congruence-similarity-and-right-triangles-curriculum-triangles-congruence-similarity-and-right-triangles-core-concepts",
+						"title": "Triangles, Congruence, Similarity, and Right Triangles Core Concepts",
+						"aliases": []
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "geometry-a-geoa6-geoa9-triangles-congruence-similarity-and-right-triangles-supplemental-project-triangle-case-file",
+						"title": "Project: Triangle Case File",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "geometry-a-geoa6-geoa9-triangles-congruence-similarity-and-right-triangles-supplemental-project-similarity-scale-plan",
+						"title": "Project: Similarity Scale Plan",
+						"aliases": [],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "geometry-a-check-in-2-triangle-relationships",
+				"title": "Check-In #2: Triangle Relationships",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-a-check-in-2-triangle-relationships-curriculum-triangle-readiness-check",
+						"title": "Triangle Readiness Check",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "geometry-a-check-in-2-triangle-relationships-supplemental-project-triangle-theorem-decision-tree",
+						"title": "Project: Triangle Theorem Decision Tree",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "geometry-a-check-in-2-triangle-relationships-supplemental-project-pythagorean-error-repair",
+						"title": "Project: Pythagorean Error Repair",
+						"aliases": [],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "geometry-a-geoa10-geoa13-triangle-centers-inequalities-and-trigonometry",
+				"title": "GEOA10-GEOA13 Triangle Centers, Inequalities, and Trigonometry",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-a-geoa10-geoa13-triangle-centers-inequalities-and-trigonometry-curriculum-triangle-centers-inequalities-and-trigonometry-core-concepts",
+						"title": "Triangle Centers, Inequalities, and Trigonometry Core Concepts",
+						"aliases": []
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "geometry-a-geoa10-geoa13-triangle-centers-inequalities-and-trigonometry-supplemental-project-triangle-center-blueprint",
+						"title": "Project: Triangle Center Blueprint",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "geometry-a-geoa10-geoa13-triangle-centers-inequalities-and-trigonometry-supplemental-project-trigonometry-measurement-plan",
+						"title": "Project: Trigonometry Measurement Plan",
+						"aliases": [],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "geometry-a-check-in-3-and-geometry-a-capstone",
+				"title": "Check-In #3 and Geometry A Capstone",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-a-check-in-3-and-geometry-a-capstone-curriculum-final-readiness-check",
+						"title": "Final Readiness Check",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "geometry-a-check-in-3-and-geometry-a-capstone-supplemental-capstone-geometry-a-design-defense",
+						"title": "Capstone: Geometry A Design Defense",
+						"aliases": [
+							"geometry-a-check-in-3-and-geometry-a-capstone-curriculum-capstone-geometry-a-design-defense"
+						],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "geometry-a-check-in-3-and-geometry-a-capstone-supplemental-project-geometry-a-portfolio-audit",
+						"title": "Project: Geometry A Portfolio Audit",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "geometry-a-check-in-3-and-geometry-a-capstone-supplemental-check-in-3-and-geometry-a-capstone-changed-case-review",
+						"title": "Check-In #3 and Geometry A Capstone Changed-Case Review",
+						"aliases": []
+					}
+				]
+			},
+			{
+				"id": "geometry-a-geometry-a-reference-archive",
+				"title": "Geometry A Reference Archive",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-a-geometry-a-reference-archive-curriculum-geometry-a-reference-map",
+						"title": "Geometry A Reference Map",
+						"aliases": [],
+						"learningPath": "choice"
+					}
+				],
+				"supplementalProjects": []
+			},
+			{
+				"id": "geometry-a-pending-static-assets",
+				"title": "Pending Static Assets",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-a-pending-static-assets-curriculum-geometry-a-pending-static-assets",
+						"title": "Geometry A Pending Static Assets",
+						"aliases": [],
+						"learningPath": "choice"
+					}
+				],
+				"supplementalProjects": []
+			}
+		],
+		"geometry-b": [
+			{
+				"id": "geometry-b-geob1-geob2-quadrilaterals-and-parallelograms",
+				"title": "GEOB1-GEOB2 Quadrilaterals and Parallelograms",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-b-geob1-geob2-quadrilaterals-and-parallelograms-curriculum-quadrilaterals-and-parallelograms-core-concepts",
+						"title": "Quadrilaterals and Parallelograms Core Concepts",
+						"aliases": []
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "geometry-b-geob1-geob2-quadrilaterals-and-parallelograms-supplemental-project-quadrilateral-classification-case-file",
+						"title": "Project: Quadrilateral Classification Case File",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "geometry-b-geob1-geob2-quadrilaterals-and-parallelograms-supplemental-project-parallelogram-property-decision-tree",
+						"title": "Project: Parallelogram Property Decision Tree",
+						"aliases": [],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "geometry-b-geob3-geob4-polygons-and-circle-measurement",
+				"title": "GEOB3-GEOB4 Polygons and Circle Measurement",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-b-geob3-geob4-polygons-and-circle-measurement-curriculum-geob3-properties-and-area-of-polygons",
+						"title": "GEOB3 Properties and Area of Polygons",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "geometry-b-geob3-geob4-polygons-and-circle-measurement-curriculum-geob4-circumference-arcs-chords-areas-and-sectors",
+						"title": "GEOB4 Circumference, Arcs, Chords, Areas, and Sectors",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "geometry-b-geob3-geob4-polygons-and-circle-measurement-supplemental-project-polygon-formula-field-guide",
+						"title": "Project: Polygon Formula Field Guide",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "geometry-b-geob3-geob4-polygons-and-circle-measurement-supplemental-project-circle-measurement-design-brief",
+						"title": "Project: Circle Measurement Design Brief",
+						"aliases": [],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "geometry-b-geob5-geob6-circle-theorems-and-challenge-problems",
+				"title": "GEOB5-GEOB6 Circle Theorems and Challenge Problems",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-b-geob5-geob6-circle-theorems-and-challenge-problems-curriculum-geob5-inscribed-central-internal-and-external-angles",
+						"title": "GEOB5 Inscribed, Central, Internal, and External Angles",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "geometry-b-geob5-geob6-circle-theorems-and-challenge-problems-curriculum-geob5-tangents",
+						"title": "GEOB5 Tangents",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "geometry-b-geob5-geob6-circle-theorems-and-challenge-problems-curriculum-geob6-challenge-circle-problems",
+						"title": "GEOB6 Challenge Circle Problems",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "geometry-b-geob5-geob6-circle-theorems-and-challenge-problems-supplemental-project-circle-theorem-sort",
+						"title": "Project: Circle Theorem Sort",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "geometry-b-geob5-geob6-circle-theorems-and-challenge-problems-supplemental-project-circle-challenge-walkthrough",
+						"title": "Project: Circle Challenge Walkthrough",
+						"aliases": [],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "geometry-b-check-in-1-quadrilaterals-polygons-and-circles",
+				"title": "Check-In #1: Quadrilaterals, Polygons, and Circles",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-b-check-in-1-quadrilaterals-polygons-and-circles-curriculum-quadrilateral-polygon-and-circle-readiness-check",
+						"title": "Quadrilateral, Polygon, and Circle Readiness Check",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "geometry-b-check-in-1-quadrilaterals-polygons-and-circles-supplemental-project-first-half-geometry-review-set",
+						"title": "Project: First-Half Geometry Review Set",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "geometry-b-check-in-1-quadrilaterals-polygons-and-circles-supplemental-project-formula-and-theorem-error-clinic",
+						"title": "Project: Formula and Theorem Error Clinic",
+						"aliases": [],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "geometry-b-geob7-geob8-transformations",
+				"title": "GEOB7-GEOB8 Transformations",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-b-geob7-geob8-transformations-curriculum-geob7-translations-and-rotations",
+						"title": "GEOB7 Translations and Rotations",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "geometry-b-geob7-geob8-transformations-curriculum-geob8-reflections-and-dilations",
+						"title": "GEOB8 Reflections and Dilations",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "geometry-b-geob7-geob8-transformations-supplemental-project-transformation-rule-gallery",
+						"title": "Project: Transformation Rule Gallery",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "geometry-b-geob7-geob8-transformations-supplemental-project-logo-transformation-redesign",
+						"title": "Project: Logo Transformation Redesign",
+						"aliases": [],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "geometry-b-geob9-geob10-polyhedra-and-round-solids",
+				"title": "GEOB9-GEOB10 Polyhedra and Round Solids",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-b-geob9-geob10-polyhedra-and-round-solids-curriculum-geob9-polyhedra-prisms-and-pyramids",
+						"title": "GEOB9 Polyhedra, Prisms, and Pyramids",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "geometry-b-geob9-geob10-polyhedra-and-round-solids-curriculum-geob10-cylinders-cones-and-spheres",
+						"title": "GEOB10 Cylinders, Cones, and Spheres",
+						"aliases": [],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "geometry-b-geob9-geob10-polyhedra-and-round-solids-supplemental-project-solid-geometry-formula-lab",
+						"title": "Project: Solid Geometry Formula Lab",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "geometry-b-geob9-geob10-polyhedra-and-round-solids-supplemental-project-packaging-design-optimization",
+						"title": "Project: Packaging Design Optimization",
+						"aliases": [],
+						"learningPath": "challenge"
+					}
+				]
+			},
+			{
+				"id": "geometry-b-check-in-2-and-geometry-b-capstone",
+				"title": "Check-In #2 and Geometry B Capstone",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-b-check-in-2-and-geometry-b-capstone-curriculum-transformations-and-solids-readiness-check",
+						"title": "Transformations and Solids Readiness Check",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "geometry-b-check-in-2-and-geometry-b-capstone-curriculum-geometry-b-capstone-synthesis",
+						"title": "Geometry B Capstone Synthesis",
+						"aliases": [],
+						"learningPath": "core"
+					},
+					{
+						"id": "geometry-b-check-in-2-and-geometry-b-capstone-supplemental-capstone-geometry-b-design-defense",
+						"title": "Capstone: Geometry B Design Defense",
+						"aliases": [
+							"geometry-b-check-in-2-and-geometry-b-capstone-curriculum-capstone-geometry-b-design-defense"
+						],
+						"learningPath": "core"
+					}
+				],
+				"supplementalProjects": [
+					{
+						"id": "geometry-b-check-in-2-and-geometry-b-capstone-supplemental-project-geometry-b-portfolio-audit",
+						"title": "Project: Geometry B Portfolio Audit",
+						"aliases": [],
+						"learningPath": "choice"
+					},
+					{
+						"id": "geometry-b-check-in-2-and-geometry-b-capstone-supplemental-check-in-2-and-geometry-b-capstone-changed-case-review",
+						"title": "Check-In #2 and Geometry B Capstone Changed-Case Review",
+						"aliases": []
+					}
+				]
+			},
+			{
+				"id": "geometry-b-geometry-b-reference-archive",
+				"title": "Geometry B Reference Archive",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-b-geometry-b-reference-archive-curriculum-geometry-b-reference-map",
+						"title": "Geometry B Reference Map",
+						"aliases": [],
+						"learningPath": "choice"
+					}
+				],
+				"supplementalProjects": []
+			},
+			{
+				"id": "geometry-b-pending-static-assets",
+				"title": "Pending Static Assets",
+				"aliases": [],
+				"curriculum": [
+					{
+						"id": "geometry-b-pending-static-assets-curriculum-geometry-b-pending-static-assets",
+						"title": "Geometry B Pending Static Assets",
+						"aliases": [],
+						"learningPath": "choice"
+					}
+				],
+				"supplementalProjects": []
+			}
+		]
+	}
+}

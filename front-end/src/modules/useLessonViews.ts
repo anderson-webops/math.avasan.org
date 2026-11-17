@@ -59,8 +59,11 @@ export function useLessonViews(
 			if (current && (changed || currentAnchor !== previous?.[1])) {
 				const matchingView = lessonViews.find(view =>
 					itemsByView.value[view.id].some(item =>
-						[item.id, ...(item.aliases ?? [])].some(
-							id => `${current.id}-${id}` === currentAnchor
+						[current.id, ...(current.aliases ?? [])].some(
+							moduleId =>
+								[item.id, ...(item.aliases ?? [])].some(
+									id => `${moduleId}-${id}` === currentAnchor
+								)
 						)
 					)
 				);

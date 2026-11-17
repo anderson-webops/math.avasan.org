@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { lateElementaryBMaterials } from "@/stores/courses/lateElementaryBMaterials";
+import { expectElementaryMaterials } from "./elementaryMaterialAssertions";
 import { loadRawCourse } from "@/stores/courses/index";
 import { lateElementaryMathBCourse } from "@/stores/courses/elementary-math-courses";
 
@@ -27,7 +29,7 @@ const EXPECTED_MODULE_SEQUENCE = [
 
 function requireModule(title: string) {
 	const module = lateElementaryMathBCourse.modules.find(
-		candidate => candidate.title === title
+		(candidate) => candidate.title === title
 	);
 	if (!module) throw new Error(`Expected Late Elementary B module ${title}.`);
 	return module;
@@ -36,11 +38,11 @@ function requireModule(title: string) {
 describe("Late Elementary B math learner flow", () => {
 	it("keeps the fractions-to-coordinate progression without asset bookkeeping", () => {
 		expect(
-			lateElementaryMathBCourse.modules.map(module => module.title)
+			lateElementaryMathBCourse.modules.map((module) => module.title)
 		).toEqual(EXPECTED_MODULE_SEQUENCE);
 		expect(
 			lateElementaryMathBCourse.modules.some(
-				module => module.title === "Pending Static Assets"
+				(module) => module.title === "Pending Static Assets"
 			)
 		).toBe(false);
 		expect(EXPECTED_MODULE_SEQUENCE.indexOf("Check-in #1")).toBe(
@@ -58,11 +60,11 @@ describe("Late Elementary B math learner flow", () => {
 				module.title
 			).toBeGreaterThanOrEqual(5);
 			expect(
-				module.curriculum.every(item => item.learningPath === "core"),
+				module.curriculum.every((item) => item.learningPath === "core"),
 				module.title
 			).toBe(true);
 			expect(
-				module.supplementalProjects.every(item =>
+				module.supplementalProjects.every((item) =>
 					["choice", "challenge"].includes(item.learningPath ?? "")
 				),
 				module.title
@@ -73,7 +75,12 @@ describe("Late Elementary B math learner flow", () => {
 		}
 	});
 
-	it("preserves every authored activity while making extensions optional", () => {
+	it("preserves every authored activity while making extensions optional", async () => {
+		await expectElementaryMaterials(
+			"late-elementary-b-math",
+			lateElementaryMathBCourse,
+			lateElementaryBMaterials
+		);
 		const requiredCount = lateElementaryMathBCourse.modules.reduce(
 			(total, module) => total + module.curriculum.length,
 			0
@@ -88,7 +95,7 @@ describe("Late Elementary B math learner flow", () => {
 		expect(
 			requireModule(
 				"LEB10 Module Project: From Facebook to YouTube"
-			).curriculum.map(item => item.title)
+			).curriculum.map((item) => item.title)
 		).toEqual([
 			"Concepts: From Facebook to YouTube",
 			"Rahul YouTube Views Table",
@@ -98,7 +105,7 @@ describe("Late Elementary B math learner flow", () => {
 		expect(
 			requireModule("LEB18 Module Project: Chanh's Space Adventure")
 				.curriculum.slice(1)
-				.every(item =>
+				.every((item) =>
 					item.content.includes("**Completion evidence:**")
 				)
 		).toBe(true);
@@ -127,7 +134,7 @@ describe("Late Elementary B math learner flow", () => {
 		expect(course).not.toBeNull();
 
 		const text = JSON.stringify(
-			course!.modules.filter(module => module.kind !== "appendix")
+			course!.modules.filter((module) => module.kind !== "appendix")
 		);
 		for (const filename of [
 			"checkin1_fractions_0.png",
@@ -140,7 +147,7 @@ describe("Late Elementary B math learner flow", () => {
 		}
 		expect(
 			course!.modules.find(
-				module => module.title === "Pending Source Media Inventory"
+				(module) => module.title === "Pending Source Media Inventory"
 			)?.kind
 		).toBe("appendix");
 	});

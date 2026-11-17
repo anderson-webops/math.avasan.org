@@ -1,7 +1,7 @@
 {
 	"name": "math-avasan-org",
 	"type": "module",
-	"version": "1.0.27",
+	"version": "1.0.28",
 	"private": true,
 	"packageManager": "npm@12.2.2",
 	"engines": {
@@ -63,6 +63,7 @@
 		"eslint-plugin-prettier": "^5.5.7",
 		"eslint-plugin-vue": "^10.12.1",
 		"globals": "^17.14.0",
+		"jsdom": "^31.0.1",
 		"katex": "^0.19.1",
 		"prettier": "^3.10.1",
 		"puppeteer": "^25.17.0",
