@@ -2,8 +2,10 @@ import type { RawCourse, RawCourseModule, RawCourseModuleItem } from "./types";
 import { applyAlgebra1ACourseReadings } from "./algebra1ACourseReadings";
 import { applyAlgebra1APractice } from "./algebra1APractice";
 import { applyAlgebraErrorAnalysisCases } from "./algebraErrorAnalysisCases";
+import { mapMarkdownProse } from "./markdownProse";
 import { applyMathCourseImplementationArtifacts } from "./math-course-implementation-artifacts";
 import { applyMathResearchBackedExpansions } from "./math-research-expansions";
+import { preserveMathArchiveProgress } from "./mathArchiveProgress";
 import { mathCourseSlugify } from "./mathCourseFlow";
 import { buildProjectGuidance } from "./projectGuidance";
 import {
@@ -1152,7 +1154,9 @@ function compactWhitespace(text: string) {
 }
 
 function preservesBlockStructure(text: string) {
-	return /(?:^|\n)\s*(?:[-*]|\d+\.)\s+\S/.test(text);
+	return /(?:^|\n)(?:\s*(?:[-*]|\d+\.)\s+\S|\s*(?:`{3,}|~{3,})|(?: {4}|\t)\S|\s*\|[^\n]*\|)/.test(
+		text
+	);
 }
 
 function hasMarkdownSupportLabel(text: string) {
@@ -2577,7 +2581,7 @@ function normalizeSectionActionAgreement(text: string) {
 	});
 }
 
-function neutralizeStudentFacingText(text: string) {
+function neutralizeStudentFacingProse(text: string) {
 	const neutralized = normalizeDuplicateArticles(
 		neutralizeCourseShouldPhrasing(
 			neutralizeLessonDirectiveText(text)
@@ -3251,6 +3255,10 @@ function neutralizeStudentFacingText(text: string) {
 	);
 }
 
+function neutralizeStudentFacingText(text: string) {
+	return mapMarkdownProse(text, neutralizeStudentFacingProse);
+}
+
 function neutralizeStudentFacingCourseText(course: RawCourse) {
 	for (const module of course.modules) {
 		module.title = neutralizeStudentFacingText(module.title);
@@ -3305,7 +3313,10 @@ function normalizeLegacyBranding(course: RawCourse) {
 		for (const section of ["curriculum", "supplementalProjects"] as const) {
 			for (const item of module[section]) {
 				item.title = normalizeLegacyBrandingText(item.title);
-				item.content = normalizeLegacyBrandingText(item.content);
+				item.content = mapMarkdownProse(
+					item.content,
+					normalizeLegacyBrandingText
+				);
 			}
 		}
 	}
@@ -3315,7 +3326,10 @@ function formatVisibleCourseMarkdown(course: RawCourse) {
 	for (const module of course.modules) {
 		for (const section of ["curriculum", "supplementalProjects"] as const) {
 			for (const item of module[section]) {
-				item.content = formatVisibleMarkdownStructure(item.content);
+				item.content = mapMarkdownProse(
+					item.content,
+					formatVisibleMarkdownStructure
+				);
 			}
 		}
 	}
@@ -9370,32 +9384,37 @@ function cleanVisibleCourseGrammar(course: RawCourse) {
 	for (const module of course.modules) {
 		for (const section of ["curriculum", "supplementalProjects"] as const) {
 			for (const item of module[section]) {
-				item.content = item.content
-					.replace(
-						new RegExp(`\\b([Aa]) (${vowelArticleNouns})\\b`, "g"),
-						(_match: string, article: string, noun: string) =>
-							`${article === "A" ? "An" : "an"} ${noun}`
-					)
-					.replace(
-						new RegExp(
-							`\\b([Aa])n (${consonantArticleNouns})\\b`,
-							"g"
-						),
-						(_match: string, article: string, noun: string) =>
-							`${article === "A" ? "A" : "a"} ${noun}`
-					)
-					.replace(
-						new RegExp(
-							`\\b(one|each|every|a|an) the (?:[A-Z]{2}[A-Z0-9+.-]*|Unit|Module)\\b[^.!?\\n]{0,120}? (${evidenceNouns})\\b`,
-							"g"
-						),
-						"$1 $2"
-					)
-					.replace(
-						/\b(first|second|third|another|one) the (?:studio|lab|work) ([a-z])/gi,
-						"$1 $2"
-					)
-					.replace(/\bthe the\b/gi, "the");
+				item.content = mapMarkdownProse(item.content, prose => {
+					return prose
+						.replace(
+							new RegExp(
+								`\\b([Aa]) (${vowelArticleNouns})\\b`,
+								"g"
+							),
+							(_match: string, article: string, noun: string) =>
+								`${article === "A" ? "An" : "an"} ${noun}`
+						)
+						.replace(
+							new RegExp(
+								`\\b([Aa])n (${consonantArticleNouns})\\b`,
+								"g"
+							),
+							(_match: string, article: string, noun: string) =>
+								`${article === "A" ? "A" : "a"} ${noun}`
+						)
+						.replace(
+							new RegExp(
+								`\\b(one|each|every|a|an) the (?:[A-Z]{2}[A-Z0-9+.-]*|Unit|Module)\\b[^.!?\\n]{0,120}? (${evidenceNouns})\\b`,
+								"g"
+							),
+							"$1 $2"
+						)
+						.replace(
+							/\b(first|second|third|another|one) the (?:studio|lab|work) ([a-z])/gi,
+							"$1 $2"
+						)
+						.replace(/\bthe the\b/gi, "the");
+				});
 			}
 		}
 	}
@@ -9485,5 +9504,6 @@ export function normalizeRawCourse(id: string, rawCourse: RawCourse) {
 	applyAlgebraErrorAnalysisCases(id, course);
 	if (id === "algebra-1a")
 		applyAlgebra1ACourseReadings(course, mathCourseSlugify);
+	preserveMathArchiveProgress(course, id);
 	return course;
 }

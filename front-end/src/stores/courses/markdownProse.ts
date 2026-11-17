@@ -69,7 +69,7 @@ export function mapMarkdownProse(
 			fence = opening[1];
 		} else if (
 			/^(?: {4}|\t)/.test(line) &&
-			(prose === "" || /\n[ \t]*\n$/.test(prose))
+			(prose.trim() === "" || /\n[ \t]*\n$/.test(prose))
 		) {
 			result += inlineProse(prose) + line;
 			prose = "";

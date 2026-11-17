@@ -2,12 +2,47 @@ import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it } from "vitest";
 import { useCoursesStore } from "@/stores/courses";
 import { courseCatalog } from "@/stores/courses/index";
+import { normalizeRawCourse } from "@/stores/courses/normalization";
 
 const COURSE_SWEEP_TIMEOUT = 180000;
 
 describe("published course quality", () => {
 	beforeEach(() => {
 		setActivePinia(createPinia());
+	});
+
+	it("edits prose while preserving inline, fenced, and indented lesson literals", () => {
+		const course = normalizeRawCourse("literal-fixture", {
+			name: "Literal reference",
+			modules: [
+				{
+					title: "Literal reference",
+					curriculum: [
+						{
+							title: "Literal reference",
+							content: [
+								"A implementation example introduces the table.",
+								"",
+								"Keep `a input` and `Juni` as supplied literals.",
+								"",
+								"```text",
+								"a input = 13",
+								'"Juni"',
+								"```",
+								"",
+								"    a input = 13"
+							].join("\n")
+						}
+					],
+					supplementalProjects: []
+				}
+			]
+		});
+		const content = course.modules[0].curriculum[0].content;
+		expect(content).toContain("An implementation example");
+		expect(content).toContain("`a input` and `Juni`");
+		expect(content).toContain('```text\na input = 13\n"Juni"\n```');
+		expect(content).toContain("    a input = 13");
 	});
 
 	it(

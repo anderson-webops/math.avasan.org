@@ -240,4 +240,45 @@ describe("math course progress compatibility", () => {
 			).toEqual(coreKeys);
 		}
 	});
+
+	it("retains historical reference-archive and capstone bookmark identities", async () => {
+		const store = useCoursesStore();
+		for (const courseId of [
+			"pre-algebra-a",
+			"pre-algebra-b",
+			"algebra-1a",
+			"algebra-1b",
+			"geometry-a",
+			"geometry-b",
+			"algebra-2a",
+			"algebra-2b",
+			"pre-calculus-a",
+			"pre-calculus-b"
+		]) {
+			const course = await store.loadCourseById(courseId);
+			const archive = course?.modules.find(module =>
+				module.title.includes("Reference Archive")
+			);
+			expect(archive?.aliases, courseId).toContain(
+				`${courseId}-source-activity-archive`
+			);
+			const scenario = archive?.curriculum.find(
+				item => item.title === "Project Scenario and Context Links"
+			);
+			if (scenario)
+				expect(scenario.aliases, courseId).toContain(
+					`${courseId}-source-activity-archive-curriculum-project-scenario-and-context-links`
+				);
+		}
+		const preAlgebra = await store.loadCourseById("pre-algebra-a");
+		const capstone = preAlgebra?.modules.find(
+			module => module.title === "Check-In #2 and Capstone"
+		);
+		const reference = capstone?.curriculum.find(
+			item => item.title === "Pre-Algebra A Capstone Reference Map"
+		);
+		expect(reference?.aliases).toContain(
+			"pre-algebra-a-check-in-2-and-capstone-curriculum-source-activity-anchors-pre-algebra-a-capstone"
+		);
+	});
 });
