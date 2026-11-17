@@ -275,6 +275,19 @@ describe("CourseExplorer public catalog", () => {
 	it("opens historical module and item bookmarks in the matching reference view", async () => {
 		const courseId = "pre-algebra-a";
 		const oldModuleId = `${courseId}-source-activity-archive`;
+		const internalArchive = (id: string, name: string) => {
+			const definition = courseDefinition(id, name);
+			if (id === courseId) {
+				Object.assign(definition.modules[2], {
+					aliases: [oldModuleId],
+					internal: true
+				});
+				Object.assign(definition.modules[2].curriculum[0], {
+					aliases: ["old-reference"]
+				});
+			}
+			return definition;
+		};
 		for (const anchor of [
 			oldModuleId,
 			`${oldModuleId}-${courseId}-reference-item`,
@@ -283,18 +296,7 @@ describe("CourseExplorer public catalog", () => {
 		]) {
 			window.localStorage.clear();
 			window.history.replaceState({}, "", `/courses/#${anchor}`);
-			const { wrapper } = await mountPublicCatalog((id, name) => {
-				const definition = courseDefinition(id, name);
-				if (id === courseId) {
-					Object.assign(definition.modules[2], {
-						aliases: [oldModuleId]
-					});
-					Object.assign(definition.modules[2].curriculum[0], {
-						aliases: ["old-reference"]
-					});
-				}
-				return definition;
-			});
+			const { wrapper } = await mountPublicCatalog(internalArchive);
 			expect(wrapper.get(".reader-header h3").text(), anchor).toBe(
 				"Reference"
 			);
@@ -304,6 +306,14 @@ describe("CourseExplorer public catalog", () => {
 			).toContain("Quick reference");
 			wrapper.unmount();
 		}
+		window.localStorage.clear();
+		window.history.replaceState({}, "", `/courses/#${courseId}`);
+		const { wrapper } = await mountPublicCatalog(internalArchive);
+		expect(wrapper.get(".reader-header h3").text()).toBe("First steps");
+		expect(wrapper.find(".outline-button.is-reference").exists()).toBe(
+			false
+		);
+		wrapper.unmount();
 	});
 
 	it("contains no account, API, or Python IDE imports", () => {

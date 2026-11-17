@@ -198,9 +198,20 @@ watch([selectedCourse, isStorageReady], ([course, storageReady]) => {
 	void reportMathClassroomUsage("course-open", course.id);
 });
 
-const courseModules = computed(
-	() => selectedCourse.value?.modules.filter(module => !module.internal) ?? []
-);
+const courseModules = computed(() => {
+	const course = selectedCourse.value;
+	if (!course) return [];
+	return course.modules.filter(module => {
+		if (!module.internal) return true;
+		if (!module.aliases?.includes(`${course.id}-source-activity-archive`))
+			return false;
+		return [module.id, ...module.aliases].some(
+			id =>
+				currentHashAnchor.value === id ||
+				currentHashAnchor.value.startsWith(`${id}-`)
+		);
+	});
+});
 const coreCourseModules = computed(() =>
 	courseModules.value.filter(isCoreModule)
 );

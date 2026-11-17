@@ -10,6 +10,7 @@ const staticMediaRequestModuleUrl = new URL(
 	"./static-media-request.mjs",
 	import.meta.url
 ).href;
+const viteModuleUrl = import.meta.resolve("vite");
 
 const auditSource = String.raw`
 import {
@@ -25,10 +26,7 @@ import {
 	resolve,
 	sep
 } from "node:path";
-import {
-	courseCatalog,
-	loadRawCourse
-} from "@/stores/courses/index";
+import { createServer } from ${JSON.stringify(viteModuleUrl)};
 import {
 	KNOWN_PENDING_STATIC_MEDIA_FILENAMES,
 	canonicalStaticMediaUrl,
@@ -138,9 +136,22 @@ function scanPath(path) {
 	if (stats.isFile()) scanFile(path);
 }
 
-for (const entry of courseCatalog) {
-	const course = await loadRawCourse(entry.id);
-	if (!course) continue;
+const sourceServer = await createServer({
+	appType: "custom",
+	configFile: false,
+	root: resolve("front-end"),
+	optimizeDeps: { include: [], noDiscovery: true },
+	resolve: { alias: { "@": resolve("front-end/src") } },
+	server: { hmr: false, middlewareMode: true, watch: null }
+});
+
+try {
+	const { courseCatalog, loadRawCourse } = await sourceServer.ssrLoadModule(
+		"/src/stores/courses/index.ts"
+	);
+	for (const entry of courseCatalog) {
+		const course = await loadRawCourse(entry.id);
+		if (!course) throw new Error("Missing published course " + entry.id);
 
 	for (const module of course.modules) {
 		const items = [
@@ -179,6 +190,9 @@ for (const entry of courseCatalog) {
 			}
 		}
 	}
+	}
+} finally {
+	await sourceServer.close();
 }
 
 for (const root of scanRoots) {
