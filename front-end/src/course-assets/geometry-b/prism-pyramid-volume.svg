@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="850" viewBox="0 0 560 850" role="img" aria-labelledby="title desc">
+  <title id="title">Prism and pyramid volume comparison</title>
+  <desc id="desc">A square prism and square pyramid have the same base area B, equal to 6 times 6 or 36 square units, and the same perpendicular height h of 4 units. The prism volume is B times h, or 144 cubic units. The pyramid volume is B times h divided by 3, or 48 cubic units. The height is perpendicular to the base, rather than the slant height of a face.</desc>
+  <rect width="560" height="850" rx="16" fill="#f8fafc"/>
+  <g transform="translate(40 0)">
+    <text x="240" y="38" fill="#0f172a" font-family="system-ui, sans-serif" text-anchor="middle" font-size="27" font-weight="700">Prism</text>
+    <g stroke="#334155" stroke-width="2.5" stroke-linejoin="round">
+      <path d="M120 290 L280 290 L365 235 L205 235 Z" fill="#cbd5e1"/>
+      <path d="M120 290 L120 140 L280 140 L280 290 Z" fill="#e2e8f0"/>
+      <path d="M280 290 L280 140 L365 85 L365 235 Z" fill="#b8c7d6"/>
+      <path d="M120 140 L280 140 L365 85 L205 85 Z" fill="#f1f5f9"/>
+      <path d="M205 85 L205 235 L120 290 M205 235 L365 235" fill="none" stroke-dasharray="6 5"/>
+    </g>
+    <path d="M397 85 L397 235 M390 85 L404 85 M390 235 L404 235" stroke="#0f172a" stroke-width="2" fill="none"/>
+    <g fill="#0f172a" font-family="system-ui, sans-serif" font-size="24">
+      <text x="410" y="170">4</text>
+      <text x="194" y="317">6</text>
+      <text x="327" y="286">6</text>
+    </g>
+    <g fill="#0f172a" font-family="system-ui, sans-serif" text-anchor="middle">
+      <text x="240" y="351" font-size="24">B = 6 × 6 = 36 square units</text>
+      <text x="240" y="386" font-size="25" font-weight="700">V = Bh = 144 cubic units</text>
+    </g>
+  </g>
+  <g transform="translate(-385 410)">
+    <text x="665" y="38" fill="#0f172a" font-family="system-ui, sans-serif" text-anchor="middle" font-size="27" font-weight="700">Pyramid</text>
+    <g stroke="#334155" stroke-width="2.5" stroke-linejoin="round">
+      <path d="M545 290 L705 290 L790 235 L630 235 Z" fill="#cbd5e1"/>
+      <path d="M668 113 L545 290 L705 290 Z" fill="#e2e8f0"/>
+      <path d="M668 113 L705 290 L790 235 Z" fill="#b8c7d6"/>
+      <path d="M668 113 L630 235 L545 290 M630 235 L790 235" fill="none" stroke-dasharray="6 5"/>
+    </g>
+    <g stroke="#0f172a" stroke-width="2" fill="none">
+      <path d="M668 113 L668 263" stroke-dasharray="5 4"/>
+      <path d="M668 249 L680 249 L680 263"/>
+    </g>
+    <g fill="#0f172a" font-family="system-ui, sans-serif" font-size="24">
+      <text x="682" y="194">h = 4</text>
+      <text x="619" y="317">6</text>
+      <text x="752" y="286">6</text>
+    </g>
+    <g fill="#0f172a" font-family="system-ui, sans-serif" text-anchor="middle">
+      <text x="665" y="351" font-size="24">B = 6 × 6 = 36 square units</text>
+      <text x="665" y="386" font-size="25" font-weight="700">V = Bh ÷ 3 = 48 cubic units</text>
+    </g>
+  </g>
+  <text x="280" y="844" fill="#0f172a" font-family="system-ui, sans-serif" text-anchor="middle" font-size="20">Same base area and perpendicular height</text>
+</svg>

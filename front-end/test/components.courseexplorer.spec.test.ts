@@ -5,6 +5,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import CourseExplorer from "@/components/CourseExplorer.vue";
 import { algebraCourseImageUrls } from "@/modules/courseAssetSourcesAlgebra";
+import { prismPyramidVolumeUrl } from "@/modules/courseAssetSourcesGeometry";
 import { prealgebraCourseImageUrls } from "@/modules/courseAssetSourcesPrealgebra";
 import { useCoursesStore } from "@/stores/courses";
 
@@ -242,6 +243,7 @@ describe("CourseExplorer public catalog", () => {
 
 	it("embeds release-bound diagrams and opens other images only on request", async () => {
 		const embedded = [
+			prismPyramidVolumeUrl,
 			...Object.values(algebraCourseImageUrls),
 			...Object.values(prealgebraCourseImageUrls)
 		];
@@ -314,6 +316,41 @@ describe("CourseExplorer public catalog", () => {
 			false
 		);
 		wrapper.unmount();
+	});
+
+	it("opens a historical media inventory link without listing it in the course", async () => {
+		const courseId = "ap-calculus";
+		const inventoryId = `${courseId}-pending-static-assets`;
+		const itemId = `${inventoryId}-curriculum-ap-calculus-pending-static-assets`;
+		const withInventory = (id: string, name: string) => {
+			const definition = courseDefinition(id, name);
+			if (id === courseId) {
+				Object.assign(definition.modules[2], {
+					id: inventoryId,
+					internal: true,
+					title: "Pending Static Assets"
+				});
+				Object.assign(definition.modules[2].curriculum[0], {
+					id: itemId
+				});
+			}
+			return definition;
+		};
+		window.history.replaceState({}, "", `/courses/#${itemId}`);
+		const { wrapper: bookmark } = await mountPublicCatalog(withInventory);
+		expect(bookmark.get(".reader-header h3").text()).toBe(
+			"Pending Static Assets"
+		);
+		expect(bookmark.get("#lesson-view-content").text()).toContain(
+			"Quick reference"
+		);
+		bookmark.unmount();
+
+		window.localStorage.clear();
+		window.history.replaceState({}, "", `/courses/#${courseId}`);
+		const { wrapper: overview } = await mountPublicCatalog(withInventory);
+		expect(overview.text()).not.toContain("Pending Static Assets");
+		overview.unmount();
 	});
 
 	it("contains no account, API, or Python IDE imports", () => {

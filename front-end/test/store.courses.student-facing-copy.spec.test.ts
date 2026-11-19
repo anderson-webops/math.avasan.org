@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { courseCatalog, loadRawCourse } from "@/stores/courses/index";
 import { geometryCompassBisectorUrl } from "@/modules/courseAssetSourcesPrealgebra";
 import { algebraCourseImageUrls } from "@/modules/courseAssetSourcesAlgebra";
+import { prismPyramidVolumeUrl } from "@/modules/courseAssetSourcesGeometry";
 
 const INTERNAL_COPY_RE =
 	/\b(?:admin dashboard|book a class|create an account|freelance|instructor note|log in|scheduler|sign up|student account|tutor|zoom)\b/i;
@@ -13,6 +14,7 @@ const ALLOWED_MEDIA_HOSTS = new Set([
 const COURSE_SWEEP_TIMEOUT = 180000;
 const ALLOWED_LOCAL_MEDIA = new Set([
 	geometryCompassBisectorUrl,
+	prismPyramidVolumeUrl,
 	...Object.values(algebraCourseImageUrls)
 ]);
 

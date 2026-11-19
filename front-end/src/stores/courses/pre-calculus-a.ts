@@ -1176,7 +1176,6 @@ export const preCalculusACourse: RawCourse = {
 				lesson(
 					"Pre-Calculus A Reference Map",
 					[
-						"This reference map summarizes Pre-Calculus and Trigonometry A topic coverage and static media slots without embedding diagram files that are still pending in the class asset library.",
 						[
 							"**Course concept map**",
 							"- Piecewise functions: conditional definitions, open and closed endpoints, discontinuities, absolute value as a piecewise function, step functions, floor and ceiling behavior, domain, and range.",
@@ -1194,25 +1193,25 @@ export const preCalculusACourse: RawCourse = {
 							"- Desmos area-under-curve prompt: https://www.desmos.com/calculator/tgyr42ezjq",
 							"- Desmos graphing calculator for exponential/log modeling: https://www.desmos.com/calculator",
 							"- Rational-function graph reference: https://www.desmos.com/calculator/auz2qerbgj"
-						].join("\n"),
-						"**Static-media note:** Legacy static diagrams are not embedded directly while those files are pending. The appendix lists stable static media URLs by original filename so diagrams can be added later without changing course references."
+						].join("\n")
 					].join("\n\n")
 				)
 			],
 			[],
 			"appendix"
 		),
-		module(
-			"Pending Static Assets",
-			[
+		{
+			title: "Pending Static Assets",
+			kind: "appendix",
+			internal: true,
+			curriculum: [
 				lesson(
 					"Pre-Calculus A Pending Static Assets",
 					sourceMediaReferences()
 				)
 			],
-			[],
-			"appendix"
-		)
+			supplementalProjects: []
+		}
 	],
 	developmentMetadata: {
 		priority: "urgent",

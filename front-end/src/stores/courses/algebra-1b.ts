@@ -822,14 +822,14 @@ Absolute-value graphs are built from a V-shape plus transformations.
 - whether the graph opens upward or downward
 - whether the graph gets narrower or wider
 
-Use the graph set below to compare shifts and stretches directly.
+Compare \`y = |x|\`, \`y = 2|x - 1| + 3\` and \`y = -|x + 2|\` on the same axes. Plot their vertices \`(0, 0)\`, \`(1, 3)\` and \`(-2, 0)\`, then plot points one unit to either side of each vertex. The paired heights are \`1\`, \`5\` and \`-1\`, respectively. Compare opening direction and steepness.
 				`.trim(),
 				media.absoluteValueBasics
 			),
 			createLesson(
 				"More Absolute Value Transformations",
 				`
-The second gallery focuses on reflection, stretching, and combined absolute-value expressions.
+Identify each graph's vertex, opening direction, and scale before plotting symmetric points.
 
 **Key observations**
 
@@ -843,7 +843,7 @@ The second gallery focuses on reflection, stretching, and combined absolute-valu
 			createLesson(
 				"Piecewise-Style Absolute Value Example",
 				`
-The graph below isolates the combined function \`|x + 3| + |x - 2|\`.
+For \`y = |x + 3| + |x - 2|\`, plot \`(-4, 7), (-3, 5), (0, 5), (2, 5), (3, 7)\`. Join consecutive points with straight segments.
 
 - Minimum value: \`5\`
 - Minimum interval: \`[-3, 2]\`
@@ -1159,11 +1159,11 @@ This check-in reviews graphing quadratics, transformations, functions, inverse f
 			createLesson(
 				"Check-In Visual Reference",
 				`
-Use a graphing tool or the provided function reference for graph-only prompts such as:
+Sketch these reference cases by hand or with a graphing tool:
 
-- the vertical-line-test example
-- the inverse-existence graph in the advanced section
-- one additional practice graph used for extrema and intervals
+- Vertical line test: the circle \`x^2 + y^2 = 4\` has outputs \`-2\` and \`2\` at \`x = 0\`. The upper semicircle \`y = sqrt(4 - x^2)\` on \`[-2, 2]\` assigns one output to each allowed input.
+- Inverse test: \`f(-1) = f(1) = 1\` for \`f(x) = x^2\`, so its inverse relation is not a function across all real inputs. Restrict the original domain to \`[0, infinity)\` to obtain the inverse function \`f^-1(x) = sqrt(x)\`.
+- Extrema and intervals: \`g(x) = -(x - 1)^2 + 4\` has maximum \`(1, 4)\` and roots at \`-1\` and \`3\`. Plot \`(-1, 0), (0, 3), (1, 4), (2, 3), (3, 0)\` and use them to check the increasing, decreasing, positive, and negative intervals.
 
 The key goal is to justify each decision from the graph feature being tested. The vertical-line test checks whether one input has more than one output. An inverse-existence graph checks whether the original relation passes the horizontal-line test. Extrema and interval questions name the x-range being described and whether the graph is increasing, decreasing, positive, negative, or reaching a maximum or minimum there.
 				`.trim(),

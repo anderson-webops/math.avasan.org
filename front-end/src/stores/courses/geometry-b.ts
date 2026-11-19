@@ -1,4 +1,5 @@
 import type { RawCourse, RawCourseModuleItem } from "./types";
+import { prismPyramidVolumeUrl } from "@/modules/courseAssetSourcesGeometry";
 import { courseAssetViewerUrl } from "@/modules/courseAssetSourcesPrealgebra";
 import { configureMathCourseFlow } from "./mathCourseFlow";
 import {
@@ -7,10 +8,11 @@ import {
 	staticMediaUrl
 } from "./staticMedia";
 
-function lesson(title: string, content: string) {
+function lesson(title: string, content: string, mediaLink?: string) {
 	return {
 		title,
 		content,
+		...(mediaLink ? { mediaLink } : {}),
 		...(/^(?:Project|Capstone):/.test(title)
 			? { preserveInstructions: true }
 			: {})
@@ -655,11 +657,12 @@ export const geometryBCourse: RawCourse = {
 						].join("\n"),
 						[
 							"**Reference links**",
-							"- Pyramid volume visualization: the historical external image is omitted because an authenticated HTTPS copy could not be verified.",
+							"- Prism and pyramid comparison: a square base of side 6 and perpendicular height 4 gives volumes of 144 and 48 cubic units.",
 							"- Sphere volume comparison visual: https://ds055uzetaobb.cloudfront.net/brioche/uploads/Fv9rxkzWWN-90675.svg?width=350",
 							"- Sphere surface-area comparison visual: https://www.mathsisfun.com/geometry/images/sphere-cylinder-area2.svg"
 						].join("\n")
-					].join("\n\n")
+					].join("\n\n"),
+					prismPyramidVolumeUrl
 				)
 			],
 			[],

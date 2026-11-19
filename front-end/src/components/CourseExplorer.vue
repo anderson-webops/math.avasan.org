@@ -16,6 +16,7 @@ import {
 } from "vue";
 import { reportMathClassroomUsage } from "@/modules/classroomUsage";
 import { algebraCourseImageUrls } from "@/modules/courseAssetSourcesAlgebra";
+import { prismPyramidVolumeUrl } from "@/modules/courseAssetSourcesGeometry";
 import { prealgebraCourseImageUrls } from "@/modules/courseAssetSourcesPrealgebra";
 import { lessonContentSections } from "@/modules/courseLessonPresentation";
 import { isYouTubeVideoUrl } from "@/modules/resourceUrls";
@@ -46,6 +47,7 @@ interface ResourceLink {
 
 const IMAGE_FILE_RE = /\.(?:avif|gif|jpe?g|png|svg|webp)(?:\?|$)/i;
 const EMBEDDED_COURSE_IMAGE_URLS = new Set([
+	prismPyramidVolumeUrl,
 	...Object.values(algebraCourseImageUrls),
 	...Object.values(prealgebraCourseImageUrls)
 ]);
@@ -203,9 +205,13 @@ const courseModules = computed(() => {
 	if (!course) return [];
 	return course.modules.filter(module => {
 		if (!module.internal) return true;
-		if (!module.aliases?.includes(`${course.id}-source-activity-archive`))
-			return false;
-		return [module.id, ...module.aliases].some(
+		const historicalArchive = module.aliases?.includes(
+			`${course.id}-source-activity-archive`
+		);
+		const historicalMediaInventory =
+			module.id === `${course.id}-pending-static-assets`;
+		if (!historicalArchive && !historicalMediaInventory) return false;
+		return [module.id, ...(module.aliases ?? [])].some(
 			id =>
 				currentHashAnchor.value === id ||
 				currentHashAnchor.value.startsWith(`${id}-`)
